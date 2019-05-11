@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/rs/xid"
+	"fmt"
 	"time"
 
+	"github.com/rs/xid"
 	"math/big"
 )
 
@@ -56,20 +57,40 @@ func NewTransaction(usr *User) (*Transaction, error) {
 	return txn, nil
 }
 
-func (txn *Transaction) Valid() bool {
-	return false
+func (txn *Transaction) AppendSplit(spl *Split) error {
+	txn.Splits = append(txn.Splits, spl)
+	return nil
+}
+
+func (txn *Transaction) Balance() (*big.Int, bool) {
+	valid := true
+	if len(txn.Splits) < 1 {
+		valid = false
+	}
+	fmt.Println(len(txn.Splits))
+	total := big.NewInt(0)
+	fmt.Println(total)
+	for _, elem := range txn.Splits {
+		total.Add(total, elem.Amount)
+		fmt.Println(total)
+	}
+
+	if total.Cmp(big.NewInt(0)) != 0 {
+		valid = false
+	}
+	return total, valid
 }
 
 type Split struct {
 	Id          string
-	Date        *time.Time
+	Date        time.Time
 	Description []byte
-	Accounts    []Account
-	Currency    Currency
-	Amount      big.Int
+	Accounts    []*Account
+	Currency    *Currency
+	Amount      *big.Int
 }
 
-func NewSplit(date *time.Time, desc []byte, accs []Account, cur Currency, amt big.Int) (*Split, error) {
+func NewSplit(date time.Time, desc []byte, accs []*Account, cur *Currency, amt *big.Int) (*Split, error) {
 	guid := xid.New()
 	spl := &Split{guid.String(), date, desc, accs, cur, amt}
 	return spl, nil
