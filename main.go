@@ -1,4 +1,9 @@
 package main
 
-import "fmt"
-import "time"
+import (
+	"fmt"
+)
+
+func main() {
+	fmt.Printf("Hello world")
+}
