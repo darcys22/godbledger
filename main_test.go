@@ -1,6 +1,8 @@
 package main
 
 import (
+	"godbledger/core"
+	"godbledger/ledger"
 	"math/big"
 	"testing"
 	"time"
@@ -8,20 +10,20 @@ import (
 
 func TestNewTransaction(t *testing.T) {
 
-	user, err := NewUser("Tester")
+	user, err := core.NewUser("Tester")
 	if err != nil {
 		t.Fatalf("New User Failed: %v", err)
 	}
-	txn, err := NewTransaction(user)
+	txn, err := core.NewTransaction(user)
 	if err != nil {
 		t.Fatalf("New Transaction Failed: %v", err)
 	}
 
-	cash, _ := NewAccount("1", "cash")
-	income, _ := NewAccount("2", "income")
-	aud, _ := NewCurrency("AUD", 2)
+	cash, _ := core.NewAccount("1", "cash")
+	income, _ := core.NewAccount("2", "income")
+	aud, _ := core.NewCurrency("AUD", 2)
 
-	spl1, err := NewSplit(time.Now(), []byte("Cash Income"), []*Account{cash}, aud, big.NewInt(10))
+	spl1, err := core.NewSplit(time.Now(), []byte("Cash Income"), []*core.Account{cash}, aud, big.NewInt(10))
 	if err != nil {
 		t.Fatalf("Creating First Split Failed: %v", err)
 	}
@@ -31,7 +33,7 @@ func TestNewTransaction(t *testing.T) {
 		t.Fatalf("Appending First Split Failed: %v", err)
 	}
 
-	spl2, err := NewSplit(time.Now(), []byte("Cash Income"), []*Account{income}, aud, big.NewInt(-10))
+	spl2, err := core.NewSplit(time.Now(), []byte("Cash Income"), []*core.Account{income}, aud, big.NewInt(-10))
 	if err != nil {
 		t.Fatalf("Creating Second Split Failed: %v", err)
 	}
@@ -41,7 +43,7 @@ func TestNewTransaction(t *testing.T) {
 		t.Fatalf("Appending Second Split Failed: %v", err)
 	}
 
-	ledger, err := NewLedgerDB()
+	ledger, err := ledger.NewLedgerDB()
 	if err != nil {
 		t.Fatalf("New ledger Failed: %v", err)
 	}
