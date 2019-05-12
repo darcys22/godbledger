@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 
+	"godbledger/ledger"
+	"godbledger/version"
+
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
@@ -21,6 +24,21 @@ func startNode(ctx *cli.Context) error {
 		return err
 	}
 	ledger.Start()
+
+	statement, _ := ledger.db.Prepare("CREATE TABLE IF NOT EXISTS people (id INTEGER PRIMARY KEY, firstname TEXT, lastname TEXT)")
+	statement.Exec()
+	statement, _ = database.Prepare("INSERT INTO people (firstname, lastname) VALUES (?, ?)")
+	statement.Exec("Nic", "Raboy")
+	rows, _ := database.Query("SELECT id, firstname, lastname FROM people")
+
+	var id int
+	var firstname string
+	var lastname string
+	for rows.Next() {
+		rows.Scan(&id, &firstname, &lastname)
+		fmt.Println(strconv.Itoa(id) + ": " + firstname + " " + lastname)
+	}
+
 	return nil
 }
 
@@ -46,16 +64,4 @@ func main() {
 		os.Exit(1)
 	}
 
-	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS people (id INTEGER PRIMARY KEY, firstname TEXT, lastname TEXT)")
-	statement.Exec()
-	statement, _ = database.Prepare("INSERT INTO people (firstname, lastname) VALUES (?, ?)")
-	statement.Exec("Nic", "Raboy")
-	rows, _ := database.Query("SELECT id, firstname, lastname FROM people")
-	var id int
-	var firstname string
-	var lastname string
-	for rows.Next() {
-		rows.Scan(&id, &firstname, &lastname)
-		fmt.Println(strconv.Itoa(id) + ": " + firstname + " " + lastname)
-	}
 }

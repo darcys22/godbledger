@@ -5,6 +5,34 @@ import (
 	"github.com/urfave/cli"
 )
 
+func homeDir() string {
+	if home := os.Getenv("HOME"); home != "" {
+		return home
+	}
+	if usr, err := user.Current(); err == nil {
+		return usr.HomeDir
+	}
+	return ""
+}
+
+// DefaultDataDir is the default data directory to use for the databases and other
+// persistence requirements.
+func DefaultDataDir() string {
+	// Try to place the data folder in the user's home dir
+	home := homeDir()
+	if home != "" {
+		if runtime.GOOS == "darwin" {
+			return filepath.Join(home, "Library", "ledger")
+		} else if runtime.GOOS == "windows" {
+			return filepath.Join(home, "AppData", "Roaming", "ledger")
+		} else {
+			return filepath.Join(home, ".ledger")
+		}
+	}
+	// As we cannot guess a stable location, return empty and handle later
+	return ""
+}
+
 var (
 	// VerbosityFlag defines the logrus configuration.
 	VerbosityFlag = cli.StringFlag{
@@ -16,7 +44,7 @@ var (
 	DataDirFlag = DirectoryFlag{
 		Name:  "datadir",
 		Usage: "Data directory for the databases and keystore",
-		Value: DirectoryString{DefaultDataDir()},
+		Value: DefaultDataDir(),
 	}
 	// ClearDB tells the beacon node to remove any previously stored data at the data directory.
 	ClearDB = cli.BoolFlag{
