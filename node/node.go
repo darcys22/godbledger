@@ -1,8 +1,6 @@
 package node
 
 import (
-	"context"
-	"fmt"
 	"os"
 	"os/signal"
 	"path"
@@ -12,19 +10,21 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 
+	"godbledger/cmd"
 	"godbledger/db"
-	"godbledger/ledger"
 	"godbledger/version"
 )
 
 var log = logrus.WithField("prefix", "node")
+
+const ledgerDBName = "ledgerdata"
 
 type Node struct {
 	//ledger *ledger.LedgerDB
 	ctx  *cli.Context
 	lock sync.RWMutex
 	stop chan struct{} // Channel to wait for termination notifications.
-	db   *db.LedgerDB
+	DB   *db.LedgerDB
 }
 
 func New(ctx *cli.Context) (*Node, error) {
@@ -39,17 +39,17 @@ func New(ctx *cli.Context) (*Node, error) {
 		stop: make(chan struct{}),
 	}
 
-	return &Node{}
+	return ledger, nil
 
 }
 
-func (n *Node) Start() error {
+func (n *Node) Start() {
 	n.lock.Lock()
 	log.WithFields(logrus.Fields{
-		"version": version.Version(),
+		"version": version.Version,
 	}).Info("Starting ledger node")
 
-	stop := l.stop
+	stop := n.stop
 	n.lock.Unlock()
 
 	go func() {
@@ -58,15 +58,14 @@ func (n *Node) Start() error {
 		defer signal.Stop(sigc)
 		<-sigc
 		log.Info("Got interrupt, shutting down...")
-		debug.Exit(b.ctx) // Ensure trace and CPU profile data are flushed.
-		go b.Close()
+		go n.Close()
 		for i := 10; i > 0; i-- {
 			<-sigc
 			if i > 1 {
 				log.Info("Already shutting down, interrupt more to panic", "times", i-1)
 			}
 		}
-		panic("Panic closing the beacon node")
+		panic("Panic closing the node")
 	}()
 
 	<-stop
@@ -87,8 +86,8 @@ func (n *Node) Close() {
 
 func (n *Node) startDB(ctx *cli.Context) error {
 	baseDir := ctx.GlobalString(cmd.DataDirFlag.Name)
-	dbPath := path.Join(baseDir, beaconChainDBName)
-	if b.ctx.GlobalBool(cmd.ClearDB.Name) {
+	dbPath := path.Join(baseDir, ledgerDBName)
+	if n.ctx.GlobalBool(cmd.ClearDB.Name) {
 		if err := db.ClearDB(dbPath); err != nil {
 			return err
 		}
@@ -100,6 +99,6 @@ func (n *Node) startDB(ctx *cli.Context) error {
 	}
 
 	log.WithField("path", dbPath).Info("Checking db")
-	b.db = db
+	n.DB = db
 	return nil
 }

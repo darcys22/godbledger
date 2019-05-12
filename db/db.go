@@ -2,11 +2,8 @@ package db
 
 import (
 	"database/sql"
-	"errors"
 	"os"
 	"path"
-	"sync"
-	"time"
 
 	"github.com/sirupsen/logrus"
 
@@ -16,13 +13,13 @@ import (
 var log = logrus.WithField("prefix", "ledgerdb")
 
 type LedgerDB struct {
-	db           *sql.DB
+	DB           *sql.DB
 	DatabasePath string
 }
 
 // Close closes the underlying database.
 func (db *LedgerDB) Close() error {
-	return db.db.Close()
+	return db.DB.Close()
 }
 
 // NewDB initializes a new DB. If the genesis block and states do not exist, this method creates it.
@@ -36,7 +33,7 @@ func NewDB(dirPath string) (*LedgerDB, error) {
 		return nil, err
 	}
 
-	db := &LedgerDB{db: SqliteDB, DatabasePath: dirPath}
+	db := &LedgerDB{DB: SqliteDB, DatabasePath: dirPath}
 
 	return db, err
 

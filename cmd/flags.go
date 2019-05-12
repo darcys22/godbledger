@@ -2,6 +2,11 @@
 package cmd
 
 import (
+	"os"
+	"os/user"
+	"path/filepath"
+	"runtime"
+
 	"github.com/urfave/cli"
 )
 
@@ -41,7 +46,7 @@ var (
 		Value: "info",
 	}
 	// DataDirFlag defines a path on disk.
-	DataDirFlag = DirectoryFlag{
+	DataDirFlag = cli.StringFlag{
 		Name:  "datadir",
 		Usage: "Data directory for the databases and keystore",
 		Value: DefaultDataDir(),

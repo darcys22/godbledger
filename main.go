@@ -2,8 +2,11 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"strconv"
 
-	"godbledger/ledger"
+	"godbledger/cmd"
+	"godbledger/node"
 	"godbledger/version"
 
 	"github.com/sirupsen/logrus"
@@ -19,17 +22,17 @@ func startNode(ctx *cli.Context) error {
 	}
 	logrus.SetLevel(level)
 
-	ledger, err := node.NewNode(ctx)
+	ledger, err := node.New(ctx)
 	if err != nil {
 		return err
 	}
 	ledger.Start()
 
-	statement, _ := ledger.db.Prepare("CREATE TABLE IF NOT EXISTS people (id INTEGER PRIMARY KEY, firstname TEXT, lastname TEXT)")
+	statement, _ := ledger.DB.DB.Prepare("CREATE TABLE IF NOT EXISTS people (id INTEGER PRIMARY KEY, firstname TEXT, lastname TEXT)")
 	statement.Exec()
-	statement, _ = database.Prepare("INSERT INTO people (firstname, lastname) VALUES (?, ?)")
+	statement, _ = ledger.DB.DB.Prepare("INSERT INTO people (firstname, lastname) VALUES (?, ?)")
 	statement.Exec("Nic", "Raboy")
-	rows, _ := database.Query("SELECT id, firstname, lastname FROM people")
+	rows, _ := ledger.DB.DB.Query("SELECT id, firstname, lastname FROM people")
 
 	var id int
 	var firstname string
@@ -52,7 +55,7 @@ func main() {
 	app.Name = "ledger"
 	app.Usage = "Accounting Ledger Database for the 21st Century"
 	app.Action = startNode
-	app.Version = version.Version()
+	app.Version = version.Version
 
 	app.Flags = []cli.Flag{
 		cmd.VerbosityFlag,
