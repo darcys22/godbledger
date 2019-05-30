@@ -3,7 +3,7 @@ package db
 import (
 	"database/sql"
 	"os"
-	"path"
+	//"path"
 	"strconv"
 	"time"
 
@@ -26,11 +26,16 @@ func (db *LedgerDB) Close() error {
 
 // NewDB initializes a new DB. If the genesis block and states do not exist, this method creates it.
 func NewDB(dirPath string) (*LedgerDB, error) {
-	if err := os.MkdirAll(dirPath, 0700); err != nil {
-		return nil, err
-	}
-	datafile := path.Join(dirPath, "ledger.db")
-	SqliteDB, err := sql.Open("sqlite3", datafile)
+	log.Info("Creating DB")
+	//if err := os.MkdirAll(dirPath, 0700); err != nil {
+	//return nil, err
+	//}
+	log.Info("Creating DB 1")
+	//datafile := path.Join(dirPath, "ledger.db")
+	log.Info("Creating DB 2")
+	//SqliteDB, err := sql.Open("sqlite3", datafile)
+	SqliteDB, err := sql.Open("sqlite3", "ledger.db")
+	log.Info("Creating DB 3")
 	if err != nil {
 		return nil, err
 	}
@@ -50,6 +55,7 @@ func ClearDB(dirPath string) error {
 }
 
 func (db *LedgerDB) TestDB() error {
+	log.Info("Testing DB")
 	createDB := "create table if not exists pages (title text, body blob, timestamp text)"
 	db.DB.Exec(createDB)
 	tx, _ := db.DB.Begin()
