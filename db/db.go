@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"os"
 	"path"
+	"strconv"
+	"time"
 
 	"github.com/sirupsen/logrus"
 
@@ -45,4 +47,17 @@ func ClearDB(dirPath string) error {
 		return nil
 	}
 	return os.RemoveAll(dirPath)
+}
+
+func (db *LedgerDB) TestDB() error {
+	createDB := "create table if not exists pages (title text, body blob, timestamp text)"
+	db.DB.Exec(createDB)
+	tx, _ := db.DB.Begin()
+
+	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
+	stmt, _ := tx.Prepare("insert into pages (title, body, timestamp) values (?, ?, ?)")
+	_, err := stmt.Exec("Sean", "Body", timestamp)
+	tx.Commit()
+
+	return err
 }

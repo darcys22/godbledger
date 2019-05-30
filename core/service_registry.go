@@ -92,4 +92,4 @@ func (s *ServiceRegistry) FetchService(service interface{}) error {
 		return nil
 	}
 	return fmt.Errorf("unknown service: %T", service)
-
+}

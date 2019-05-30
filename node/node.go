@@ -11,6 +11,7 @@ import (
 	"github.com/urfave/cli"
 
 	"godbledger/cmd"
+	"godbledger/core"
 	"godbledger/db"
 	"godbledger/version"
 )
@@ -34,7 +35,7 @@ func New(ctx *cli.Context) (*Node, error) {
 	//return nil, err
 	//}
 
-	registry := shared.NewServiceRegistry()
+	registry := core.NewServiceRegistry()
 
 	ledger := &Node{
 		//ledger: l,
@@ -52,6 +53,11 @@ func (n *Node) Start() {
 	log.WithFields(logrus.Fields{
 		"version": version.Version,
 	}).Info("Starting ledger node")
+
+	ldb, _ := db.NewDB("")
+	n.DB = ldb
+
+	n.DB.TestDB()
 
 	n.services.StartAll()
 	stop := n.stop
