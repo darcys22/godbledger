@@ -21,10 +21,11 @@ const ledgerDBName = "ledgerdata"
 
 type Node struct {
 	//ledger *ledger.LedgerDB
-	ctx  *cli.Context
-	lock sync.RWMutex
-	stop chan struct{} // Channel to wait for termination notifications.
-	DB   *db.LedgerDB
+	ctx      *cli.Context
+	lock     sync.RWMutex
+	services *core.ServiceRegistry
+	stop     chan struct{} // Channel to wait for termination notifications.
+	DB       *db.LedgerDB
 }
 
 func New(ctx *cli.Context) (*Node, error) {
@@ -33,10 +34,13 @@ func New(ctx *cli.Context) (*Node, error) {
 	//return nil, err
 	//}
 
+	registry := shared.NewServiceRegistry()
+
 	ledger := &Node{
 		//ledger: l,
-		ctx:  ctx,
-		stop: make(chan struct{}),
+		ctx:      ctx,
+		services: registry,
+		stop:     make(chan struct{}),
 	}
 
 	return ledger, nil
@@ -49,6 +53,7 @@ func (n *Node) Start() {
 		"version": version.Version,
 	}).Info("Starting ledger node")
 
+	n.services.StartAll()
 	stop := n.stop
 	n.lock.Unlock()
 
@@ -77,6 +82,7 @@ func (n *Node) Close() {
 	defer n.lock.Unlock()
 
 	log.Info("Stopping ledger node")
+	n.services.StopAll()
 	//b.services.StopAll()
 	//if err := b.db.Close(); err != nil {
 	//log.Errorf("Failed to close database: %v", err)

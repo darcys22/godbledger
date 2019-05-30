@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
+	//"fmt"
 	"os"
-	"strconv"
+	//"strconv"
 
 	"godbledger/cmd"
 	"godbledger/node"
@@ -28,19 +28,19 @@ func startNode(ctx *cli.Context) error {
 	}
 	ledger.Start()
 
-	statement, _ := ledger.DB.DB.Prepare("CREATE TABLE IF NOT EXISTS people (id INTEGER PRIMARY KEY, firstname TEXT, lastname TEXT)")
-	statement.Exec()
-	statement, _ = ledger.DB.DB.Prepare("INSERT INTO people (firstname, lastname) VALUES (?, ?)")
-	statement.Exec("Nic", "Raboy")
-	rows, _ := ledger.DB.DB.Query("SELECT id, firstname, lastname FROM people")
+	//statement, _ := ledger.DB.DB.Prepare("CREATE TABLE IF NOT EXISTS people (id INTEGER PRIMARY KEY, firstname TEXT, lastname TEXT)")
+	//statement.Exec()
+	//statement, _ = ledger.DB.DB.Prepare("INSERT INTO people (firstname, lastname) VALUES (?, ?)")
+	//statement.Exec("Nic", "Raboy")
+	//rows, _ := ledger.DB.DB.Query("SELECT id, firstname, lastname FROM people")
 
-	var id int
-	var firstname string
-	var lastname string
-	for rows.Next() {
-		rows.Scan(&id, &firstname, &lastname)
-		fmt.Println(strconv.Itoa(id) + ": " + firstname + " " + lastname)
-	}
+	//var id int
+	//var firstname string
+	//var lastname string
+	//for rows.Next() {
+	//rows.Scan(&id, &firstname, &lastname)
+	//fmt.Println(strconv.Itoa(id) + ": " + firstname + " " + lastname)
+	//}
 
 	return nil
 }

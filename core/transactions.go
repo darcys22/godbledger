@@ -1,7 +1,6 @@
 package core
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/rs/xid"
@@ -67,12 +66,9 @@ func (txn *Transaction) Balance() (*big.Int, bool) {
 	if len(txn.Splits) < 1 {
 		valid = false
 	}
-	fmt.Println(len(txn.Splits))
 	total := big.NewInt(0)
-	fmt.Println(total)
 	for _, elem := range txn.Splits {
 		total.Add(total, elem.Amount)
-		fmt.Println(total)
 	}
 
 	if total.Cmp(big.NewInt(0)) != 0 {
