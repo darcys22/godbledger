@@ -30,9 +30,7 @@ func NewDB(dirPath string) (*LedgerDB, error) {
 	//if err := os.MkdirAll(dirPath, 0700); err != nil {
 	//return nil, err
 	//}
-	log.Info("Creating DB 1")
 	//datafile := path.Join(dirPath, "ledger.db")
-	log.Info("Creating DB 2")
 	//SqliteDB, err := sql.Open("sqlite3", datafile)
 	SqliteDB, err := sql.Open("sqlite3", "ledger.db")
 	log.Info("Creating DB 3")
