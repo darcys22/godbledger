@@ -27,7 +27,7 @@ func startNode(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	ledger, err := ledger.New()
+	ledger, err := ledger.New(ctx)
 	fullnode.Register(ledger)
 	fullnode.Start()
 

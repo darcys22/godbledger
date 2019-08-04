@@ -3,22 +3,18 @@ package node
 import (
 	"os"
 	"os/signal"
-	"path"
 	"sync"
 	"syscall"
 
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 
-	"godbledger/cmd"
 	"godbledger/core"
 	"godbledger/db"
 	"godbledger/version"
 )
 
 var log = logrus.WithField("prefix", "node")
-
-const ledgerDBName = "ledgerdata"
 
 type Node struct {
 	//ledger *ledger.LedgerDB
@@ -98,23 +94,4 @@ func (n *Node) Close() {
 	//log.Errorf("Failed to close database: %v", err)
 	//}
 	close(n.stop)
-}
-
-func (n *Node) startDB(ctx *cli.Context) error {
-	baseDir := ctx.GlobalString(cmd.DataDirFlag.Name)
-	dbPath := path.Join(baseDir, ledgerDBName)
-	if n.ctx.GlobalBool(cmd.ClearDB.Name) {
-		if err := db.ClearDB(dbPath); err != nil {
-			return err
-		}
-	}
-
-	db, err := db.NewDB(dbPath)
-	if err != nil {
-		return err
-	}
-
-	log.WithField("path", dbPath).Info("Checking db")
-	n.DB = db
-	return nil
 }

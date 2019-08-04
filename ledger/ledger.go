@@ -1,11 +1,17 @@
 package ledger
 
 import (
+	"path"
+
+	"godbledger/cmd"
 	"godbledger/core"
 	"godbledger/db"
 
 	"github.com/sirupsen/logrus"
+	"github.com/urfave/cli"
 )
+
+const ledgerDBName = "ledgerdata"
 
 var log = logrus.WithField("prefix", "ledger")
 
@@ -20,8 +26,21 @@ type Ledger struct {
 	ledgerDb *db.LedgerDB
 }
 
-func New() (*Ledger, error) {
-	ledgerDb, err := db.NewDB("")
+func New(ctx *cli.Context) (*Ledger, error) {
+	baseDir := ctx.GlobalString(cmd.DataDirFlag.Name)
+	dbPath := path.Join(baseDir, ledgerDBName)
+	log.WithField("path", dbPath).Info("Checking db")
+	if ctx.GlobalBool(cmd.ClearDB.Name) {
+		if err := db.ClearDB(dbPath); err != nil {
+			return nil, err
+		}
+	}
+
+	ledgerDb, err := db.NewDB(dbPath)
+	if err != nil {
+		return nil, err
+	}
+
 	if err != nil {
 		return nil, err
 	}
