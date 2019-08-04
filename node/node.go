@@ -48,16 +48,20 @@ func New(ctx *cli.Context) (*Node, error) {
 
 }
 
+func (n *Node) Register(constructor core.Service) error {
+	n.lock.Lock()
+	defer n.lock.Unlock()
+
+	n.services.RegisterService(constructor)
+
+	return nil
+}
+
 func (n *Node) Start() {
 	n.lock.Lock()
 	log.WithFields(logrus.Fields{
 		"version": version.Version,
 	}).Info("Starting ledger node")
-
-	ldb, _ := db.NewDB("")
-	n.DB = ldb
-
-	n.DB.TestDB()
 
 	n.services.StartAll()
 	stop := n.stop

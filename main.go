@@ -6,6 +6,7 @@ import (
 	//"strconv"
 
 	"godbledger/cmd"
+	"godbledger/ledger"
 	"godbledger/node"
 	"godbledger/version"
 
@@ -22,11 +23,13 @@ func startNode(ctx *cli.Context) error {
 	}
 	logrus.SetLevel(level)
 
-	ledger, err := node.New(ctx)
+	fullnode, err := node.New(ctx)
 	if err != nil {
 		return err
 	}
-	ledger.Start()
+	ledger, err := ledger.New()
+	fullnode.Register(ledger)
+	fullnode.Start()
 
 	return nil
 }
