@@ -33,7 +33,6 @@ func NewDB(dirPath string) (*LedgerDB, error) {
 	//datafile := path.Join(dirPath, "ledger.db")
 	//SqliteDB, err := sql.Open("sqlite3", datafile)
 	SqliteDB, err := sql.Open("sqlite3", "ledger.db")
-	log.Info("Creating DB 3")
 	if err != nil {
 		return nil, err
 	}
@@ -55,12 +54,36 @@ func ClearDB(dirPath string) error {
 func (db *LedgerDB) TestDB() error {
 	log.Info("Testing DB")
 	createDB := "create table if not exists pages (title text, body blob, timestamp text)"
-	db.DB.Exec(createDB)
+	log.Debug("Query: " + createDB)
+	res, err := db.DB.Exec(createDB)
+
+	lastId, err := res.LastInsertId()
+	if err != nil {
+		log.Fatal(err)
+	}
+	rowCnt, err := res.RowsAffected()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
+
 	tx, _ := db.DB.Begin()
 
 	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
 	stmt, _ := tx.Prepare("insert into pages (title, body, timestamp) values (?, ?, ?)")
-	_, err := stmt.Exec("Sean", "Body", timestamp)
+	log.Debug("Query: Insert")
+	res, err = stmt.Exec("Sean", "Body", timestamp)
+
+	lastId, err = res.LastInsertId()
+	if err != nil {
+		log.Fatal(err)
+	}
+	rowCnt, err = res.RowsAffected()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
+
 	tx.Commit()
 
 	return err
