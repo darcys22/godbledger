@@ -48,6 +48,7 @@ func main() {
 
 	app.Flags = []cli.Flag{
 		cmd.VerbosityFlag,
+		cmd.DataDirFlag,
 		cmd.ClearDB,
 	}
 

@@ -17,7 +17,6 @@ import (
 var log = logrus.WithField("prefix", "node")
 
 type Node struct {
-	//ledger *ledger.LedgerDB
 	ctx      *cli.Context
 	lock     sync.RWMutex
 	services *core.ServiceRegistry
@@ -26,15 +25,10 @@ type Node struct {
 }
 
 func New(ctx *cli.Context) (*Node, error) {
-	//l, err := NewLedgerDB()
-	//if err != nil {
-	//return nil, err
-	//}
 
 	registry := core.NewServiceRegistry()
 
 	ledger := &Node{
-		//ledger: l,
 		ctx:      ctx,
 		services: registry,
 		stop:     make(chan struct{}),
@@ -89,9 +83,5 @@ func (n *Node) Close() {
 
 	log.Info("Stopping ledger node")
 	n.services.StopAll()
-	//b.services.StopAll()
-	//if err := b.db.Close(); err != nil {
-	//log.Errorf("Failed to close database: %v", err)
-	//}
 	close(n.stop)
 }

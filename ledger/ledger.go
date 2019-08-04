@@ -28,8 +28,9 @@ type Ledger struct {
 
 func New(ctx *cli.Context) (*Ledger, error) {
 	baseDir := ctx.GlobalString(cmd.DataDirFlag.Name)
+	log.Debug(cmd.DataDirFlag.Name)
 	dbPath := path.Join(baseDir, ledgerDBName)
-	log.WithField("path", dbPath).Info("Checking db")
+	log.WithField("path", dbPath).Info("Checking db path")
 	if ctx.GlobalBool(cmd.ClearDB.Name) {
 		if err := db.ClearDB(dbPath); err != nil {
 			return nil, err
