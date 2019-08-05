@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package transaction;
+
+service Transactorr {
+  rpc NewTransaction(TransactionData) returns (Receipt) {}
+}
+
+message TransactionData {
+  string name = 1;
+}
+
+message Receipt {
+  string message = 1;
+}
