@@ -3,9 +3,9 @@ package ledger
 import (
 	"path"
 
-	"github.com/darcys22/godbledger/cmd"
-	"github.com/darcys22/godbledger/core"
-	"github.com/darcys22/godbledger/db"
+	"github.com/darcys22/godbledger/server/cmd"
+	"github.com/darcys22/godbledger/server/core"
+	"github.com/darcys22/godbledger/server/db"
 
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
