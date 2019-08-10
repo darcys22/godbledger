@@ -9,9 +9,9 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 
-	"godbledger/core"
-	"godbledger/db"
-	"godbledger/version"
+	"github.com/darcys22/godbledger/core"
+	"github.com/darcys22/godbledger/db"
+	"github.com/darcys22/godbledger/version"
 )
 
 var log = logrus.WithField("prefix", "node")

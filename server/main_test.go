@@ -1,8 +1,8 @@
 package main
 
 import (
-	"godbledger/core"
-	"godbledger/ledger"
+	"github.com/darcys22/godbledger/core"
+	"github.com/darcys22/godbledger/ledger"
 	"math/big"
 	"testing"
 	"time"

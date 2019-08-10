@@ -1,8 +1,4 @@
 load("@bazel_gazelle//:def.bzl", "gazelle")
 
-gazelle(
-    name = "gazelle",
-    # you project name here!
-    prefix = "github.com/brendanjryan/groupcache-bazel",
-)
-
+# gazelle:prefix github.com/darcys22/godbledger
+gazelle(name = "gazelle")

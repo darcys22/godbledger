@@ -5,10 +5,10 @@ import (
 	"os"
 	//"strconv"
 
-	"godbledger/cmd"
-	"godbledger/ledger"
-	"godbledger/node"
-	"godbledger/version"
+	"github.com/darcys22/godbledger/cmd"
+	"github.com/darcys22/godbledger/ledger"
+	"github.com/darcys22/godbledger/node"
+	"github.com/darcys22/godbledger/version"
 
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
