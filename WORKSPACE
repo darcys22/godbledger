@@ -24,6 +24,34 @@ http_archive(
     sha256 = "be9296bfd64882e3c08e3283c58fcb461fa6dd3c171764fcc4cf322f60615a9b",
 )
 
-load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
+load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
 
 gazelle_dependencies()
+
+go_repository(
+    name = "com_github_rs_xid",
+    importpath = "github.com/rs/xid",
+    sum = "h1:mhH9Nq+C1fY2l1XIpgxIiUOfNpRBYH1kKcr+qfKgjRc=",
+    version = "v1.2.1",
+)
+
+go_repository(
+    name = "com_github_sirupsen_logrus",
+    importpath = "github.com/sirupsen/logrus",
+    sum = "h1:SPIRibHv4MatM3XXNO2BJeFLZwZ2LvZgfQ5+UNI2im4=",
+    version = "v1.4.2",
+)
+
+go_repository(
+    name = "com_github_urfave_cli",
+    importpath = "github.com/urfave/cli",
+    sum = "h1:wYSSj06510qPIzGSua9ZqsncMmWE3Zr55KBERygyrxE=",
+    version = "v1.21.0",
+)
+
+go_repository(
+    name = "com_github_x_cray_logrus_prefixed_formatter",
+    importpath = "github.com/x-cray/logrus-prefixed-formatter",
+    sum = "h1:00txxvfBM9muc0jiLIEAkAcIMJzfthRT6usrui8uGmg=",
+    version = "v0.5.2",
+)
