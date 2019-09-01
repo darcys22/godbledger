@@ -21,8 +21,8 @@ func init() {
 
 type LedgerServer struct{}
 
-func (s *LedgerServer) GetVersion(ctx context.Context, in *pb.VersionRequest) (*pb.VersionResponse, error) {
-	log.Printf("Received: %v", in.GetHash())
+func (s *LedgerServer) NodeVersion(ctx context.Context, in *pb.VersionRequest) (*pb.VersionResponse, error) {
+	log.Printf("Received Version Request: %s", in)
 	return &pb.VersionResponse{Message: version.Version}, nil
 }
 

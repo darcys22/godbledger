@@ -4,30 +4,11 @@ package transaction;
 
 service Transactor {
   rpc NodeVersion(VersionRequest) returns (VersionResponse) {}
-  /*rpc StopNode(ExitRequest) returns (ExitResponse) {}*/
-  /*rpc NewTransaction(TransactionData) returns (Receipt) {}*/
-}
-
-message TransactionData {
-  string name = 1;
-}
-
-message Receipt {
-  string message = 1;
-}
-
-message ExitRequest {
-    bytes hash = 1;
-}
-
-message ExitResponse {
-    bytes result = 1;
 }
 
 message VersionRequest {
-    bytes hash = 1;
+    string message = 1;
 }
-
 
 message VersionResponse {
     string message = 1;
