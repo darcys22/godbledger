@@ -8,6 +8,7 @@ import (
 	"github.com/darcys22/godbledger/server/cmd"
 	"github.com/darcys22/godbledger/server/ledger"
 	"github.com/darcys22/godbledger/server/node"
+	"github.com/darcys22/godbledger/server/rpc"
 	"github.com/darcys22/godbledger/server/version"
 
 	"github.com/sirupsen/logrus"
@@ -29,6 +30,8 @@ func startNode(ctx *cli.Context) error {
 	}
 	ledger, err := ledger.New(ctx)
 	fullnode.Register(ledger)
+	rpc, err := rpc.NewRPCService(ctx, rpc.Config{Port: ":50051"})
+	fullnode.Register(rpc)
 	fullnode.Start()
 
 	return nil

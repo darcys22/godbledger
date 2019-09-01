@@ -2,8 +2,10 @@ syntax = "proto3";
 
 package transaction;
 
-service Transactorr {
-  rpc NewTransaction(TransactionData) returns (Receipt) {}
+service Transactor {
+  rpc NodeVersion(VersionRequest) returns (VersionResponse) {}
+  /*rpc StopNode(ExitRequest) returns (ExitResponse) {}*/
+  /*rpc NewTransaction(TransactionData) returns (Receipt) {}*/
 }
 
 message TransactionData {
@@ -12,4 +14,21 @@ message TransactionData {
 
 message Receipt {
   string message = 1;
+}
+
+message ExitRequest {
+    bytes hash = 1;
+}
+
+message ExitResponse {
+    bytes result = 1;
+}
+
+message VersionRequest {
+    bytes hash = 1;
+}
+
+
+message VersionResponse {
+    string message = 1;
 }
