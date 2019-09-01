@@ -54,6 +54,11 @@ func New(ctx *cli.Context) (*Ledger, error) {
 	return ledger, nil
 }
 
+func (l *Ledger) Insert(txn *core.Transaction) {
+	l.InsertUser(txn.Poster)
+
+}
+
 func (l *Ledger) Start() {
 	l.ledgerDb.TestDB()
 }

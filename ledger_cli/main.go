@@ -44,7 +44,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	date := "2011/03/15"
+	date := "2011-03-15"
 	desc := "Whole Food Market"
 
 	transactionLines := make([]*pb.LineItem, 2)
