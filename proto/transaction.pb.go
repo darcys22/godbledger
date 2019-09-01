@@ -24,6 +24,155 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
+type LineItem struct {
+	Accountname          string   `protobuf:"bytes,1,opt,name=accountname,proto3" json:"accountname,omitempty"`
+	Description          string   `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	Amount               int64    `protobuf:"varint,3,opt,name=amount,proto3" json:"amount,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *LineItem) Reset()         { *m = LineItem{} }
+func (m *LineItem) String() string { return proto.CompactTextString(m) }
+func (*LineItem) ProtoMessage()    {}
+func (*LineItem) Descriptor() ([]byte, []int) {
+	return fileDescriptor_2cc4e03d2c28c490, []int{0}
+}
+
+func (m *LineItem) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_LineItem.Unmarshal(m, b)
+}
+func (m *LineItem) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_LineItem.Marshal(b, m, deterministic)
+}
+func (m *LineItem) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_LineItem.Merge(m, src)
+}
+func (m *LineItem) XXX_Size() int {
+	return xxx_messageInfo_LineItem.Size(m)
+}
+func (m *LineItem) XXX_DiscardUnknown() {
+	xxx_messageInfo_LineItem.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_LineItem proto.InternalMessageInfo
+
+func (m *LineItem) GetAccountname() string {
+	if m != nil {
+		return m.Accountname
+	}
+	return ""
+}
+
+func (m *LineItem) GetDescription() string {
+	if m != nil {
+		return m.Description
+	}
+	return ""
+}
+
+func (m *LineItem) GetAmount() int64 {
+	if m != nil {
+		return m.Amount
+	}
+	return 0
+}
+
+type TransactionRequest struct {
+	Date                 string      `protobuf:"bytes,1,opt,name=date,proto3" json:"date,omitempty"`
+	Description          string      `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	Lines                []*LineItem `protobuf:"bytes,3,rep,name=lines,proto3" json:"lines,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *TransactionRequest) Reset()         { *m = TransactionRequest{} }
+func (m *TransactionRequest) String() string { return proto.CompactTextString(m) }
+func (*TransactionRequest) ProtoMessage()    {}
+func (*TransactionRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_2cc4e03d2c28c490, []int{1}
+}
+
+func (m *TransactionRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TransactionRequest.Unmarshal(m, b)
+}
+func (m *TransactionRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TransactionRequest.Marshal(b, m, deterministic)
+}
+func (m *TransactionRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TransactionRequest.Merge(m, src)
+}
+func (m *TransactionRequest) XXX_Size() int {
+	return xxx_messageInfo_TransactionRequest.Size(m)
+}
+func (m *TransactionRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_TransactionRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TransactionRequest proto.InternalMessageInfo
+
+func (m *TransactionRequest) GetDate() string {
+	if m != nil {
+		return m.Date
+	}
+	return ""
+}
+
+func (m *TransactionRequest) GetDescription() string {
+	if m != nil {
+		return m.Description
+	}
+	return ""
+}
+
+func (m *TransactionRequest) GetLines() []*LineItem {
+	if m != nil {
+		return m.Lines
+	}
+	return nil
+}
+
+type TransactionResponse struct {
+	Message              string   `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *TransactionResponse) Reset()         { *m = TransactionResponse{} }
+func (m *TransactionResponse) String() string { return proto.CompactTextString(m) }
+func (*TransactionResponse) ProtoMessage()    {}
+func (*TransactionResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_2cc4e03d2c28c490, []int{2}
+}
+
+func (m *TransactionResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TransactionResponse.Unmarshal(m, b)
+}
+func (m *TransactionResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TransactionResponse.Marshal(b, m, deterministic)
+}
+func (m *TransactionResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TransactionResponse.Merge(m, src)
+}
+func (m *TransactionResponse) XXX_Size() int {
+	return xxx_messageInfo_TransactionResponse.Size(m)
+}
+func (m *TransactionResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_TransactionResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TransactionResponse proto.InternalMessageInfo
+
+func (m *TransactionResponse) GetMessage() string {
+	if m != nil {
+		return m.Message
+	}
+	return ""
+}
+
 type VersionRequest struct {
 	Message              string   `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -35,7 +184,7 @@ func (m *VersionRequest) Reset()         { *m = VersionRequest{} }
 func (m *VersionRequest) String() string { return proto.CompactTextString(m) }
 func (*VersionRequest) ProtoMessage()    {}
 func (*VersionRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_2cc4e03d2c28c490, []int{0}
+	return fileDescriptor_2cc4e03d2c28c490, []int{3}
 }
 
 func (m *VersionRequest) XXX_Unmarshal(b []byte) error {
@@ -74,7 +223,7 @@ func (m *VersionResponse) Reset()         { *m = VersionResponse{} }
 func (m *VersionResponse) String() string { return proto.CompactTextString(m) }
 func (*VersionResponse) ProtoMessage()    {}
 func (*VersionResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_2cc4e03d2c28c490, []int{1}
+	return fileDescriptor_2cc4e03d2c28c490, []int{4}
 }
 
 func (m *VersionResponse) XXX_Unmarshal(b []byte) error {
@@ -103,6 +252,9 @@ func (m *VersionResponse) GetMessage() string {
 }
 
 func init() {
+	proto.RegisterType((*LineItem)(nil), "transaction.LineItem")
+	proto.RegisterType((*TransactionRequest)(nil), "transaction.TransactionRequest")
+	proto.RegisterType((*TransactionResponse)(nil), "transaction.TransactionResponse")
 	proto.RegisterType((*VersionRequest)(nil), "transaction.VersionRequest")
 	proto.RegisterType((*VersionResponse)(nil), "transaction.VersionResponse")
 }
@@ -110,16 +262,24 @@ func init() {
 func init() { proto.RegisterFile("transaction.proto", fileDescriptor_2cc4e03d2c28c490) }
 
 var fileDescriptor_2cc4e03d2c28c490 = []byte{
-	// 139 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x12, 0x2c, 0x29, 0x4a, 0xcc,
-	0x2b, 0x4e, 0x4c, 0x2e, 0xc9, 0xcc, 0xcf, 0xd3, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0xe2, 0x46,
-	0x12, 0x52, 0xd2, 0xe2, 0xe2, 0x0b, 0x4b, 0x2d, 0x2a, 0xce, 0xcc, 0xcf, 0x0b, 0x4a, 0x2d, 0x2c,
-	0x4d, 0x2d, 0x2e, 0x11, 0x92, 0xe0, 0x62, 0xcf, 0x4d, 0x2d, 0x2e, 0x4e, 0x4c, 0x4f, 0x95, 0x60,
-	0x54, 0x60, 0xd4, 0xe0, 0x0c, 0x82, 0x71, 0x95, 0xb4, 0xb9, 0xf8, 0xe1, 0x6a, 0x8b, 0x0b, 0xf2,
-	0xf3, 0x8a, 0x53, 0x71, 0x2b, 0x36, 0x8a, 0xe0, 0xe2, 0x0a, 0x81, 0xda, 0x93, 0x5f, 0x24, 0xe4,
-	0xc5, 0xc5, 0xed, 0x97, 0x9f, 0x92, 0x0a, 0xd5, 0x2e, 0x24, 0xad, 0x87, 0xec, 0x2c, 0x54, 0x07,
-	0x48, 0xc9, 0x60, 0x97, 0x84, 0xd8, 0xa8, 0xc4, 0x90, 0xc4, 0x06, 0xf6, 0x86, 0x31, 0x20, 0x00,
-	0x00, 0xff, 0xff, 0x8f, 0x9b, 0x27, 0xbd, 0xdb, 0x00, 0x00, 0x00,
+	// 269 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x92, 0xc1, 0x4a, 0xc4, 0x30,
+	0x10, 0x86, 0xad, 0xd5, 0x55, 0xa7, 0xb0, 0xe2, 0x88, 0x52, 0x56, 0xc1, 0x90, 0x53, 0x71, 0x61,
+	0x85, 0xf5, 0x09, 0x3c, 0x2a, 0xe2, 0xa1, 0xa8, 0xf7, 0xd8, 0x8c, 0x52, 0xb0, 0x49, 0xcd, 0x64,
+	0xf1, 0xb1, 0x7c, 0x45, 0xe9, 0x76, 0xa3, 0x29, 0xba, 0xe8, 0x2d, 0x33, 0xf9, 0x66, 0xfe, 0xff,
+	0x0f, 0x81, 0x03, 0xef, 0x94, 0x61, 0x55, 0xf9, 0xda, 0x9a, 0x59, 0xeb, 0xac, 0xb7, 0x98, 0x45,
+	0x2d, 0xf9, 0x0c, 0xbb, 0xb7, 0xb5, 0xa1, 0x6b, 0x4f, 0x0d, 0x0a, 0xc8, 0x54, 0x55, 0xd9, 0x85,
+	0xf1, 0x46, 0x35, 0x94, 0x27, 0x22, 0x29, 0xf6, 0xca, 0xb8, 0xd5, 0x11, 0x9a, 0xb8, 0x72, 0x75,
+	0xdb, 0x0d, 0xe7, 0x9b, 0x3d, 0x11, 0xb5, 0xf0, 0x18, 0x46, 0xaa, 0xe9, 0xf8, 0x3c, 0x15, 0x49,
+	0x91, 0x96, 0xab, 0x4a, 0xbe, 0x03, 0xde, 0x7f, 0xcb, 0x96, 0xf4, 0xb6, 0x20, 0xf6, 0x88, 0xb0,
+	0xa5, 0x95, 0x0f, 0x52, 0xcb, 0xf3, 0x3f, 0x34, 0xa6, 0xb0, 0xfd, 0x5a, 0x1b, 0xe2, 0x3c, 0x15,
+	0x69, 0x91, 0xcd, 0x8f, 0x66, 0x71, 0xc6, 0x90, 0xa6, 0xec, 0x19, 0x79, 0x01, 0x87, 0x03, 0x61,
+	0x6e, 0xad, 0x61, 0xc2, 0x1c, 0x76, 0x1a, 0x62, 0x56, 0x2f, 0x41, 0x3c, 0x94, 0xf2, 0x1c, 0xc6,
+	0x8f, 0xe4, 0x38, 0x72, 0xb9, 0x9e, 0x9d, 0xc2, 0xfe, 0x17, 0xfb, 0xd7, 0xe2, 0xf9, 0x47, 0x02,
+	0x10, 0xac, 0x58, 0x87, 0x37, 0x90, 0xdd, 0x59, 0x4d, 0xab, 0x79, 0x3c, 0x19, 0xa4, 0x18, 0x3a,
+	0x98, 0x9c, 0xfe, 0x7e, 0xd9, 0x4b, 0xca, 0x0d, 0x7c, 0x80, 0xf1, 0x95, 0xd6, 0x51, 0x4e, 0x3c,
+	0x1b, 0x4c, 0xfc, 0x7c, 0xfa, 0x89, 0x58, 0x0f, 0x84, 0xb5, 0x4f, 0xa3, 0xe5, 0x87, 0xb9, 0xfc,
+	0x0c, 0x00, 0x00, 0xff, 0xff, 0x60, 0x9e, 0xb8, 0xbb, 0x45, 0x02, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -135,6 +295,7 @@ const _ = grpc.SupportPackageIsVersion4
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type TransactorClient interface {
 	NodeVersion(ctx context.Context, in *VersionRequest, opts ...grpc.CallOption) (*VersionResponse, error)
+	AddTransaction(ctx context.Context, in *TransactionRequest, opts ...grpc.CallOption) (*TransactionResponse, error)
 }
 
 type transactorClient struct {
@@ -154,9 +315,19 @@ func (c *transactorClient) NodeVersion(ctx context.Context, in *VersionRequest, 
 	return out, nil
 }
 
+func (c *transactorClient) AddTransaction(ctx context.Context, in *TransactionRequest, opts ...grpc.CallOption) (*TransactionResponse, error) {
+	out := new(TransactionResponse)
+	err := c.cc.Invoke(ctx, "/transaction.Transactor/AddTransaction", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TransactorServer is the server API for Transactor service.
 type TransactorServer interface {
 	NodeVersion(context.Context, *VersionRequest) (*VersionResponse, error)
+	AddTransaction(context.Context, *TransactionRequest) (*TransactionResponse, error)
 }
 
 // UnimplementedTransactorServer can be embedded to have forward compatible implementations.
@@ -165,6 +336,9 @@ type UnimplementedTransactorServer struct {
 
 func (*UnimplementedTransactorServer) NodeVersion(ctx context.Context, req *VersionRequest) (*VersionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NodeVersion not implemented")
+}
+func (*UnimplementedTransactorServer) AddTransaction(ctx context.Context, req *TransactionRequest) (*TransactionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddTransaction not implemented")
 }
 
 func RegisterTransactorServer(s *grpc.Server, srv TransactorServer) {
@@ -189,6 +363,24 @@ func _Transactor_NodeVersion_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Transactor_AddTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TransactionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TransactorServer).AddTransaction(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/transaction.Transactor/AddTransaction",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TransactorServer).AddTransaction(ctx, req.(*TransactionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Transactor_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "transaction.Transactor",
 	HandlerType: (*TransactorServer)(nil),
@@ -196,6 +388,10 @@ var _Transactor_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "NodeVersion",
 			Handler:    _Transactor_NodeVersion_Handler,
+		},
+		{
+			MethodName: "AddTransaction",
+			Handler:    _Transactor_AddTransaction_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

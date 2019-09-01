@@ -4,6 +4,23 @@ package transaction;
 
 service Transactor {
   rpc NodeVersion(VersionRequest) returns (VersionResponse) {}
+  rpc AddTransaction(TransactionRequest) returns (TransactionResponse) {}
+}
+
+message LineItem {
+  string accountname = 1;
+  string description = 2;
+  int64 amount = 3;
+}
+
+message TransactionRequest {
+    string date = 1;
+    string description = 2;
+    repeated LineItem lines = 3;
+}
+
+message TransactionResponse {
+    string message = 1;
 }
 
 message VersionRequest {
