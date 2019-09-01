@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/darcys22/godbledger/server/version"
-
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 
@@ -17,18 +15,6 @@ var log logrus.FieldLogger
 
 func init() {
 	log = logrus.WithField("prefix", "rpc")
-}
-
-type LedgerServer struct{}
-
-func (s *LedgerServer) AddTransaction(ctx context.Context, in *pb.TransactionRequest) (*pb.TransactionResponse, error) {
-	log.Printf("Received New Transaction Request")
-	return &pb.TransactionResponse{Message: "Accepted"}, nil
-}
-
-func (s *LedgerServer) NodeVersion(ctx context.Context, in *pb.VersionRequest) (*pb.VersionResponse, error) {
-	log.Printf("Received Version Request: %s", in)
-	return &pb.VersionResponse{Message: version.Version}, nil
 }
 
 type Service struct {
