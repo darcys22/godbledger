@@ -18,6 +18,14 @@ func (db *LedgerDB) SafeAddUser(usr *core.User) error {
 
 }
 
+func (db *LedgerDB) AddCurrency(usr *core.Currency) error {
+	return nil
+}
+
+func (db *LedgerDB) AddAccount(usr *core.Account) error {
+	return nil
+}
+
 func (db *LedgerDB) AddUser(usr *core.User) error {
 	log.Info("Adding User to DB")
 	insertUser := `

@@ -50,6 +50,23 @@ func New(ctx *cli.Context) (*Ledger, error) {
 func (l *Ledger) Insert(txn *core.Transaction) {
 	log.Printf("Created Transaction: %s", txn)
 	l.ledgerDb.SafeAddUser(txn.Poster)
+	currencies, _ := l.GetCurrencies(txn)
+	for _, currency := range currencies {
+		l.ledgerDb.AddCurrency(currency)
+	}
+	accounts, _ := l.GetAccounts(txn)
+
+	for _, account := range accounts {
+		l.ledgerDb.AddAccount(account)
+	}
+}
+
+func (l *Ledger) GetCurrencies(txn *core.Transaction) ([]*core.Currency, error) {
+	return nil, nil
+}
+
+func (l *Ledger) GetAccounts(txn *core.Transaction) ([]*core.Account, error) {
+	return nil, nil
 }
 
 func (l *Ledger) Start() {
