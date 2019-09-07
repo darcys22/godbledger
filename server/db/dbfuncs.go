@@ -18,12 +18,62 @@ func (db *LedgerDB) SafeAddUser(usr *core.User) error {
 
 }
 
-func (db *LedgerDB) AddCurrency(usr *core.Currency) error {
-	return nil
+func (db *LedgerDB) AddCurrency(cur *core.Currency) error {
+	log.Info("Adding Currency to DB")
+	insertCurrency := `
+		INSERT INTO currencies(name,decimals)
+			VALUES(?,?);
+	`
+	tx, _ := db.DB.Begin()
+	stmt, _ := tx.Prepare(insertCurrency)
+	log.Debug("Query: " + insertCurrency)
+	res, err := stmt.Exec(cur.Name, cur.Decimals)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	lastId, err := res.LastInsertId()
+	if err != nil {
+		log.Fatal(err)
+	}
+	rowCnt, err := res.RowsAffected()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
+
+	tx.Commit()
+
+	return err
 }
 
-func (db *LedgerDB) AddAccount(usr *core.Account) error {
-	return nil
+func (db *LedgerDB) AddAccount(acc *core.Account) error {
+	log.Info("Adding Account to DB")
+	insertAccount := `
+		INSERT INTO accounts(account_id, name)
+			VALUES(?,?);
+	`
+	tx, _ := db.DB.Begin()
+	stmt, _ := tx.Prepare(insertAccount)
+	log.Debug("Query: " + insertAccount)
+	res, err := stmt.Exec(acc.Code, acc.Name)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	lastId, err := res.LastInsertId()
+	if err != nil {
+		log.Fatal(err)
+	}
+	rowCnt, err := res.RowsAffected()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
+
+	tx.Commit()
+
+	return err
 }
 
 func (db *LedgerDB) AddUser(usr *core.User) error {

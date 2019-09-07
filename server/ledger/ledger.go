@@ -62,11 +62,49 @@ func (l *Ledger) Insert(txn *core.Transaction) {
 }
 
 func (l *Ledger) GetCurrencies(txn *core.Transaction) ([]*core.Currency, error) {
-	return nil, nil
+
+	currencies := []*core.Currency{}
+
+	for _, split := range txn.Splits {
+		cur := split.Currency
+		exists := false
+
+		for _, b := range currencies {
+			if b == cur {
+				exists = true
+			}
+		}
+
+		if exists == false {
+			currencies = append(currencies, cur)
+		}
+
+	}
+
+	return currencies, nil
 }
 
 func (l *Ledger) GetAccounts(txn *core.Transaction) ([]*core.Account, error) {
-	return nil, nil
+	accounts := []*core.Account{}
+
+	for _, split := range txn.Splits {
+		accs := split.Accounts
+
+		for _, a := range accs {
+			exists := false
+			for _, b := range accounts {
+				if b == a {
+					exists = true
+				}
+			}
+			if exists == false {
+				accounts = append(accounts, a)
+			}
+		}
+
+	}
+
+	return accounts, nil
 }
 
 func (l *Ledger) Start() {

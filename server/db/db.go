@@ -53,6 +53,28 @@ func (db *LedgerDB) InitDB() error {
 	if err != nil {
 		log.Fatal(err)
 	}
+	createDB = `
+	CREATE TABLE IF NOT EXISTS accounts (
+		account_id VARCHAR(255) NOT NULL,
+		name VARCHAR(255) NOT NULL,
+		PRIMARY KEY(account_id)
+	);`
+	log.Debug("Query: " + createDB)
+	_, err = db.DB.Exec(createDB)
+	if err != nil {
+		log.Fatal(err)
+	}
+	createDB = `
+	CREATE TABLE IF NOT EXISTS currencies (
+		name VARCHAR(255) NOT NULL,
+		decimals INT NOT NULL,
+		PRIMARY KEY(name)
+	);`
+	log.Debug("Query: " + createDB)
+	_, err = db.DB.Exec(createDB)
+	if err != nil {
+		log.Fatal(err)
+	}
 	return err
 }
 
