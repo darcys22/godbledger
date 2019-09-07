@@ -9,13 +9,43 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func (db *LedgerDB) SafeAddUser(usr *core.User) error {
-	u, _ := db.FindUser(usr.Name)
-	if u != nil {
-		return nil
+func (db *LedgerDB) AddTransaction(txn *core.Transaction) error {
+	log.Info("Adding Transaction to DB")
+	insertTransaction := `
+		INSERT INTO transactions(txn_id, post_date, description)
+			VALUES(?,?,?);
+	`
+	tx, _ := db.DB.Begin()
+	stmt, _ := tx.Prepare(insertTransaction)
+	log.Debug("Query: " + insertTransaction)
+	res, err := stmt.Exec(txn.Id, txn.Postdate, txn.Description)
+	if err != nil {
+		log.Fatal(err)
 	}
-	return db.AddUser(usr)
 
+	lastId, err := res.LastInsertId()
+	if err != nil {
+		log.Fatal(err)
+	}
+	rowCnt, err := res.RowsAffected()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
+
+	tx.Commit()
+
+	return err
+}
+
+func (db *LedgerDB) FindCurrency(cur string) (*core.Currency, error) {
+	var resp core.Currency
+	log.Info("Searching Currency in DB")
+	err := db.DB.QueryRow(`SELECT * FROM currencies WHERE name = $1 LIMIT 1`, cur).Scan(&resp.Name, &resp.Decimals)
+	if err != nil {
+		return nil, err
+	}
+	return &resp, nil
 }
 
 func (db *LedgerDB) AddCurrency(cur *core.Currency) error {
@@ -47,6 +77,24 @@ func (db *LedgerDB) AddCurrency(cur *core.Currency) error {
 	return err
 }
 
+func (db *LedgerDB) SafeAddCurrency(cur *core.Currency) error {
+	u, _ := db.FindCurrency(cur.Name)
+	if u != nil {
+		return nil
+	}
+	return db.AddCurrency(cur)
+}
+
+func (db *LedgerDB) FindAccount(code string) (*core.Account, error) {
+	var resp core.Account
+	log.Info("Searching Account in DB")
+	err := db.DB.QueryRow(`SELECT * FROM accounts WHERE account_id = $1 LIMIT 1`, code).Scan(&resp.Code, &resp.Name)
+	if err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
 func (db *LedgerDB) AddAccount(acc *core.Account) error {
 	log.Info("Adding Account to DB")
 	insertAccount := `
@@ -74,6 +122,25 @@ func (db *LedgerDB) AddAccount(acc *core.Account) error {
 	tx.Commit()
 
 	return err
+}
+
+func (db *LedgerDB) SafeAddAccount(acc *core.Account) error {
+	u, _ := db.FindAccount(acc.Code)
+	if u != nil {
+		return nil
+	}
+	return db.AddAccount(acc)
+
+}
+
+func (db *LedgerDB) FindUser(pubKey string) (*core.User, error) {
+	var resp core.User
+	log.Info("Searching User in DB")
+	err := db.DB.QueryRow(`SELECT * FROM users WHERE username = $1 LIMIT 1`, pubKey).Scan(&resp.Id, &resp.Name)
+	if err != nil {
+		return nil, err
+	}
+	return &resp, nil
 }
 
 func (db *LedgerDB) AddUser(usr *core.User) error {
@@ -105,14 +172,13 @@ func (db *LedgerDB) AddUser(usr *core.User) error {
 	return err
 }
 
-func (db *LedgerDB) FindUser(pubKey string) (*core.User, error) {
-	var resp core.User
-	log.Info("Searching User in DB")
-	err := db.DB.QueryRow(`SELECT * FROM users WHERE username = $1 LIMIT 1`, pubKey).Scan(&resp.Id, &resp.Name)
-	if err != nil {
-		return nil, err
+func (db *LedgerDB) SafeAddUser(usr *core.User) error {
+	u, _ := db.FindUser(usr.Name)
+	if u != nil {
+		return nil
 	}
-	return &resp, nil
+	return db.AddUser(usr)
+
 }
 
 func (db *LedgerDB) TestDB() error {

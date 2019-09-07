@@ -52,12 +52,12 @@ func (l *Ledger) Insert(txn *core.Transaction) {
 	l.ledgerDb.SafeAddUser(txn.Poster)
 	currencies, _ := l.GetCurrencies(txn)
 	for _, currency := range currencies {
-		l.ledgerDb.AddCurrency(currency)
+		l.ledgerDb.SafeAddCurrency(currency)
 	}
 	accounts, _ := l.GetAccounts(txn)
 
 	for _, account := range accounts {
-		l.ledgerDb.AddAccount(account)
+		l.ledgerDb.SafeAddAccount(account)
 	}
 }
 
