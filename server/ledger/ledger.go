@@ -53,6 +53,7 @@ func (l *Ledger) Insert(txn *core.Transaction) {
 }
 
 func (l *Ledger) Start() {
+	l.ledgerDb.InitDB()
 }
 
 func (l *Ledger) Stop() error {

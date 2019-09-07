@@ -33,7 +33,6 @@ func NewDB(dirPath string) (*LedgerDB, error) {
 	}
 	datafile := path.Join(dirPath, "ledger.db")
 	SqliteDB, err := sql.Open("sqlite3", datafile)
-	//SqliteDB, err := sql.Open("sqlite3", "ledger.db")
 	if err != nil {
 		return nil, err
 	}
@@ -48,13 +47,28 @@ func (db *LedgerDB) AddUser(usr *core.User) error {
 	log.Info("Adding User to DB")
 	insertUser := `
 	INSERT INTO users(user_id, username)
-		VALUES(?,?);
+	VALUES(?,?);
 	`
-
 	tx, _ := db.DB.Begin()
 	stmt, _ := tx.Prepare(insertUser)
 	log.Debug("Query: " + insertUser)
-	_, err := stmt.Exec(usr.Id, usr.Name)
+	res, err := stmt.Exec(usr.Id, usr.Name)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	lastId, err := res.LastInsertId()
+	if err != nil {
+		log.Fatal(err)
+	}
+	rowCnt, err := res.RowsAffected()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
+
+	tx.Commit()
+
 	return err
 }
 
@@ -62,11 +76,15 @@ func (db *LedgerDB) InitDB() error {
 	log.Info("Initialising DB Table")
 	createDB := `
 	CREATE TABLE IF NOT EXISTS users (
-		user_id INT AUTO_INCREMENT,
-		username VARCHAR(255) NOT NULL
+		user_id INT NOT NULL,
+		username VARCHAR(255) NOT NULL,
+		PRIMARY KEY(user_id)
 	);`
 	log.Debug("Query: " + createDB)
 	_, err := db.DB.Exec(createDB)
+	if err != nil {
+		log.Fatal(err)
+	}
 	return err
 }
 
