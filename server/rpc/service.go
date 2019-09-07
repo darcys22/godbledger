@@ -9,6 +9,7 @@ import (
 	"google.golang.org/grpc"
 
 	pb "github.com/darcys22/godbledger/proto"
+	"github.com/darcys22/godbledger/server/ledger"
 )
 
 var log logrus.FieldLogger
@@ -18,6 +19,7 @@ func init() {
 }
 
 type Service struct {
+	ld         *ledger.Ledger
 	ctx        context.Context
 	cancel     context.CancelFunc
 	grpcServer *grpc.Server
@@ -29,9 +31,10 @@ type Config struct {
 	Port string
 }
 
-func NewRPCService(ctx context.Context, cfg *Config) *Service {
+func NewRPCService(ctx context.Context, cfg *Config, l *ledger.Ledger) *Service {
 	ctx, cancel := context.WithCancel(ctx)
 	return &Service{
+		ld:     l,
 		ctx:    ctx,
 		cancel: cancel,
 		port:   cfg.Port,
@@ -49,7 +52,7 @@ func (s *Service) Start() {
 	log.WithField("port", s.port).Info("Listening on port")
 	s.grpcServer = grpc.NewServer()
 
-	ledgerServer := &LedgerServer{}
+	ledgerServer := &LedgerServer{ld: s.ld}
 
 	pb.RegisterTransactorServer(s.grpcServer, ledgerServer)
 

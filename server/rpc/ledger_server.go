@@ -6,12 +6,15 @@ import (
 	"time"
 
 	"github.com/darcys22/godbledger/server/core"
+	"github.com/darcys22/godbledger/server/ledger"
 	"github.com/darcys22/godbledger/server/version"
 
 	pb "github.com/darcys22/godbledger/proto"
 )
 
-type LedgerServer struct{}
+type LedgerServer struct {
+	ld *ledger.Ledger
+}
 
 func (s *LedgerServer) AddTransaction(ctx context.Context, in *pb.TransactionRequest) (*pb.TransactionResponse, error) {
 	log.Printf("Received New Transaction Request")
@@ -58,7 +61,7 @@ func (s *LedgerServer) AddTransaction(ctx context.Context, in *pb.TransactionReq
 
 	}
 
-	log.Printf("Created Transaction: %s", txn)
+	s.ld.Insert(txn)
 
 	return &pb.TransactionResponse{Message: "Accepted"}, nil
 }

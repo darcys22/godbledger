@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/darcys22/godbledger/server/core"
 	"github.com/sirupsen/logrus"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -24,7 +25,7 @@ func (db *LedgerDB) Close() error {
 	return db.DB.Close()
 }
 
-// NewDB initializes a new DB. If the genesis block and states do not exist, this method creates it.
+// NewDB initializes a new DB.
 func NewDB(dirPath string) (*LedgerDB, error) {
 	log.Info("Creating DB")
 	if err := os.MkdirAll(dirPath, 0700); err != nil {
@@ -41,6 +42,32 @@ func NewDB(dirPath string) (*LedgerDB, error) {
 
 	return db, err
 
+}
+
+func (db *LedgerDB) AddUser(usr *core.User) error {
+	log.Info("Adding User to DB")
+	insertUser := `
+	INSERT INTO users(user_id, username)
+		VALUES(?,?);
+	`
+
+	tx, _ := db.DB.Begin()
+	stmt, _ := tx.Prepare(insertUser)
+	log.Debug("Query: " + insertUser)
+	_, err := stmt.Exec(usr.Id, usr.Name)
+	return err
+}
+
+func (db *LedgerDB) InitDB() error {
+	log.Info("Initialising DB Table")
+	createDB := `
+	CREATE TABLE IF NOT EXISTS users (
+		user_id INT AUTO_INCREMENT,
+		username VARCHAR(255) NOT NULL
+	);`
+	log.Debug("Query: " + createDB)
+	_, err := db.DB.Exec(createDB)
+	return err
 }
 
 // ClearDB removes the previously stored directory at the data directory.

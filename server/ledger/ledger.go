@@ -16,13 +16,6 @@ const ledgerDBName = "ledgerdata"
 var log = logrus.WithField("prefix", "ledger")
 
 type Ledger struct {
-	Name         []byte
-	Users        []core.User
-	Currencies   []core.Currency
-	Chart        []core.Account
-	Transactions []core.Transaction
-	Splits       []core.Split
-
 	ledgerDb *db.LedgerDB
 }
 
@@ -55,12 +48,11 @@ func New(ctx *cli.Context) (*Ledger, error) {
 }
 
 func (l *Ledger) Insert(txn *core.Transaction) {
-	l.InsertUser(txn.Poster)
-
+	log.Printf("Created Transaction: %s", txn)
+	l.ledgerDb.AddUser(txn.Poster)
 }
 
 func (l *Ledger) Start() {
-	l.ledgerDb.TestDB()
 }
 
 func (l *Ledger) Stop() error {
@@ -69,15 +61,5 @@ func (l *Ledger) Stop() error {
 }
 
 func (l *Ledger) Status() error {
-	return nil
-}
-
-func (l *Ledger) AppendTransaction(txn *core.Transaction) error {
-	l.Transactions = append(l.Transactions, *txn)
-	return nil
-}
-
-func (l *Ledger) AppendUser(usr core.User) error {
-	l.Users = append(l.Users, usr)
 	return nil
 }
