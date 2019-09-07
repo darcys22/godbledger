@@ -49,7 +49,7 @@ func New(ctx *cli.Context) (*Ledger, error) {
 
 func (l *Ledger) Insert(txn *core.Transaction) {
 	log.Printf("Created Transaction: %s", txn)
-	l.ledgerDb.AddUser(txn.Poster)
+	l.ledgerDb.SafeAddUser(txn.Poster)
 }
 
 func (l *Ledger) Start() {

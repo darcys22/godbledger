@@ -4,16 +4,13 @@ import (
 	"database/sql"
 	"os"
 	"path"
-	"strconv"
-	"time"
 
-	"github.com/darcys22/godbledger/server/core"
 	"github.com/sirupsen/logrus"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var log = logrus.WithField("prefix", "ledgerdb")
+var log = logrus.WithField("prefix", "SQLLite ledgerdb")
 
 type LedgerDB struct {
 	DB           *sql.DB
@@ -43,35 +40,6 @@ func NewDB(dirPath string) (*LedgerDB, error) {
 
 }
 
-func (db *LedgerDB) AddUser(usr *core.User) error {
-	log.Info("Adding User to DB")
-	insertUser := `
-	INSERT INTO users(user_id, username)
-	VALUES(?,?);
-	`
-	tx, _ := db.DB.Begin()
-	stmt, _ := tx.Prepare(insertUser)
-	log.Debug("Query: " + insertUser)
-	res, err := stmt.Exec(usr.Id, usr.Name)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	lastId, err := res.LastInsertId()
-	if err != nil {
-		log.Fatal(err)
-	}
-	rowCnt, err := res.RowsAffected()
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
-
-	tx.Commit()
-
-	return err
-}
-
 func (db *LedgerDB) InitDB() error {
 	log.Info("Initialising DB Table")
 	createDB := `
@@ -94,42 +62,4 @@ func ClearDB(dirPath string) error {
 		return nil
 	}
 	return os.RemoveAll(dirPath)
-}
-
-func (db *LedgerDB) TestDB() error {
-	log.Info("Testing DB")
-	createDB := "create table if not exists pages (title text, body blob, timestamp text)"
-	log.Debug("Query: " + createDB)
-	res, err := db.DB.Exec(createDB)
-
-	lastId, err := res.LastInsertId()
-	if err != nil {
-		log.Fatal(err)
-	}
-	rowCnt, err := res.RowsAffected()
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
-
-	tx, _ := db.DB.Begin()
-
-	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
-	stmt, _ := tx.Prepare("insert into pages (title, body, timestamp) values (?, ?, ?)")
-	log.Debug("Query: Insert")
-	res, err = stmt.Exec("Sean", "Body", timestamp)
-
-	lastId, err = res.LastInsertId()
-	if err != nil {
-		log.Fatal(err)
-	}
-	rowCnt, err = res.RowsAffected()
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
-
-	tx.Commit()
-
-	return err
 }
