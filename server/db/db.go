@@ -79,8 +79,18 @@ func (db *LedgerDB) InitDB() error {
 	CREATE TABLE IF NOT EXISTS transactions (
 		transaction_id VARCHAR(255) NOT NULL,
 		postdate INT NOT NULL,
-		description INT NOT NULL,
+		brief VARCHAR(255),
 		PRIMARY KEY(transaction_id)
+	);`
+	log.Debug("Query: " + createDB)
+	_, err = db.DB.Exec(createDB)
+	if err != nil {
+		log.Fatal(err)
+	}
+	createDB = `
+	CREATE TABLE IF NOT EXISTS transactions_body (
+		transaction_id VARCHAR(255) NOT NULL,
+		body TEXT,
 	);`
 	log.Debug("Query: " + createDB)
 	_, err = db.DB.Exec(createDB)

@@ -12,7 +12,7 @@ import (
 func (db *LedgerDB) AddTransaction(txn *core.Transaction) error {
 	log.Info("Adding Transaction to DB")
 	insertTransaction := `
-		INSERT INTO transactions(txn_id, post_date, description)
+		INSERT INTO transactions(txn_id, post_date, brief)
 			VALUES(?,?,?);
 	`
 	tx, _ := db.DB.Begin()
