@@ -59,6 +59,7 @@ func (l *Ledger) Insert(txn *core.Transaction) {
 	for _, account := range accounts {
 		l.ledgerDb.SafeAddAccount(account)
 	}
+	l.ledgerDb.AddTransaction(txn)
 }
 
 func (l *Ledger) GetCurrencies(txn *core.Transaction) ([]*core.Currency, error) {

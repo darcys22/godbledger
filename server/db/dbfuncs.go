@@ -11,14 +11,16 @@ import (
 
 func (db *LedgerDB) AddTransaction(txn *core.Transaction) error {
 	log.Info("Adding Transaction to DB")
+	log.Info(txn.Id)
+	log.Info(string(txn.Description[:]))
 	insertTransaction := `
-		INSERT INTO transactions(txn_id, post_date, brief)
+		INSERT INTO transactions(transaction_id, postdate, brief)
 			VALUES(?,?,?);
 	`
 	tx, _ := db.DB.Begin()
 	stmt, _ := tx.Prepare(insertTransaction)
 	log.Debug("Query: " + insertTransaction)
-	res, err := stmt.Exec(txn.Id, txn.Postdate, txn.Description)
+	res, err := stmt.Exec(txn.Id, txn.Postdate, string(txn.Description[:]))
 	if err != nil {
 		log.Fatal(err)
 	}

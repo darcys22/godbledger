@@ -78,7 +78,7 @@ func (db *LedgerDB) InitDB() error {
 	createDB = `
 	CREATE TABLE IF NOT EXISTS transactions (
 		transaction_id VARCHAR(255) NOT NULL,
-		postdate INT NOT NULL,
+		postdate DATETIME NOT NULL,
 		brief VARCHAR(255),
 		PRIMARY KEY(transaction_id)
 	);`
@@ -90,7 +90,7 @@ func (db *LedgerDB) InitDB() error {
 	createDB = `
 	CREATE TABLE IF NOT EXISTS transactions_body (
 		transaction_id VARCHAR(255) NOT NULL,
-		body TEXT,
+		body TEXT
 	);`
 	log.Debug("Query: " + createDB)
 	_, err = db.DB.Exec(createDB)
