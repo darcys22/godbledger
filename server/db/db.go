@@ -97,6 +97,20 @@ func (db *LedgerDB) InitDB() error {
 	if err != nil {
 		log.Fatal(err)
 	}
+	createDB = `
+	CREATE TABLE IF NOT EXISTS splits (
+		split_id VARCHAR(255) NOT NULL,
+		split_date DATETIME,
+		description VARCHAR(255),
+		currency VARCHAR(255),
+		amount BIGINT,
+		PRIMARY KEY(split_id)
+	);`
+	log.Debug("Query: " + createDB)
+	_, err = db.DB.Exec(createDB)
+	if err != nil {
+		log.Fatal(err)
+	}
 	return err
 }
 

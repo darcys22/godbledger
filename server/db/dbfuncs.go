@@ -2,6 +2,7 @@ package db
 
 import (
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/darcys22/godbledger/server/core"
@@ -11,8 +12,6 @@ import (
 
 func (db *LedgerDB) AddTransaction(txn *core.Transaction) error {
 	log.Info("Adding Transaction to DB")
-	log.Info(txn.Id)
-	log.Info(string(txn.Description[:]))
 	insertTransaction := `
 		INSERT INTO transactions(transaction_id, postdate, brief)
 			VALUES(?,?,?);
@@ -30,6 +29,35 @@ func (db *LedgerDB) AddTransaction(txn *core.Transaction) error {
 		log.Fatal(err)
 	}
 	rowCnt, err := res.RowsAffected()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
+
+	tx.Commit()
+
+	sqlStr := "INSERT INTO splits(split_id, split_date, description, currency, amount)"
+	vals := []interface{}{}
+
+	for _, split := range txn.Splits {
+		log.Info("Adding Split to DB")
+		sqlStr += "(?, ?, ?, ?, ?),"
+		vals = append(vals, split.Id, split.Date, string(split.Description[:]), split.Currency.Name, 10)
+	}
+	sqlStr = strings.TrimSuffix(sqlStr, ",")
+	tx, _ = db.DB.Begin()
+	stmt, _ = tx.Prepare(sqlStr)
+	log.Debug("Query: " + sqlStr)
+	res, err = stmt.Exec(vals...)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	lastId, err = res.LastInsertId()
+	if err != nil {
+		log.Fatal(err)
+	}
+	rowCnt, err = res.RowsAffected()
 	if err != nil {
 		log.Fatal(err)
 	}
