@@ -14,11 +14,15 @@ const (
 var app *cli.App
 
 func init() {
-	app := cli.NewApp()
+	app = cli.NewApp()
 	app.Name = "Reporter"
 	app.Usage = "Provides GL and TB reports for GoDBLedger"
 	app.Commands = []cli.Command{
 		commandTransactionListing,
+	}
+	app.Action = func(c *cli.Context) error {
+		fmt.Printf("Hello %q", c.Args().Get(0))
+		return nil
 	}
 }
 

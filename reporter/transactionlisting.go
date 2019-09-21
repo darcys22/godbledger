@@ -2,16 +2,11 @@ package main
 
 import (
 	"fmt"
-	"os"
+	//"os"
 	//"path/filepath"
 
 	"github.com/urfave/cli"
 )
-
-type outputGenerate struct {
-	Address      string
-	AddressEIP55 string
-}
 
 var commandTransactionListing = cli.Command{
 	Name:      "transactions",
@@ -30,16 +25,17 @@ If you want to see all the transactions in the database, or export to CSV
 		//},
 	},
 	Action: func(ctx *cli.Context) error {
-		// Check if keyfile path given and make sure it doesn't already exist.
+		//Check if keyfile path given and make sure it doesn't already exist.
 		databasefilepath := ctx.Args().First()
 		if databasefilepath == "" {
 			databasefilepath = defaultDBName
 		}
-		if _, err := os.Stat(databasefilepath); err != nil {
-			panic(fmt.Sprintf("Database does not already exist at %s.", databasefilepath))
-		}
+		fmt.Println(databasefilepath)
+		//if _, err := os.Stat(databasefilepath); err != nil {
+		//panic(fmt.Sprintf("Database does not already exist at %s.", databasefilepath))
+		//}
 
-		fmt.Println("Success")
+		//fmt.Println("Success")
 
 		// Output some information.
 		//out := outputGenerate{
