@@ -111,6 +111,19 @@ func (db *LedgerDB) InitDB() error {
 	if err != nil {
 		log.Fatal(err)
 	}
+	createDB = `
+	CREATE TABLE IF NOT EXISTS split_accounts (
+		id INT AUTO_INCREMENT PRIMARY KEY,
+		split_id VARCHAR(255),
+		account_id VARCHAR(255),
+		FOREIGN KEY(split_id) REFERENCES splits(split_id),
+		FOREIGN KEY(account_id) REFERENCES accounts(account_id)
+	);`
+	log.Debug("Query: " + createDB)
+	_, err = db.DB.Exec(createDB)
+	if err != nil {
+		log.Fatal(err)
+	}
 	return err
 }
 

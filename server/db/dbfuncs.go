@@ -38,16 +38,24 @@ func (db *LedgerDB) AddTransaction(txn *core.Transaction) error {
 
 	sqlStr := "INSERT INTO splits(split_id, split_date, description, currency, amount) VALUES "
 	vals := []interface{}{}
+	sqlAccStr := "INSERT INTO split_accounts(split_id, account_id) VALUES "
+	accVals := []interface{}{}
 
 	for _, split := range txn.Splits {
-		log.Info("Adding Split to DB")
 		sqlStr += "(?, ?, ?, ?, ?),"
 		vals = append(vals, split.Id, split.Date, string(split.Description[:]), split.Currency.Name, split.Amount.Int64())
+		for _, acc := range split.Accounts {
+			sqlAccStr += "(?, ?),"
+			accVals = append(accVals, split.Id, acc.Code)
+		}
 	}
+
 	sqlStr = strings.TrimSuffix(sqlStr, ",")
 	tx, _ = db.DB.Begin()
 	stmt, _ = tx.Prepare(sqlStr)
 	log.Debug("Query: " + sqlStr)
+	log.Debugf("NumberVals = %d", len(vals))
+	log.Info("Adding Split to DB")
 	res, err = stmt.Exec(vals...)
 	if err != nil {
 		log.Fatal(err)
@@ -64,6 +72,28 @@ func (db *LedgerDB) AddTransaction(txn *core.Transaction) error {
 	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
 
 	tx.Commit()
+
+	sqlAccStr = strings.TrimSuffix(sqlAccStr, ",")
+	tx2, _ := db.DB.Begin()
+	accStmt, _ := tx2.Prepare(sqlAccStr)
+	log.Debug("Query: " + sqlAccStr)
+	log.Info("Adding Split Accounts to DB")
+	res, err = accStmt.Exec(accVals...)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	lastId, err = res.LastInsertId()
+	if err != nil {
+		log.Fatal(err)
+	}
+	rowCnt, err = res.RowsAffected()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
+
+	tx2.Commit()
 
 	return err
 }
