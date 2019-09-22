@@ -26,10 +26,7 @@ func init() {
 		commandTransactionListing,
 		commandTrialBalance,
 	}
-	app.Action = func(c *cli.Context) error {
-		fmt.Printf("Hello %q", c.Args().Get(0))
-		return nil
-	}
+	app.Action = reporterConsole
 }
 
 // Commonly used command line flags.
