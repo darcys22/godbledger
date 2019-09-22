@@ -24,6 +24,7 @@ func init() {
 	app.Usage = "Provides GL and TB reports for GoDBLedger"
 	app.Commands = []cli.Command{
 		commandTransactionListing,
+		commandTrialBalance,
 	}
 	app.Action = func(c *cli.Context) error {
 		fmt.Printf("Hello %q", c.Args().Get(0))
