@@ -20,63 +20,29 @@
 package main
 
 import (
-	"context"
-	"log"
-	"time"
+	"fmt"
+	"os"
 
-	pb "github.com/darcys22/godbledger/proto"
-	"google.golang.org/grpc"
+	"github.com/urfave/cli"
 )
 
 const (
 	address = "localhost:50051"
 )
 
+var app *cli.App
+
+func init() {
+	app = cli.NewApp()
+	app.Name = "Ledger CLI"
+	app.Usage = "Command Line for GoDBLedger gRPC"
+	app.Commands = []cli.Command{}
+	app.Action = transaction
+}
+
 func main() {
-	// Set up a connection to the server.
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+	if err := app.Run(os.Args); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
-	defer conn.Close()
-	c := pb.NewTransactorClient(conn)
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
-	date := "2011-03-15"
-	desc := "Whole Food Market"
-
-	transactionLines := make([]*pb.LineItem, 2)
-
-	line1Account := "Expenses:Groceries"
-	line1Desc := "Groceries"
-	line1Amount := int64(7500)
-
-	transactionLines[0] = &pb.LineItem{
-		Accountname: line1Account,
-		Description: line1Desc,
-		Amount:      line1Amount,
-	}
-
-	line2Account := "Assets:Checking"
-	line2Desc := "Groceries"
-	line2Amount := int64(-7500)
-
-	transactionLines[1] = &pb.LineItem{
-		Accountname: line2Account,
-		Description: line2Desc,
-		Amount:      line2Amount,
-	}
-
-	req := &pb.TransactionRequest{
-		Date:        date,
-		Description: desc,
-		Lines:       transactionLines,
-	}
-	r, err := c.AddTransaction(ctx, req)
-	if err != nil {
-		log.Fatalf("could not greet: %v", err)
-	}
-	log.Printf("Version: %s", r.GetMessage())
 }
