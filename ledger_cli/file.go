@@ -26,35 +26,35 @@ Loads a file in the ledger cli format
 
 		var ledgerFileName string
 
-		ledgerFileName = "test.txt"
-		fmt.Println(ledgerFileName)
+		ledgerFileName = "test/transaction-codes-2.test"
 
-		//columnWidth := 80
+		columnWidth := 80
 
 		//if len(ledgerFileName) == 0 {
 		//flag.Usage()
 		//return nil
 		//}
 
-		//ledgerFileReader, err := NewLedgerReader(ledgerFileName)
-		//if err != nil {
-		//fmt.Println(err)
-		//return err
-		//}
+		ledgerFileReader, err := NewLedgerReader(ledgerFileName)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
 
-		//generalLedger, parseError := ParseLedger(ledgerFileReader)
-		//if parseError != nil {
-		//fmt.Printf("%s\n", parseError.Error())
-		//return parseError
-		//}
+		generalLedger, parseError := ParseLedger(ledgerFileReader)
+		if parseError != nil {
+			fmt.Printf("%s\n", parseError.Error())
+			return parseError
+		}
 
-		//PrintLedger(generalLedger, columnWidth)
+		PrintLedger(generalLedger, columnWidth)
 		return nil
 	},
 }
 
 // PrintTransaction prints a transaction formatted to fit in specified column width.
 func PrintTransaction(trans *Transaction, columns int) {
+	fmt.Printf("%+v\n", trans)
 	fmt.Printf("%s %s\n", trans.Date.Format(transactionDateFormat), trans.Payee)
 	for _, accChange := range trans.AccountChanges {
 		outBalanceString := accChange.Balance.FloatString(displayPrecision)

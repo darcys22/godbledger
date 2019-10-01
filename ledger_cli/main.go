@@ -38,8 +38,9 @@ func init() {
 	app.Usage = "Command Line for GoDBLedger gRPC"
 	app.Commands = []cli.Command{
 		commandFile,
+		commandSingleTestTransaction,
 	}
-	app.Action = transaction
+	//app.Action = transaction
 }
 
 func main() {
