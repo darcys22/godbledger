@@ -1,9 +1,10 @@
 package main
 
 import (
-	"flag"
+	//"flag"
 	"fmt"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/urfave/cli"
 )
@@ -25,26 +26,29 @@ Loads a file in the ledger cli format
 
 		var ledgerFileName string
 
-		columnWidth := 80
+		ledgerFileName = "test.txt"
+		fmt.Println(ledgerFileName)
 
-		if len(ledgerFileName) == 0 {
-			flag.Usage()
-			return nil
-		}
+		//columnWidth := 80
 
-		ledgerFileReader, err := NewLedgerReader(ledgerFileName)
-		if err != nil {
-			fmt.Println(err)
-			return err
-		}
+		//if len(ledgerFileName) == 0 {
+		//flag.Usage()
+		//return nil
+		//}
 
-		generalLedger, parseError := ParseLedger(ledgerFileReader)
-		if parseError != nil {
-			fmt.Printf("%s\n", parseError.Error())
-			return parseError
-		}
+		//ledgerFileReader, err := NewLedgerReader(ledgerFileName)
+		//if err != nil {
+		//fmt.Println(err)
+		//return err
+		//}
 
-		PrintLedger(generalLedger, columnWidth)
+		//generalLedger, parseError := ParseLedger(ledgerFileReader)
+		//if parseError != nil {
+		//fmt.Printf("%s\n", parseError.Error())
+		//return parseError
+		//}
+
+		//PrintLedger(generalLedger, columnWidth)
 		return nil
 	},
 }
@@ -61,7 +65,7 @@ func PrintTransaction(trans *Transaction, columns int) {
 }
 
 // PrintLedger prints all transactions as a formatted ledger file.
-func PrintLedger(generalLedger []*ledger.Transaction, columns int) {
+func PrintLedger(generalLedger []*Transaction, columns int) {
 	for _, trans := range generalLedger {
 		PrintTransaction(trans, columns)
 	}
