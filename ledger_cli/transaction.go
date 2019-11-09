@@ -73,32 +73,32 @@ var commandSingleTestTransaction = cli.Command{
 func send(t *Transaction) error {
 
 	// Set up a connection to the server.
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-	}
-	defer conn.Close()
-	client := pb.NewTransactorClient(conn)
+	//conn, err := grpc.Dial(address, grpc.WithInsecure())
+	//if err != nil {
+	//log.Fatalf("did not connect: %v", err)
+	//}
+	//defer conn.Close()
+	//client := pb.NewTransactorClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
+	//ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	//defer cancel()
 
-	transactionLines := make([]*pb.LineItem, 2)
+	//transactionLines := make([]*pb.LineItem, 2)
 
-	for _, accChange := range trans.AccountChanges {
-		transactionLine := make(*pb.LineItem)
+	//for _, accChange := range t.AccountChanges {
+	//transactionLine := make(*pb.LineItem)
 
-	}
+	//}
 
-	req := &pb.TransactionRequest{
-		Date:        date,
-		Description: desc,
-		Lines:       transactionLines,
-	}
-	r, err := client.AddTransaction(ctx, req)
-	if err != nil {
-		log.Fatalf("could not greet: %v", err)
-	}
-	log.Printf("Version: %s", r.GetMessage())
+	//req := &pb.TransactionRequest{
+	//Date:        t.Date,
+	//Description: desc,
+	//Lines:       transactionLines,
+	//}
+	//r, err := client.AddTransaction(ctx, req)
+	//if err != nil {
+	//log.Fatalf("could not greet: %v", err)
+	//}
+	//log.Printf("Version: %s", r.GetMessage())
 	return nil
 }

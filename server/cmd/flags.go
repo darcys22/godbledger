@@ -51,9 +51,13 @@ var (
 		Usage: "Data directory for the databases and keystore",
 		Value: DefaultDataDir(),
 	}
-	// ClearDB tells the beacon node to remove any previously stored data at the data directory.
+	// ClearDB tells the node to remove any previously stored data at the data directory.
 	ClearDB = cli.BoolFlag{
 		Name:  "clear-db",
 		Usage: "Clears any previously stored data at the data directory",
+	}
+	ConfigFileFlag = cli.StringFlag{
+		Name:  "config",
+		Usage: "TOML configuration file",
 	}
 )
