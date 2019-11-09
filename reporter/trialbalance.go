@@ -87,7 +87,7 @@ If you want to see all the transactions in the database, or export to CSV
 
 		//Output some information.
 		if len(ctx.String(csvFlag.Name)) > 0 {
-			file, err := os.OpenFile(ctx.String(csvFlag.Name), os.O_CREATE|os.O_WRONLY, 0777)
+			file, err := os.OpenFile(ctx.String(csvFlag.Name), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 			defer file.Close()
 
 			if err != nil {

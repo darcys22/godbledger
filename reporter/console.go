@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/mattn/go-colorable"
 	"github.com/urfave/cli"
@@ -54,8 +55,10 @@ func (c *Console) Welcome() {
 // Evaluate executes code and pretty prints the result to the specified output
 // stream.
 func (c *Console) Evaluate(statement string) error {
-
-	switch statement {
+	switch strings.TrimSpace(statement) {
+	case "quit":
+		os.Exit(1)
+		break
 	case "tb":
 		fmt.Println("Today is 5th. Clean your house.")
 	case "gl":
@@ -82,8 +85,7 @@ func reporterConsole(c *cli.Context) error {
 	console, _ := New(Config{})
 	console.Welcome()
 
-	something, _ := console.PromptInput("Report to Run:")
-	fmt.Printf("Hello %s", something)
+	something, _ := console.PromptInput("~:")
 	console.Evaluate(something)
 
 	return nil
