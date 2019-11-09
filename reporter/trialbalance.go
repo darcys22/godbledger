@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"database/sql"
+	"encoding/csv"
 	_ "github.com/mattn/go-sqlite3"
 
 	"github.com/olekukonko/tablewriter"
@@ -85,9 +86,31 @@ If you want to see all the transactions in the database, or export to CSV
 		}
 
 		//Output some information.
-		fmt.Println()
-		table.Render()
-		fmt.Println()
+		if len(ctx.String(csvFlag.Name)) > 0 {
+			file, err := os.OpenFile(ctx.String(csvFlag.Name), os.O_CREATE|os.O_WRONLY, 0777)
+			defer file.Close()
+
+			if err != nil {
+				os.Exit(1)
+			}
+
+			csvWriter := csv.NewWriter(file)
+			defer csvWriter.Flush()
+			csvWriter.Write([]string{"Account", "Balance"})
+
+			for _, element := range tboutput.Data {
+				err := csvWriter.Write([]string{element.Account, element.Amount})
+				if err != nil {
+					log.Fatal("Cannot write to file", err)
+				}
+			}
+
+			fmt.Println("CSV Yo")
+		} else {
+			fmt.Println()
+			table.Render()
+			fmt.Println()
+		}
 		//if ctx.Bool(jsonFlag.Name) {
 		//mustPrintJSON(out)
 		//} else {

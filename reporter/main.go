@@ -32,7 +32,7 @@ func init() {
 // Commonly used command line flags.
 var (
 	defaultDBName = "/.ledger/ledgerdata/ledger.db"
-	csvFlag       = cli.BoolFlag{
+	csvFlag       = cli.StringFlag{
 		Name:  "csv",
 		Usage: "output CSV instead of human-readable format",
 	}
