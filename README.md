@@ -1,8 +1,19 @@
-## Installation
+## Go DB Ledger
+Accounting system designed to have an easily accessable database
 
-### Building
-```
-```
+## Executables
+|    Command    | Description
+|
+| :-----------: |
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+|
+|  **`server`**   | 
+The main server. It is the access point for transactions that will be saved to the accounting database.
+|   `ledger_cli`    | 
+Gives a CLI client that can be used to transmit transactions to the server|
+|  `reporter`   | 
+Builds basic reports from the database on the command line
+|
 
 ### Building the Proto Buffers
 Call from the root directory

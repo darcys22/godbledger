@@ -56,12 +56,12 @@ If you want to see all the transactions in the database, or export to CSV
 			log.Fatal(err)
 		}
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Account", "ID", "Date", "Description", "Currency", "Amount"})
+		table.SetHeader([]string{"Date", "ID", "Account", "Description", "Currency", "Amount"})
 		table.SetBorder(false)
 
 		queryDB := `
 			SELECT 
-				splits.split_id,
+				transactions.transaction_id,
 				splits.split_date,
 				splits.description,
 				splits.currency,
@@ -69,7 +69,9 @@ If you want to see all the transactions in the database, or export to CSV
 				split_accounts.account_id
 			FROM splits 
 				JOIN split_accounts 
-				ON splits.split_id = split_accounts.split_id
+					ON splits.split_id = split_accounts.split_id
+				JOIN transactions
+					on splits.transaction_id = transactions.transaction_id
 		;`
 
 		rows, err := SqliteDB.Query(queryDB)
@@ -85,21 +87,20 @@ If you want to see all the transactions in the database, or export to CSV
 				// handle error
 			}
 			output.Data = append(output.Data, t)
-			table.Append([]string{t.Account, t.ID, t.Date, t.Description, t.Currency, t.Amount})
+			table.Append([]string{t.Date, t.ID, t.Account, t.Description, t.Currency, t.Amount})
 		}
 		if rows.Err() != nil {
 			// handle error
 		}
 
 		//Output some information.
-		fmt.Println()
-		table.Render()
-		fmt.Println()
-		//if ctx.Bool(jsonFlag.Name) {
-		//mustPrintJSON(out)
-		//} else {
-		//fmt.Println("Address:", out.Address)
-		//}
+		if ctx.Bool(csvFlag.Name) {
+			fmt.Println("CSV Yo")
+		} else {
+			fmt.Println()
+			table.Render()
+			fmt.Println()
+		}
 		return nil
 	},
 }

@@ -104,6 +104,8 @@ func (db *LedgerDB) InitDB() error {
 		description VARCHAR(255),
 		currency VARCHAR(255),
 		amount BIGINT,
+		transaction_id VARCHAR(255),
+		FOREIGN KEY(transaction_id) REFERENCES transactions(transaction_id),
 		PRIMARY KEY(split_id)
 	);`
 	log.Debug("Query: " + createDB)

@@ -36,14 +36,14 @@ func (db *LedgerDB) AddTransaction(txn *core.Transaction) error {
 
 	tx.Commit()
 
-	sqlStr := "INSERT INTO splits(split_id, split_date, description, currency, amount) VALUES "
+	sqlStr := "INSERT INTO splits(transaction_id, split_id, split_date, description, currency, amount) VALUES "
 	vals := []interface{}{}
 	sqlAccStr := "INSERT INTO split_accounts(split_id, account_id) VALUES "
 	accVals := []interface{}{}
 
 	for _, split := range txn.Splits {
-		sqlStr += "(?, ?, ?, ?, ?),"
-		vals = append(vals, split.Id, split.Date, string(split.Description[:]), split.Currency.Name, split.Amount.Int64())
+		sqlStr += "(?, ?, ?, ?, ?, ?),"
+		vals = append(vals, txn.Id, split.Id, split.Date, string(split.Description[:]), split.Currency.Name, split.Amount.Int64())
 		for _, acc := range split.Accounts {
 			sqlAccStr += "(?, ?),"
 			accVals = append(accVals, split.Id, acc.Code)
