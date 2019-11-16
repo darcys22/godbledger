@@ -61,3 +61,16 @@ var (
 		Usage: "TOML configuration file",
 	}
 )
+
+func setConfig(ctx *cli.Context, cfg *LedgerConfig) {
+
+	if ctx.GlobalIsSet(VerbosityFlag.Name) {
+		cfg.LogVerbosity = ctx.String(VerbosityFlag.Name)
+	}
+	if ctx.GlobalIsSet(ConfigFileFlag.Name) {
+		cfg.ConfigFile = ctx.String(ConfigFileFlag.Name)
+	}
+	if ctx.GlobalIsSet(DataDirFlag.Name) {
+		cfg.ConfigFile = ctx.String(DataDirFlag.Name)
+	}
+}

@@ -17,12 +17,11 @@ var log = logrus.WithField("prefix", "ledger")
 
 type Ledger struct {
 	ledgerDb *db.LedgerDB
+	config   *cmd.LedgerConfig
 }
 
-func New(ctx *cli.Context) (*Ledger, error) {
-	baseDir := ctx.GlobalString(cmd.DataDirFlag.Name)
-	log.Debug(cmd.DataDirFlag.Name)
-	dbPath := path.Join(baseDir, ledgerDBName)
+func New(ctx *cli.Context, cfg *cmd.LedgerConfig) (*Ledger, error) {
+	dbPath := path.Join(cfg.DataDirectory, ledgerDBName)
 	log.WithField("path", dbPath).Info("Checking db path")
 	if ctx.GlobalBool(cmd.ClearDB.Name) {
 		if err := db.ClearDB(dbPath); err != nil {
@@ -42,6 +41,7 @@ func New(ctx *cli.Context) (*Ledger, error) {
 
 	ledger := &Ledger{
 		ledgerDb: ledgerDb,
+		config:   cfg,
 	}
 
 	return ledger, nil

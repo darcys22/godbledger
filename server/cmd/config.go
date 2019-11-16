@@ -51,6 +51,9 @@ func MakeConfig(cli *cli.Context) (error, *LedgerConfig) {
 		return err, nil
 	}
 
+	//apply flags
+	setConfig(cli, config)
+
 	return nil, config
 }
 
