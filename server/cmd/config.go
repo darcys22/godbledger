@@ -30,11 +30,6 @@ var (
 		Description: `The dumpconfig command shows configuration values.`,
 	}
 
-	configFileFlag = cli.StringFlag{
-		Name:  "config",
-		Usage: "TOML configuration file",
-	}
-
 	defaultLedgerConfig = &LedgerConfig{
 		RPCPort:       "50051",
 		DataDirectory: DefaultDataDir(),
@@ -43,12 +38,15 @@ var (
 	}
 )
 
-func makeConfig(cli *cli.Context) (error, *LedgerConfig) {
+func MakeConfig(cli *cli.Context) (error, *LedgerConfig) {
 
 	log.Infof("Setting up configuration")
-
 	config := defaultLedgerConfig
 	fileName := config.ConfigFile
+	if len(cli.String("config")) > 0 {
+		fileName = cli.String("config")
+	}
+
 	if _, err := toml.DecodeFile(fileName, &config); err != nil {
 		return err, nil
 	}
@@ -79,7 +77,7 @@ func InitConfig() error {
 // dumpConfig is the dumpconfig command.
 func dumpConfig(ctx *cli.Context) error {
 
-	err, cfg := makeConfig(ctx)
+	err, cfg := MakeConfig(ctx)
 
 	buf := new(bytes.Buffer)
 	if err := toml.NewEncoder(buf).Encode(cfg); err != nil {

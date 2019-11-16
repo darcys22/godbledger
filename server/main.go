@@ -18,8 +18,9 @@ import (
 )
 
 func startNode(ctx *cli.Context) error {
-	verbosity := ctx.GlobalString(cmd.VerbosityFlag.Name)
-	level, err := logrus.ParseLevel(verbosity)
+	err, cfg := cmd.MakeConfig(ctx)
+
+	level, err := logrus.ParseLevel(cfg.LogVerbosity)
 	if err != nil {
 		return err
 	}
@@ -31,7 +32,7 @@ func startNode(ctx *cli.Context) error {
 	}
 	ledger, err := ledger.New(ctx)
 	fullnode.Register(ledger)
-	rpc := rpc.NewRPCService(context.Background(), &rpc.Config{Port: "50051"}, ledger)
+	rpc := rpc.NewRPCService(context.Background(), &rpc.Config{Port: cfg.RPCPort}, ledger)
 	fullnode.Register(rpc)
 	fullnode.Start()
 
@@ -58,6 +59,7 @@ func main() {
 		cmd.VerbosityFlag,
 		cmd.DataDirFlag,
 		cmd.ClearDB,
+		cmd.ConfigFileFlag,
 	}
 
 	if err := app.Run(os.Args); err != nil {

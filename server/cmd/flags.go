@@ -43,13 +43,13 @@ var (
 	VerbosityFlag = cli.StringFlag{
 		Name:  "verbosity",
 		Usage: "Logging verbosity (debug, info=default, warn, error, fatal, panic)",
-		Value: "debug",
+		//Value: "debug",
 	}
 	// DataDirFlag defines a path on disk.
 	DataDirFlag = cli.StringFlag{
 		Name:  "datadir",
 		Usage: "Data directory for the databases and keystore",
-		Value: DefaultDataDir(),
+		//Value: DefaultDataDir(),
 	}
 	// ClearDB tells the node to remove any previously stored data at the data directory.
 	ClearDB = cli.BoolFlag{
