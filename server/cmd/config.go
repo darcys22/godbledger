@@ -2,11 +2,16 @@ package cmd
 
 import (
 	"bytes"
-	"fmt"
+	//"fmt"
+	"os"
 
 	"github.com/BurntSushi/toml"
 	"github.com/urfave/cli"
+
+	"github.com/sirupsen/logrus"
 )
+
+var log = logrus.WithField("prefix", "Config")
 
 type LedgerConfig struct {
 	RPCPort       string // RPCPort defines the port that the server will listen for transactions on
@@ -15,17 +20,36 @@ type LedgerConfig struct {
 	ConfigFile    string // Location of the TOML config file, including directory path
 }
 
-var defaultLedgerConfig = &LedgerConfig{
-	RPCPort:       "50051",
-	DataDirectory: DefaultDataDir(),
-	LogVerbosity:  "debug",
-	ConfigFile:    DefaultDataDir() + "/config.toml",
-}
+var (
+	DumpConfigCommand = cli.Command{
+		Action:      dumpConfig,
+		Name:        "dumpconfig",
+		Usage:       "Show configuration values",
+		ArgsUsage:   "",
+		Category:    "MISCELLANEOUS COMMANDS",
+		Description: `The dumpconfig command shows configuration values.`,
+	}
+
+	configFileFlag = cli.StringFlag{
+		Name:  "config",
+		Usage: "TOML configuration file",
+	}
+
+	defaultLedgerConfig = &LedgerConfig{
+		RPCPort:       "50051",
+		DataDirectory: DefaultDataDir(),
+		LogVerbosity:  "debug",
+		ConfigFile:    DefaultDataDir() + "/config.toml",
+	}
+)
 
 func makeConfig(cli *cli.Context) (error, *LedgerConfig) {
 
+	log.Infof("Setting up configuration")
+
 	config := defaultLedgerConfig
-	if _, err := toml.DecodeFile("example.toml", &config); err != nil {
+	fileName := config.ConfigFile
+	if _, err := toml.DecodeFile(fileName, &config); err != nil {
 		return err, nil
 	}
 
@@ -34,10 +58,45 @@ func makeConfig(cli *cli.Context) (error, *LedgerConfig) {
 
 func InitConfig() error {
 	config := defaultLedgerConfig
+	_, err := os.Stat(config.ConfigFile)
+	if os.IsNotExist(err) {
+		log.Infof("Config File doesn't exist creating at %s", config.ConfigFile)
+		buf := new(bytes.Buffer)
+		if err := toml.NewEncoder(buf).Encode(config); err != nil {
+			return err
+		}
+		dump, err := os.OpenFile(config.ConfigFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+		if err != nil {
+			return err
+		}
+		defer dump.Close()
+		dump.Write(buf.Bytes())
+	}
+
+	return nil
+}
+
+// dumpConfig is the dumpconfig command.
+func dumpConfig(ctx *cli.Context) error {
+
+	err, cfg := makeConfig(ctx)
+
 	buf := new(bytes.Buffer)
-	if err := toml.NewEncoder(buf).Encode(config); err != nil {
+	if err := toml.NewEncoder(buf).Encode(cfg); err != nil {
 		return err
 	}
-	fmt.Println(buf.String())
+
+	dump := os.Stdout
+	if ctx.NArg() > 0 {
+		log.Infof("Writing Config to file: '%s'", ctx.Args().Get(0))
+		dump, err = os.OpenFile(ctx.Args().Get(0), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+		if err != nil {
+			log.Panicf("Could not open the file service: %v", err)
+			return err
+		}
+		defer dump.Close()
+	}
+	dump.Write(buf.Bytes())
+
 	return nil
 }

@@ -46,9 +46,13 @@ func main() {
 	log := logrus.WithField("prefix", "main")
 	app := cli.NewApp()
 	app.Name = "ledger"
-	app.Usage = "Accounting Ledger Database for the 21st Century"
+	app.Usage = "Accounting Ledger Database Server"
 	app.Action = startNode
 	app.Version = version.Version
+	app.Commands = []cli.Command{
+		// See config.go
+		cmd.DumpConfigCommand,
+	}
 
 	app.Flags = []cli.Flag{
 		cmd.VerbosityFlag,
