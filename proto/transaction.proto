@@ -17,6 +17,7 @@ message TransactionRequest {
     string date = 1;
     string description = 2;
     repeated LineItem lines = 3;
+    string signature = 4;
 }
 
 message TransactionResponse {

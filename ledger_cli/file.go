@@ -48,6 +48,7 @@ Loads a file in the ledger cli format
 		}
 
 		PrintLedger(generalLedger, columnWidth)
+		SendLedger(generalLedger)
 		return nil
 	},
 }
@@ -68,5 +69,11 @@ func PrintTransaction(trans *Transaction, columns int) {
 func PrintLedger(generalLedger []*Transaction, columns int) {
 	for _, trans := range generalLedger {
 		PrintTransaction(trans, columns)
+	}
+}
+
+func SendLedger(generalLedger []*Transaction) {
+	for _, trans := range generalLedger {
+		Send(trans)
 	}
 }

@@ -9,6 +9,8 @@ import (
 	"encoding/csv"
 	_ "github.com/mattn/go-sqlite3"
 
+	"github.com/darcys22/godbledger/godbledger/cmd"
+
 	"github.com/olekukonko/tablewriter"
 	"github.com/urfave/cli"
 )
@@ -44,9 +46,11 @@ If you want to see all the transactions in the database, or export to CSV
 	},
 	Action: func(ctx *cli.Context) error {
 		//Check if keyfile path given and make sure it doesn't already exist.
+
+		err, cfg := cmd.MakeConfig(ctx)
 		databasefilepath := ctx.Args().First()
 		if databasefilepath == "" {
-			databasefilepath = defaultDBName
+			databasefilepath = cfg.ConfigFile
 		}
 		if _, err := os.Stat(databasefilepath); err != nil {
 			panic(fmt.Sprintf("Database does not already exist at %s.", databasefilepath))

@@ -7,8 +7,9 @@ import (
 
 // Account holds the name and balance
 type Account struct {
-	Name    string
-	Balance *big.Rat
+	Name        string
+	Description string
+	Balance     *big.Rat
 }
 
 type sortAccounts []*Account
@@ -30,6 +31,7 @@ type Transaction struct {
 	Payee          string
 	Date           time.Time
 	AccountChanges []Account
+	Signature      string
 }
 
 type sortTransactions []*Transaction

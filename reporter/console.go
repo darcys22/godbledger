@@ -26,6 +26,7 @@ type Config struct {
 type Console struct {
 	prompter *bufio.Reader // Input prompter to allow interactive user feedback (defaults to TerminalPrompter)
 	printer  io.Writer     // Output writer to serialize any display strings to
+	config   Config
 }
 
 func New(config Config) (*Console, error) {
@@ -47,7 +48,7 @@ func New(config Config) (*Console, error) {
 // console's available modules.
 func (c *Console) Welcome() {
 	message := "Welcome to the GoDBLedger Reporter console!\n\n"
-	message += "Database File: " + defaultDBName + "\n"
+	message += "Database File: " + c.config.DataDir + "\n"
 
 	fmt.Fprintln(c.printer, message)
 }
