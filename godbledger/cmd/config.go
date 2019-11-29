@@ -14,10 +14,12 @@ import (
 var log = logrus.WithField("prefix", "Config")
 
 type LedgerConfig struct {
-	RPCPort       string // RPCPort defines the port that the server will listen for transactions on
-	DataDirectory string // DataDirectory defines the host systems folder directory holding the database and config files
-	LogVerbosity  string // LogVerbosity defines the logging level {debug, info, warn, error, fatal, panic}
-	ConfigFile    string // Location of the TOML config file, including directory path
+	RPCPort          string // RPCPort defines the port that the server will listen for transactions on
+	DataDirectory    string // DataDirectory defines the host systems folder directory holding the database and config files
+	LogVerbosity     string // LogVerbosity defines the logging level {debug, info, warn, error, fatal, panic}
+	ConfigFile       string // Location of the TOML config file, including directory path
+	DatabaseType     string // Type of Database being used
+	DatabaseLocation string // Location of the database file, including directory path
 }
 
 var (
@@ -31,10 +33,12 @@ var (
 	}
 
 	defaultLedgerConfig = &LedgerConfig{
-		RPCPort:       "50051",
-		DataDirectory: DefaultDataDir(),
-		LogVerbosity:  "debug",
-		ConfigFile:    DefaultDataDir() + "/config.toml",
+		RPCPort:          "50051",
+		DataDirectory:    DefaultDataDir(),
+		LogVerbosity:     "debug",
+		ConfigFile:       DefaultDataDir() + "/config.toml",
+		DatabaseType:     "sqlite3",
+		DatabaseLocation: DefaultDataDir() + "/ledgerdata/ledger.db",
 	}
 )
 

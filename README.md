@@ -23,3 +23,10 @@ sqlite3 ledger.db
 SELECT * FROM splits JOIN split_accounts ON splits.split_id = split_accounts.split_id
 
 ```
+
+TODO
+
+fix the database for reporter
+Add a delete transaction function
+Add an edit transaction function
+Make a reporter that shows the live reports

@@ -45,7 +45,7 @@ If you want to see all the transactions in the database, or export to CSV
 		err, cfg := cmd.MakeConfig(ctx)
 		databasefilepath := ctx.Args().First()
 		if databasefilepath == "" {
-			databasefilepath = cfg.ConfigFile
+			databasefilepath = cfg.DatabaseLocation
 		}
 		if _, err := os.Stat(databasefilepath); err != nil {
 			panic(fmt.Sprintf("Database does not already exist at %s.", databasefilepath))

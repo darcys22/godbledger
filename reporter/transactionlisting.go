@@ -50,7 +50,7 @@ If you want to see all the transactions in the database, or export to CSV
 		err, cfg := cmd.MakeConfig(ctx)
 		databasefilepath := ctx.Args().First()
 		if databasefilepath == "" {
-			databasefilepath = cfg.ConfigFile
+			databasefilepath = cfg.DatabaseLocation
 		}
 		if _, err := os.Stat(databasefilepath); err != nil {
 			panic(fmt.Sprintf("Database does not already exist at %s.", databasefilepath))
@@ -94,6 +94,7 @@ If you want to see all the transactions in the database, or export to CSV
 			output.Data = append(output.Data, t)
 			table.Append([]string{t.Date, t.ID, t.Account, t.Description, t.Currency, t.Amount})
 		}
+		fmt.Printf("Database does not already exist at %s.\n", databasefilepath)
 		if rows.Err() != nil {
 			// handle error
 		}
