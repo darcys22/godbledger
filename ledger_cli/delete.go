@@ -34,7 +34,7 @@ var commandDeleteTransaction = cli.Command{
 		var signature string
 		var identifier string
 
-		identifier = "bngfhgh794qsnrlk7ej0"
+		identifier = "bnher01794qso4g7c350"
 		signature = "test"
 
 		req := &pb.DeleteRequest{

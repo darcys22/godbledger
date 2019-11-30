@@ -99,7 +99,15 @@ func (db *LedgerDB) AddTransaction(txn *core.Transaction) error {
 }
 
 func (db *LedgerDB) DeleteTransaction(txnID string) error {
-	//err := db.DB.QueryRow(`SELECT * FROM currencies WHERE name = $1 LIMIT 1`, cur).Scan(&resp.Name, &resp.Decimals)
+
+	sqlStatement := `
+	DELETE FROM transactions
+	WHERE transaction_id = $1;`
+	_, err := db.DB.Exec(sqlStatement, txnID)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
