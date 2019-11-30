@@ -16,7 +16,6 @@
  *
  */
 
-// Package main implements a client for Greeter service.
 package main
 
 import (
@@ -39,6 +38,7 @@ func init() {
 	app.Commands = []cli.Command{
 		commandFile,
 		commandSingleTestTransaction,
+		commandDeleteTransaction,
 	}
 	//app.Action = transaction
 }

@@ -30,3 +30,5 @@ fix the database for reporter
 Add a delete transaction function
 Add an edit transaction function
 Make a reporter that shows the live reports
+Tags - Make a "Main" tag for the transactions of the main entity
+Entity table

@@ -98,6 +98,10 @@ func (db *LedgerDB) AddTransaction(txn *core.Transaction) error {
 	return err
 }
 
+func (db *LedgerDB) DeleteTransaction(txnID string) error {
+	return nil
+}
+
 func (db *LedgerDB) FindCurrency(cur string) (*core.Currency, error) {
 	var resp core.Currency
 	log.Info("Searching Currency in DB")

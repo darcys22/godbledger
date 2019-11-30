@@ -5,6 +5,7 @@ package transaction;
 service Transactor {
   rpc NodeVersion(VersionRequest) returns (VersionResponse) {}
   rpc AddTransaction(TransactionRequest) returns (TransactionResponse) {}
+  rpc DeleteTransaction(DeleteRequest) returns (TransactionResponse) {}
 }
 
 message LineItem {
@@ -18,6 +19,11 @@ message TransactionRequest {
     string description = 2;
     repeated LineItem lines = 3;
     string signature = 4;
+}
+
+message DeleteRequest {
+    string identifier = 1;
+    string signature = 2;
 }
 
 message TransactionResponse {

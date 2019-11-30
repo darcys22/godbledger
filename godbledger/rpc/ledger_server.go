@@ -70,3 +70,10 @@ func (s *LedgerServer) NodeVersion(ctx context.Context, in *pb.VersionRequest) (
 	log.Printf("Received Version Request: %s", in)
 	return &pb.VersionResponse{Message: version.Version}, nil
 }
+
+func (s *LedgerServer) DeleteTransaction(ctx context.Context, in *pb.DeleteRequest) (*pb.TransactionResponse, error) {
+	log.Printf("Received New Delete Request")
+	s.ld.Delete(in.GetIdentifier())
+
+	return &pb.TransactionResponse{Message: "Accepted"}, nil
+}

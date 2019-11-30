@@ -62,6 +62,11 @@ func (l *Ledger) Insert(txn *core.Transaction) {
 	l.ledgerDb.AddTransaction(txn)
 }
 
+func (l *Ledger) Delete(txnID string) {
+	log.Printf("Deleting Transaction: %s", txnID)
+	l.ledgerDb.DeleteTransaction(txnID)
+}
+
 func (l *Ledger) GetCurrencies(txn *core.Transaction) ([]*core.Currency, error) {
 
 	currencies := []*core.Currency{}
