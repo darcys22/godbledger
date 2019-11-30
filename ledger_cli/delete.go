@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"log"
-	"math/big"
 	"time"
 
 	pb "github.com/darcys22/godbledger/proto"
@@ -32,9 +31,15 @@ var commandDeleteTransaction = cli.Command{
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
 
+		var signature string
+		var identifier string
+
+		identifier = "bngfhgh794qsnrlk7ej0"
+		signature = "test"
+
 		req := &pb.DeleteRequest{
-			Identifier: transactionLines,
-			Signature:  t.Signature,
+			Identifier: identifier,
+			Signature:  signature,
 		}
 		r, err := client.DeleteTransaction(ctx, req)
 		if err != nil {

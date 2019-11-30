@@ -90,7 +90,8 @@ func (db *LedgerDB) InitDB() error {
 	createDB = `
 	CREATE TABLE IF NOT EXISTS transactions_body (
 		transaction_id VARCHAR(255) NOT NULL,
-		body TEXT
+		body TEXT,
+		FOREIGN KEY(transaction_id) REFERENCES transactions(transaction_id) ON DELETE CASCADE
 	);`
 	log.Debug("Query: " + createDB)
 	_, err = db.DB.Exec(createDB)
@@ -105,7 +106,7 @@ func (db *LedgerDB) InitDB() error {
 		currency VARCHAR(255),
 		amount BIGINT,
 		transaction_id VARCHAR(255),
-		FOREIGN KEY(transaction_id) REFERENCES transactions(transaction_id),
+		FOREIGN KEY(transaction_id) REFERENCES transactions(transaction_id) ON DELETE CASCADE,
 		PRIMARY KEY(split_id)
 	);`
 	log.Debug("Query: " + createDB)
@@ -118,8 +119,8 @@ func (db *LedgerDB) InitDB() error {
 		id INT AUTO_INCREMENT PRIMARY KEY,
 		split_id VARCHAR(255),
 		account_id VARCHAR(255),
-		FOREIGN KEY(split_id) REFERENCES splits(split_id),
-		FOREIGN KEY(account_id) REFERENCES accounts(account_id)
+		FOREIGN KEY(split_id) REFERENCES splits(split_id) ON DELETE CASCADE,
+		FOREIGN KEY(account_id) REFERENCES accounts(account_id) ON DELETE CASCADE
 	);`
 	log.Debug("Query: " + createDB)
 	_, err = db.DB.Exec(createDB)
