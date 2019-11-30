@@ -3,6 +3,7 @@ package main
 import (
 	//"flag"
 	"fmt"
+	"log"
 	"strings"
 	"unicode/utf8"
 
@@ -26,29 +27,29 @@ Loads a file in the ledger cli format
 
 		var ledgerFileName string
 
-		ledgerFileName = "test/transaction-codes-2.test"
+		if ctx.NArg() > 0 {
+			columnWidth := 80
 
-		columnWidth := 80
+			ledgerFileName = "test/transaction-codes-2.test"
+			//ledgerFileName = c.Args().Get(0)
 
-		//if len(ledgerFileName) == 0 {
-		//flag.Usage()
-		//return nil
-		//}
+			ledgerFileReader, err := NewLedgerReader(ledgerFileName)
+			if err != nil {
+				log.Printf("error reading file, %v\n", err)
+				return err
+			}
 
-		ledgerFileReader, err := NewLedgerReader(ledgerFileName)
-		if err != nil {
-			fmt.Println(err)
-			return err
+			generalLedger, parseError := ParseLedger(ledgerFileReader)
+			if parseError != nil {
+				log.Printf("error parsing file, %s\n", parseError.Error())
+				return parseError
+			}
+
+			PrintLedger(generalLedger, columnWidth)
+			SendLedger(generalLedger)
+		} else {
+			log.Printf("This command requires an argument.")
 		}
-
-		generalLedger, parseError := ParseLedger(ledgerFileReader)
-		if parseError != nil {
-			fmt.Printf("%s\n", parseError.Error())
-			return parseError
-		}
-
-		PrintLedger(generalLedger, columnWidth)
-		SendLedger(generalLedger)
 		return nil
 	},
 }
