@@ -20,33 +20,34 @@ var commandDeleteTransaction = cli.Command{
 	Flags: []cli.Flag{},
 	Action: func(c *cli.Context) error {
 
-		// Set up a connection to the server.
-		conn, err := grpc.Dial(address, grpc.WithInsecure())
-		if err != nil {
-			log.Fatalf("did not connect: %v", err)
+		if c.NArg() > 0 {
+			// Set up a connection to the server.
+			conn, err := grpc.Dial(address, grpc.WithInsecure())
+			if err != nil {
+				log.Fatalf("did not connect: %v", err)
+			}
+			defer conn.Close()
+			client := pb.NewTransactorClient(conn)
+
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
+
+			var signature string
+
+			signature = "test"
+			req := &pb.DeleteRequest{
+				Identifier: c.Args().Get(0),
+				Signature:  signature,
+			}
+			r, err := client.DeleteTransaction(ctx, req)
+			if err != nil {
+				log.Fatalf("could not delete: %v", err)
+			}
+			log.Printf("Response: %s", r.GetMessage())
+			return nil
+		} else {
+			log.Fatalf("This command requires an argument.")
 		}
-		defer conn.Close()
-		client := pb.NewTransactorClient(conn)
-
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-
-		var signature string
-		var identifier string
-
-		identifier = "bnher01794qso4g7c350"
-		signature = "test"
-
-		req := &pb.DeleteRequest{
-			Identifier: identifier,
-			Signature:  signature,
-		}
-		r, err := client.DeleteTransaction(ctx, req)
-		if err != nil {
-			log.Fatalf("could not delete: %v", err)
-		}
-		log.Printf("Response: %s", r.GetMessage())
-		return nil
 
 		return nil
 	},
