@@ -104,9 +104,17 @@ var commandPDFGenerate = cli.Command{
 			panic(err)
 		}
 
-		command := "node ./src/pdfgenerator.js"
+		command := "node ./pdfgenerator.js"
 		parts := strings.Fields(command)
-		_, err := exec.Command(parts[0], parts[1:]...).Output()
+		cmd := exec.Command(parts[0], parts[1:]...)
+		cmd.Dir = "./src"
+
+		cmd.Run()
+		err := os.Rename("src/mypdf.pdf", "financials.pdf")
+		if err != nil {
+			panic(err)
+		}
+		err = os.RemoveAll("src")
 		if err != nil {
 			panic(err)
 		}
