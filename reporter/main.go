@@ -18,6 +18,7 @@ func init() {
 	app.Commands = []cli.Command{
 		commandTransactionListing,
 		commandTrialBalance,
+		commandPDFGenerate,
 	}
 	app.Action = reporterConsole
 }

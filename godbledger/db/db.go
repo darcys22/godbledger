@@ -127,6 +127,20 @@ func (db *LedgerDB) InitDB() error {
 	if err != nil {
 		log.Fatal(err)
 	}
+	createDB = `
+	CREATE TABLE IF NOT EXISTS entities (
+		entity_id VARCHAR(255) NOT NULL,
+		name VARCHAR(255) NOT NULL,
+		tag VARCHAR(255),
+		type VARCHAR(255),
+		description VARCHAR(255),
+		PRIMARY KEY(entity_id)
+	);`
+	log.Debug("Query: " + createDB)
+	_, err = db.DB.Exec(createDB)
+	if err != nil {
+		log.Fatal(err)
+	}
 	return err
 }
 
