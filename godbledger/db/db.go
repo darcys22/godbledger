@@ -42,6 +42,8 @@ func NewDB(dirPath string) (*LedgerDB, error) {
 
 func (db *LedgerDB) InitDB() error {
 	log.Info("Initialising DB Table")
+
+	//USERS
 	createDB := `
 	CREATE TABLE IF NOT EXISTS users (
 		user_id INT NOT NULL,
@@ -53,6 +55,8 @@ func (db *LedgerDB) InitDB() error {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	//ACCOUNTS
 	createDB = `
 	CREATE TABLE IF NOT EXISTS accounts (
 		account_id VARCHAR(255) NOT NULL,
@@ -64,6 +68,35 @@ func (db *LedgerDB) InitDB() error {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	//TAGS
+	createDB = `
+	CREATE TABLE IF NOT EXISTS tags (
+		tag_id INTEGER AUTO_INCREMENT PRIMARY KEY,
+		tag_name VARCHAR(100) NOT NULL,
+	);`
+	log.Debug("Query: " + createDB)
+	_, err = db.DB.Exec(createDB)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	//TAGS FOR ACCOUNTS
+	createDB = `
+	CREATE TABLE IF NOT EXISTS account_tag (
+    account_id VARCHAR(255) NOT NULL,
+    tag_id INTEGER NOT NULL,
+    FOREIGN KEY (account_id) REFERENCES accounts (account_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tags (tag_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    PRIMARY KEY (employee_id, company_id)
+	);`
+	log.Debug("Query: " + createDB)
+	_, err = db.DB.Exec(createDB)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	//CURRENCIES
 	createDB = `
 	CREATE TABLE IF NOT EXISTS currencies (
 		name VARCHAR(255) NOT NULL,
@@ -75,6 +108,8 @@ func (db *LedgerDB) InitDB() error {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	//TRANSACTIONS
 	createDB = `
 	CREATE TABLE IF NOT EXISTS transactions (
 		transaction_id VARCHAR(255) NOT NULL,
@@ -87,6 +122,8 @@ func (db *LedgerDB) InitDB() error {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	//TRANSACTIONS BODY
 	createDB = `
 	CREATE TABLE IF NOT EXISTS transactions_body (
 		transaction_id VARCHAR(255) NOT NULL,
@@ -98,6 +135,8 @@ func (db *LedgerDB) InitDB() error {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	//LINE ITEMS FOR TRANSACTIONS (SPLITS)
 	createDB = `
 	CREATE TABLE IF NOT EXISTS splits (
 		split_id VARCHAR(255) NOT NULL,
@@ -114,6 +153,8 @@ func (db *LedgerDB) InitDB() error {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	//ACCOUNTS FOR SPLITS
 	createDB = `
 	CREATE TABLE IF NOT EXISTS split_accounts (
 		id INT AUTO_INCREMENT PRIMARY KEY,
@@ -127,6 +168,8 @@ func (db *LedgerDB) InitDB() error {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	//ENTITIES
 	createDB = `
 	CREATE TABLE IF NOT EXISTS entities (
 		entity_id VARCHAR(255) NOT NULL,

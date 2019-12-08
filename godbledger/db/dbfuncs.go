@@ -111,6 +111,101 @@ func (db *LedgerDB) DeleteTransaction(txnID string) error {
 	return nil
 }
 
+func (db *LedgerDB) FindTag(tag string) (int, error) {
+	var resp int
+	log.Info("Searching Tag in DB")
+	err := db.DB.QueryRow(`SELECT tag_id FROM currencies WHERE name = $1 LIMIT 1`, tag).Scan(&resp)
+	if err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (db *LedgerDB) AddTag(tag string) error {
+	log.Info("Adding Tag to DB")
+	insertTag := `
+		INSERT INTO tags(name_name)
+			VALUES(?);
+	`
+	tx, _ := db.DB.Begin()
+	stmt, _ := tx.Prepare(insertTag)
+	log.Debug("Query: " + insertTag)
+	res, err := stmt.Exec(tag)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	lastId, err := res.LastInsertId()
+	if err != nil {
+		log.Fatal(err)
+	}
+	rowCnt, err := res.RowsAffected()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
+
+	tx.Commit()
+
+	return nil
+}
+
+func (db *LedgerDB) SafeAddTag(tag string) error {
+	u, _ := db.FindTag(tag)
+	if u != nil {
+		return nil
+	}
+	return db.AddTag(tag)
+}
+
+func (db *LedgerDB) SafeAddTagToAccount(account, tag string) error {
+	err := db.SafeAddTag(tag)
+	if err != nil {
+		return err
+	}
+	tagID, _ := db.FindTag(tag)
+
+	var accountID string
+	err := db.DB.QueryRow(`SELECT account_id FROM accounts WHERE name = $1 LIMIT 1`, code).Scan(&accountID)
+	if err != nil {
+		return err
+	}
+
+	return db.AddTagToAccount(accountID, tagID)
+}
+
+func (db *LedgerDB) AddTagToAccount(accountID string, tag int) error {
+	insertTag := `
+		INSERT INTO account_tag(account_id, tag_id)
+			VALUES(?,?);
+	`
+	tx, _ := db.DB.Begin()
+	stmt, _ := tx.Prepare(insertTag)
+	log.Debug("Query: " + insertTag)
+	res, err := stmt.Exec(accountID, tagID)
+	if err != nil {
+		log.Debug(err)
+		return err
+	}
+
+	lastId, err := res.LastInsertId()
+	if err != nil {
+		log.Debug(err)
+		return err
+	}
+	rowCnt, err := res.RowsAffected()
+	if err != nil {
+		log.Debug(err)
+		return err
+	}
+	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
+
+	tx.Commit()
+
+	return nil
+
+}
+
 func (db *LedgerDB) FindCurrency(cur string) (*core.Currency, error) {
 	var resp core.Currency
 	log.Info("Searching Currency in DB")

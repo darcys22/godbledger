@@ -58,6 +58,7 @@ func (l *Ledger) Insert(txn *core.Transaction) {
 
 	for _, account := range accounts {
 		l.ledgerDb.SafeAddAccount(account)
+		l.ledgerDb.SafeAddTagToAccount(account.name, "main")
 	}
 	l.ledgerDb.AddTransaction(txn)
 }
