@@ -114,17 +114,18 @@ func (db *LedgerDB) DeleteTransaction(txnID string) error {
 func (db *LedgerDB) FindTag(tag string) (int, error) {
 	var resp int
 	log.Info("Searching Tag in DB")
-	err := db.DB.QueryRow(`SELECT tag_id FROM currencies WHERE name = $1 LIMIT 1`, tag).Scan(&resp)
+	err := db.DB.QueryRow(`SELECT tag_id FROM tags WHERE tag_name = $1 LIMIT 1`, tag).Scan(&resp)
 	if err != nil {
-		return nil, err
+		log.Debug(err)
+		return 0, err
 	}
-	return &resp, nil
+	return resp, nil
 }
 
 func (db *LedgerDB) AddTag(tag string) error {
 	log.Info("Adding Tag to DB")
 	insertTag := `
-		INSERT INTO tags(name_name)
+		INSERT INTO tags(tag_name)
 			VALUES(?);
 	`
 	tx, _ := db.DB.Begin()
@@ -152,7 +153,11 @@ func (db *LedgerDB) AddTag(tag string) error {
 
 func (db *LedgerDB) SafeAddTag(tag string) error {
 	u, _ := db.FindTag(tag)
-	if u != nil {
+	//if err != nil {
+	//log.Debug(err)
+	//return err
+	//}
+	if u != 0 {
 		return nil
 	}
 	return db.AddTag(tag)
@@ -161,13 +166,15 @@ func (db *LedgerDB) SafeAddTag(tag string) error {
 func (db *LedgerDB) SafeAddTagToAccount(account, tag string) error {
 	err := db.SafeAddTag(tag)
 	if err != nil {
+		log.Debug(err)
 		return err
 	}
 	tagID, _ := db.FindTag(tag)
 
 	var accountID string
-	err := db.DB.QueryRow(`SELECT account_id FROM accounts WHERE name = $1 LIMIT 1`, code).Scan(&accountID)
+	err = db.DB.QueryRow(`SELECT account_id FROM accounts WHERE name = $1 LIMIT 1`, account).Scan(&accountID)
 	if err != nil {
+		log.Debug(err)
 		return err
 	}
 
@@ -175,6 +182,16 @@ func (db *LedgerDB) SafeAddTagToAccount(account, tag string) error {
 }
 
 func (db *LedgerDB) AddTagToAccount(accountID string, tag int) error {
+	var exists int
+	err := db.DB.QueryRow(`SELECT EXISTS(SELECT * FROM account_tag where (account_id = $1) AND (tag_id = $2));`, accountID, tag).Scan(&exists)
+	if err != nil {
+		log.Debug(err)
+		return err
+	}
+	if exists == 1 {
+		return nil
+	}
+
 	insertTag := `
 		INSERT INTO account_tag(account_id, tag_id)
 			VALUES(?,?);
@@ -182,7 +199,7 @@ func (db *LedgerDB) AddTagToAccount(accountID string, tag int) error {
 	tx, _ := db.DB.Begin()
 	stmt, _ := tx.Prepare(insertTag)
 	log.Debug("Query: " + insertTag)
-	res, err := stmt.Exec(accountID, tagID)
+	res, err := stmt.Exec(accountID, tag)
 	if err != nil {
 		log.Debug(err)
 		return err

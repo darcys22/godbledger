@@ -72,8 +72,8 @@ func (db *LedgerDB) InitDB() error {
 	//TAGS
 	createDB = `
 	CREATE TABLE IF NOT EXISTS tags (
-		tag_id INTEGER AUTO_INCREMENT PRIMARY KEY,
-		tag_name VARCHAR(100) NOT NULL,
+		tag_id INTEGER PRIMARY KEY,
+		tag_name VARCHAR(100) NOT NULL UNIQUE
 	);`
 	log.Debug("Query: " + createDB)
 	_, err = db.DB.Exec(createDB)
@@ -88,7 +88,7 @@ func (db *LedgerDB) InitDB() error {
     tag_id INTEGER NOT NULL,
     FOREIGN KEY (account_id) REFERENCES accounts (account_id) ON DELETE RESTRICT ON UPDATE CASCADE,
     FOREIGN KEY (tag_id) REFERENCES tags (tag_id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    PRIMARY KEY (employee_id, company_id)
+    PRIMARY KEY (account_id, tag_id)
 	);`
 	log.Debug("Query: " + createDB)
 	_, err = db.DB.Exec(createDB)
