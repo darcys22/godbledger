@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"io"
+	"io/ioutil"
 	"os/exec"
 	"strings"
 	//"log"
@@ -16,14 +18,22 @@ import (
 	"github.com/urfave/cli"
 )
 
-//type Account struct {
-//Account string `json:"account"`
-//Amount  string `json:"amount"`
-//}
+type Tag struct {
+	Name     string       `json:"Name"`
+	Total    int          `json:"Total"`
+	Accounts []PDFAccount `json:"Accounts"`
+}
 
-//var tboutput struct {
-//Data []Account `json:"data"`
-//}
+type PDFAccount struct {
+	Account string `json:"Account"`
+	Amount  int    `json:"Amount"`
+}
+
+var reporteroutput struct {
+	Data      []Tag `json:"Tags"`
+	Profit    int   `json:"Profit"`
+	NetAssets int   `json:"NetAssets"`
+}
 
 var commandPDFGenerate = cli.Command{
 	Name:      "pdf",
@@ -39,6 +49,25 @@ var commandPDFGenerate = cli.Command{
 		//},
 	},
 	Action: func(ctx *cli.Context) error {
+
+		reporteroutput.Data = append(reporteroutput.Data, Tag{"Income", -3000, []PDFAccount{
+			PDFAccount{"Sales", -2800},
+			PDFAccount{"Other Sales", -200},
+		}})
+
+		reporteroutput.Data = append(reporteroutput.Data, Tag{"Expenses", 1500, []PDFAccount{
+			PDFAccount{"Depreciation", 1200},
+			PDFAccount{"R&D", 200},
+			PDFAccount{"Operations", 100},
+		}})
+
+		reporteroutput.Data = append(reporteroutput.Data, Tag{"Assets", 1500, []PDFAccount{
+			PDFAccount{"Cash", 1500},
+		}})
+
+		reporteroutput.Profit = -1500
+		reporteroutput.NetAssets = 1500
+
 		//Check if keyfile path given and make sure it doesn't already exist.
 		//err, cfg := cmd.MakeConfig(ctx)
 		//databasefilepath := ctx.Args().First()
@@ -92,6 +121,12 @@ var commandPDFGenerate = cli.Command{
 			}
 		}
 
+		outputJson, _ := json.Marshal(reporteroutput)
+		err := ioutil.WriteFile("src/output.json", outputJson, 0644)
+		if err != nil {
+			panic(err)
+		}
+
 		if err := DownloadFile("./src/financials.html", "https://raw.githubusercontent.com/darcys22/pdf-generator/master/financials.html"); err != nil {
 			panic(err)
 		}
@@ -110,14 +145,16 @@ var commandPDFGenerate = cli.Command{
 		cmd.Dir = "./src"
 
 		cmd.Run()
-		err := os.Rename("src/mypdf.pdf", "financials.pdf")
-		if err != nil {
-			panic(err)
-		}
-		err = os.RemoveAll("src")
-		if err != nil {
-			panic(err)
-		}
+
+		//Restructure and Cleanup
+		//err := os.Rename("src/mypdf.pdf", "financials.pdf")
+		//if err != nil {
+		//panic(err)
+		//}
+		//err = os.RemoveAll("src")
+		//if err != nil {
+		//panic(err)
+		//}
 
 		return nil
 	},
