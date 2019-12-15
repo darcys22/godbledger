@@ -135,10 +135,6 @@ var commandPDFGenerate = cli.Command{
 			panic(err)
 		}
 
-		if err := DownloadFile("./src/data.json", "https://raw.githubusercontent.com/darcys22/pdf-generator/master/data.json"); err != nil {
-			panic(err)
-		}
-
 		command := "node ./pdfgenerator.js"
 		parts := strings.Fields(command)
 		cmd := exec.Command(parts[0], parts[1:]...)
@@ -147,14 +143,14 @@ var commandPDFGenerate = cli.Command{
 		cmd.Run()
 
 		//Restructure and Cleanup
-		//err := os.Rename("src/mypdf.pdf", "financials.pdf")
-		//if err != nil {
-		//panic(err)
-		//}
-		//err = os.RemoveAll("src")
-		//if err != nil {
-		//panic(err)
-		//}
+		err = os.Rename("src/mypdf.pdf", "financials.pdf")
+		if err != nil {
+			panic(err)
+		}
+		err = os.RemoveAll("src")
+		if err != nil {
+			panic(err)
+		}
 
 		return nil
 	},
