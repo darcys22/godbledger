@@ -39,6 +39,7 @@ func init() {
 		commandFile,
 		commandSingleTestTransaction,
 		commandDeleteTransaction,
+		commandWizardJournal,
 	}
 	//app.Action = transaction
 }

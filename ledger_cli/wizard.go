@@ -1,16 +1,19 @@
 package main
 
 import (
-	"context"
+	"bufio"
+	"fmt"
 	"log"
 	"math/big"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/urfave/cli"
 )
 
 var commandWizardJournal = cli.Command{
-	Name:      "single",
+	Name:      "journal",
 	Usage:     "creates and submits a single transaction",
 	ArgsUsage: "[]",
 	Description: `
@@ -19,38 +22,55 @@ var commandWizardJournal = cli.Command{
 	Action: func(c *cli.Context) error {
 
 		reader := bufio.NewReader(os.Stdin)
-		fmt.Println(text)
 
 		fmt.Println("Journal Entry Wizard")
 		fmt.Println("--------------------")
 
 		fmt.Print("Enter the date (yyyy-mm-dd): ")
 		datetext, _ := reader.ReadString('\n')
-		date, _ := time.Parse("2006-01-02", datetext)
-
-		fmt.Print("Enter the Journal Descritpion: ")
-		desc, _ := reader.ReadString('\n')
-
-		transactionLines := make([]Account, 2)
-
-		line1Account := "Expenses:Groceries"
-		line1Desc := "Groceries"
-		line1Amount := big.NewRat(7500, 1)
-
-		transactionLines[0] = Account{
-			Name:        line1Account,
-			Description: line1Desc,
-			Balance:     line1Amount,
+		date, err := time.Parse("2006-01-02", strings.TrimSpace(datetext))
+		if err != nil {
+			panic(err)
 		}
 
-		line2Account := "Assets:Checking"
-		line2Desc := "Groceries"
-		line2Amount := big.NewRat(-7500, 1)
+		fmt.Print("Enter the Journal Descripion: ")
+		desc, _ := reader.ReadString('\n')
+		fmt.Println("")
 
-		transactionLines[1] = Account{
-			Name:        line2Account,
-			Description: line2Desc,
-			Balance:     line2Amount,
+		count := 0
+
+		var transactionLines []Account
+
+		for {
+			count += 1
+			fmt.Printf("Line item #%d\n", count)
+			fmt.Print("Enter the line Descripion: ")
+			lineDesc, _ := reader.ReadString('\n')
+
+			fmt.Print("Enter the Account: ")
+			lineAccount, _ := reader.ReadString('\n')
+
+			fmt.Print("Enter the Amount: ")
+			var i int64
+			_, err := fmt.Scanf("%d", &i)
+			if err != nil {
+				panic(err)
+			}
+			lineAmount := big.NewRat(i, 1)
+
+			transactionLines = append(transactionLines, Account{
+				Name:        lineAccount,
+				Description: lineDesc,
+				Balance:     lineAmount,
+			})
+
+			fmt.Print("Would you like to enter more line items? (n to stop): ")
+			exit, _ := reader.ReadString('\n')
+			fmt.Println("")
+			if strings.ToLower(strings.TrimSpace(exit)) == "n" {
+				fmt.Println("")
+				break
+			}
 		}
 
 		req := &Transaction{
@@ -60,7 +80,9 @@ var commandWizardJournal = cli.Command{
 			Signature:      "stuff",
 		}
 
-		err := Send(req)
+		fmt.Printf("%v\n", req)
+
+		err = Send(req)
 		if err != nil {
 			log.Fatalf("could not send: %v", err)
 		}
