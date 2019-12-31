@@ -1,4 +1,4 @@
-package main
+Package main
 
 import (
 	"encoding/json"
@@ -6,14 +6,14 @@ import (
 	"io/ioutil"
 	"os/exec"
 	"strings"
-	//"log"
+	"log"
 	"net/http"
 	"os"
 
-	//"database/sql"
-	//_ "github.com/mattn/go-sqlite3"
+	"database/sql"
+	_ "github.com/mattn/go-sqlite3"
 
-	//"github.com/darcys22/godbledger/godbledger/cmd"
+	"github.com/darcys22/godbledger/godbledger/cmd"
 
 	"github.com/urfave/cli"
 )
@@ -50,67 +50,77 @@ var commandPDFGenerate = cli.Command{
 	},
 	Action: func(ctx *cli.Context) error {
 
-		reporteroutput.Data = append(reporteroutput.Data, Tag{"Income", -3000, []PDFAccount{
-			PDFAccount{"Sales", -2800},
-			PDFAccount{"Other Sales", -200},
-		}})
+		//reporteroutput.Data = append(reporteroutput.Data, Tag{"Income", -3000, []PDFAccount{
+			//PDFAccount{"Sales", -2800},
+			//PDFAccount{"Other Sales", -200},
+		//}})
 
-		reporteroutput.Data = append(reporteroutput.Data, Tag{"Expenses", 1500, []PDFAccount{
-			PDFAccount{"Depreciation", 1200},
-			PDFAccount{"R&D", 200},
-			PDFAccount{"Operations", 100},
-		}})
+		//reporteroutput.Data = append(reporteroutput.Data, Tag{"Expenses", 1500, []PDFAccount{
+			//PDFAccount{"Depreciation", 1200},
+			//PDFAccount{"R&D", 200},
+			//PDFAccount{"Operations", 100},
+		//}})
 
-		reporteroutput.Data = append(reporteroutput.Data, Tag{"Assets", 1500, []PDFAccount{
-			PDFAccount{"Cash", 1500},
-		}})
+		//reporteroutput.Data = append(reporteroutput.Data, Tag{"Assets", 1500, []PDFAccount{
+			//PDFAccount{"Cash", 1500},
+		//}})
 
-		reporteroutput.Profit = -1500
-		reporteroutput.NetAssets = 1500
+		//reporteroutput.Profit = -1500
+		//reporteroutput.NetAssets = 1500
 
 		//Check if keyfile path given and make sure it doesn't already exist.
-		//err, cfg := cmd.MakeConfig(ctx)
-		//databasefilepath := ctx.Args().First()
-		//if databasefilepath == "" {
-		//databasefilepath = cfg.DatabaseLocation
-		//}
-		//if _, err := os.Stat(databasefilepath); err != nil {
-		//panic(fmt.Sprintf("Database does not already exist at %s.", databasefilepath))
-		//}
+		err, cfg := cmd.MakeConfig(ctx)
+		databasefilepath := ctx.Args().First()
+		if databasefilepath == "" {
+			databasefilepath = cfg.DatabaseLocation
+		}
+		if _, err := os.Stat(databasefilepath); err != nil {
+			panic(fmt.Sprintf("Database does not already exist at %s.", databasefilepath))
+		}
 
-		//SqliteDB, err := sql.Open("sqlite3", databasefilepath)
-		//if err != nil {
-		//log.Fatal(err)
-		//}
+		SqliteDB, err := sql.Open("sqlite3", databasefilepath)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-		//queryDB := `
-		//SELECT
-		//split_accounts.account_id,
-		//SUM(splits.amount)
-		//FROM splits
-		//JOIN split_accounts
-		//ON splits.split_id = split_accounts.split_id
-		//GROUP  BY split_accounts.account_id
-		//;`
+		queryDB := `
+			SELECT
+					tags.tag_name,
+					Table_Aggregate.account_id,
+					sums
+			FROM account_tag
+					join ((SELECT
+							split_accounts.account_id as account_id,
+							SUM(splits.amount) as sums
+						FROM splits 
+							JOIN split_accounts 
+							ON splits.split_id = split_accounts.split_id
+						GROUP  BY split_accounts.account_id
+							
+						)) AS Table_Aggregate
+						on account_tag.account_id = Table_Aggregate.account_id
+					join tags
+						on tags.tag_id = account_tag.tag_id
+			order BY tags.tag_name
+		;`
 
-		//rows, err := SqliteDB.Query(queryDB)
-		//if err != nil {
-		//log.Fatal(err)
-		//}
-		//defer rows.Close()
+		rows, err := SqliteDB.Query(queryDB)
+		if err != nil {
+		log.Fatal(err)
+		}
+		defer rows.Close()
 
-		//for rows.Next() {
-		//Scan one customer record
-		//var t Account
-		//if err := rows.Scan(&t.Account, &t.Amount); err != nil {
-		//handle error
-		//}
-		//tboutput.Data = append(tboutput.Data, t)
-		//table.Append([]string{t.Account, t.Amount})
-		//}
-		//if rows.Err() != nil {
-		//handle error
-		//}
+		for rows.Next() {
+				var t Account
+			if err := rows.Scan(&t.Account, &t.Amount); err != nil {
+				handle error
+			}
+			tboutput.Data = append(tboutput.Data, t)
+			table.Append([]string{t.Account, t.Amount})
+		}
+		if rows.Err() != nil {
+			handle error
+		}
 
 		dir := "src"
 
