@@ -48,7 +48,7 @@ func New(ctx *cli.Context, cfg *cmd.LedgerConfig) (*Ledger, error) {
 }
 
 func (l *Ledger) Insert(txn *core.Transaction) {
-	log.Printf("Created Transaction: %s", txn)
+	log.Info("Created Transaction: %s", txn)
 	l.ledgerDb.SafeAddUser(txn.Poster)
 	currencies, _ := l.GetCurrencies(txn)
 	for _, currency := range currencies {
@@ -64,8 +64,13 @@ func (l *Ledger) Insert(txn *core.Transaction) {
 }
 
 func (l *Ledger) Delete(txnID string) {
-	log.Printf("Deleting Transaction: %s", txnID)
+	log.Info("Deleting Transaction: %s", txnID)
 	l.ledgerDb.DeleteTransaction(txnID)
+}
+
+func (l *Ledger) InsertTag(account, tag string) error {
+	log.Info("Creating Tag %s on %s", tag, account)
+	return l.ledgerDb.SafeAddTagToAccount(account, tag)
 }
 
 func (l *Ledger) GetCurrencies(txn *core.Transaction) ([]*core.Currency, error) {

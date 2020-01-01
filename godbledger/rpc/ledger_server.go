@@ -67,13 +67,29 @@ func (s *LedgerServer) AddTransaction(ctx context.Context, in *pb.TransactionReq
 }
 
 func (s *LedgerServer) NodeVersion(ctx context.Context, in *pb.VersionRequest) (*pb.VersionResponse, error) {
-	log.Printf("Received Version Request: %s", in)
+	log.Info("Received Version Request: %s", in)
 	return &pb.VersionResponse{Message: version.Version}, nil
 }
 
 func (s *LedgerServer) DeleteTransaction(ctx context.Context, in *pb.DeleteRequest) (*pb.TransactionResponse, error) {
-	log.Printf("Received New Delete Request")
+	log.Info("Received New Delete Request")
 	s.ld.Delete(in.GetIdentifier())
+
+	return &pb.TransactionResponse{Message: "Accepted"}, nil
+}
+
+func (s *LedgerServer) AddTag(ctx context.Context, in *pb.TagRequest) (*pb.TransactionResponse, error) {
+	log.Info("Received New Add Tag Request")
+
+	s.ld.InsertTag(in.GetAccount(), in.GetTag())
+
+	return &pb.TransactionResponse{Message: "Accepted"}, nil
+}
+
+func (s *LedgerServer) DeleteTag(ctx context.Context, in *pb.DeleteTagRequest) (*pb.TransactionResponse, error) {
+	log.Info("Received New Delete Request")
+	log.Debug("Not yet implemented")
+	//s.ld.DeleteTag(in.GetIdentifier())
 
 	return &pb.TransactionResponse{Message: "Accepted"}, nil
 }
