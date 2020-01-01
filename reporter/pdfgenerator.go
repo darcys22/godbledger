@@ -1,22 +1,25 @@
-Package main
+package main
 
 import (
-	"encoding/json"
+	//"encoding/json"
+	"fmt"
 	"io"
-	"io/ioutil"
-	"os/exec"
-	"strings"
-	"log"
+	//"io/ioutil"
 	"net/http"
 	"os"
+	//"os/exec"
+	//"strings"
 
 	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
 
 	"github.com/darcys22/godbledger/godbledger/cmd"
 
+	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 )
+
+var log = logrus.WithField("prefix", "Reporter")
 
 type Tag struct {
 	Name     string       `json:"Name"`
@@ -51,18 +54,18 @@ var commandPDFGenerate = cli.Command{
 	Action: func(ctx *cli.Context) error {
 
 		//reporteroutput.Data = append(reporteroutput.Data, Tag{"Income", -3000, []PDFAccount{
-			//PDFAccount{"Sales", -2800},
-			//PDFAccount{"Other Sales", -200},
+		//PDFAccount{"Sales", -2800},
+		//PDFAccount{"Other Sales", -200},
 		//}})
 
 		//reporteroutput.Data = append(reporteroutput.Data, Tag{"Expenses", 1500, []PDFAccount{
-			//PDFAccount{"Depreciation", 1200},
-			//PDFAccount{"R&D", 200},
-			//PDFAccount{"Operations", 100},
+		//PDFAccount{"Depreciation", 1200},
+		//PDFAccount{"R&D", 200},
+		//PDFAccount{"Operations", 100},
 		//}})
 
 		//reporteroutput.Data = append(reporteroutput.Data, Tag{"Assets", 1500, []PDFAccount{
-			//PDFAccount{"Cash", 1500},
+		//PDFAccount{"Cash", 1500},
 		//}})
 
 		//reporteroutput.Profit = -1500
@@ -75,7 +78,7 @@ var commandPDFGenerate = cli.Command{
 			databasefilepath = cfg.DatabaseLocation
 		}
 		if _, err := os.Stat(databasefilepath); err != nil {
-			panic(fmt.Sprintf("Database does not already exist at %s.", databasefilepath))
+			log.Fatal(fmt.Sprintf("Database does not already exist at %s.", databasefilepath))
 		}
 
 		SqliteDB, err := sql.Open("sqlite3", databasefilepath)
@@ -104,63 +107,75 @@ var commandPDFGenerate = cli.Command{
 			order BY tags.tag_name
 		;`
 
+		log.Debugf("Quering the Database")
 		rows, err := SqliteDB.Query(queryDB)
 		if err != nil {
-		log.Fatal(err)
+			log.Fatal(err)
 		}
 		defer rows.Close()
+		accounts := make(map[string][]PDFAccount)
+		totals := make(map[string]int)
 
 		for rows.Next() {
-				var t Account
-			if err := rows.Scan(&t.Account, &t.Amount); err != nil {
-				handle error
+			var t PDFAccount
+			var name string
+			if err := rows.Scan(&name, &t.Account, &t.Amount); err != nil {
+				log.Fatal(err)
 			}
-			tboutput.Data = append(tboutput.Data, t)
-			table.Append([]string{t.Account, t.Amount})
+			log.Debugf("%v", t)
+			if val, ok := m[name]; ok {
+				accounts[name] = append(val, t)
+				totals[name] = append(totals[name], t.Amount)
+			} else {
+				accounts[name] = []PDFAccount{t}
+				totals[name] = []PDFAccount{t}
+			}
 		}
 		if rows.Err() != nil {
-			handle error
+			log.Fatal(err)
 		}
 
-		dir := "src"
+		log.Debugf("%v", m)
 
-		if _, err := os.Stat(dir); os.IsNotExist(err) {
-			err = os.MkdirAll(dir, 0755)
-			if err != nil {
-				panic(err)
-			}
-		}
+		//dir := "src"
 
-		outputJson, _ := json.Marshal(reporteroutput)
-		err := ioutil.WriteFile("src/output.json", outputJson, 0644)
-		if err != nil {
-			panic(err)
-		}
+		//if _, err := os.Stat(dir); os.IsNotExist(err) {
+		//err = os.MkdirAll(dir, 0755)
+		//if err != nil {
+		//panic(err)
+		//}
+		//}
 
-		if err := DownloadFile("./src/financials.html", "https://raw.githubusercontent.com/darcys22/pdf-generator/master/financials.html"); err != nil {
-			panic(err)
-		}
+		//outputJson, _ := json.Marshal(reporteroutput)
+		//err = ioutil.WriteFile("src/output.json", outputJson, 0644)
+		//if err != nil {
+		//panic(err)
+		//}
 
-		if err := DownloadFile("./src/pdfgenerator.js", "https://raw.githubusercontent.com/darcys22/pdf-generator/master/pdfgenerator.js"); err != nil {
-			panic(err)
-		}
+		//if err := DownloadFile("./src/financials.html", "https://raw.githubusercontent.com/darcys22/pdf-generator/master/financials.html"); err != nil {
+		//panic(err)
+		//}
 
-		command := "node ./pdfgenerator.js"
-		parts := strings.Fields(command)
-		cmd := exec.Command(parts[0], parts[1:]...)
-		cmd.Dir = "./src"
+		//if err := DownloadFile("./src/pdfgenerator.js", "https://raw.githubusercontent.com/darcys22/pdf-generator/master/pdfgenerator.js"); err != nil {
+		//panic(err)
+		//}
 
-		cmd.Run()
+		//command := "node ./pdfgenerator.js"
+		//parts := strings.Fields(command)
+		//cmd := exec.Command(parts[0], parts[1:]...)
+		//cmd.Dir = "./src"
 
-		//Restructure and Cleanup
-		err = os.Rename("src/mypdf.pdf", "financials.pdf")
-		if err != nil {
-			panic(err)
-		}
-		err = os.RemoveAll("src")
-		if err != nil {
-			panic(err)
-		}
+		//cmd.Run()
+
+		////Restructure and Cleanup
+		//err = os.Rename("src/mypdf.pdf", "financials.pdf")
+		//if err != nil {
+		//panic(err)
+		//}
+		//err = os.RemoveAll("src")
+		//if err != nil {
+		//panic(err)
+		//}
 
 		return nil
 	},

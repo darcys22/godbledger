@@ -20,12 +20,6 @@ import (
 func startNode(ctx *cli.Context) error {
 	err, cfg := cmd.MakeConfig(ctx)
 
-	level, err := logrus.ParseLevel(cfg.LogVerbosity)
-	if err != nil {
-		return err
-	}
-	logrus.SetLevel(level)
-
 	fullnode, err := node.New(ctx)
 	if err != nil {
 		return err
@@ -46,7 +40,7 @@ func main() {
 	logrus.SetFormatter(customFormatter)
 	log := logrus.WithField("prefix", "main")
 	app := cli.NewApp()
-	app.Name = "ledger"
+	app.Name = "Godbledger"
 	app.Usage = "Accounting Ledger Database Server"
 	app.Action = startNode
 	app.Version = version.Version

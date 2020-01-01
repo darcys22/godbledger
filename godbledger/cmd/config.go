@@ -46,18 +46,36 @@ func MakeConfig(cli *cli.Context) (error, *LedgerConfig) {
 
 	log.Infof("Setting up configuration")
 	config := defaultLedgerConfig
+	//set logrus verbosity
+	level, err := logrus.ParseLevel(config.LogVerbosity)
+	if err != nil {
+		log.Debugf("Error Parsing level: %s", err)
+		return err, nil
+	}
+	logrus.SetLevel(level)
 	fileName := config.ConfigFile
 	if len(cli.String("config")) > 0 {
 		fileName = cli.String("config")
 	}
 
+	log.Debugf("Filepath to config file: %s", fileName)
 	if _, err := toml.DecodeFile(fileName, &config); err != nil {
+		log.Debugf("Error decoding config file: %s", err)
 		return err, nil
 	}
 
 	//apply flags
 	setConfig(cli, config)
 
+	//set logrus verbosity
+	level, err = logrus.ParseLevel(config.LogVerbosity)
+	if err != nil {
+		log.Debugf("Error Parsing level: %s", err)
+		return err, nil
+	}
+	logrus.SetLevel(level)
+
+	log.Debugf("Config set successfully")
 	return nil, config
 }
 

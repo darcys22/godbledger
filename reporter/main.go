@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
+	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
 
 const ()
@@ -12,9 +14,13 @@ const ()
 var app *cli.App
 
 func init() {
+	customFormatter := new(prefixed.TextFormatter)
+	customFormatter.TimestampFormat = "2006-01-02 15:04:05"
+	customFormatter.FullTimestamp = true
+	logrus.SetFormatter(customFormatter)
 	app = cli.NewApp()
 	app.Name = "Reporter"
-	app.Usage = "Provides GL and TB reports for GoDBLedger"
+	app.Usage = "Extracts GL and TB reports from a Godbledger database"
 	app.Commands = []cli.Command{
 		commandTransactionListing,
 		commandTrialBalance,
