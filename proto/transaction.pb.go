@@ -228,6 +228,116 @@ func (m *TransactionResponse) GetMessage() string {
 	return ""
 }
 
+type TagRequest struct {
+	Account              string   `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
+	Tag                  string   `protobuf:"bytes,2,opt,name=tag,proto3" json:"tag,omitempty"`
+	Signature            string   `protobuf:"bytes,3,opt,name=signature,proto3" json:"signature,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *TagRequest) Reset()         { *m = TagRequest{} }
+func (m *TagRequest) String() string { return proto.CompactTextString(m) }
+func (*TagRequest) ProtoMessage()    {}
+func (*TagRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_2cc4e03d2c28c490, []int{4}
+}
+
+func (m *TagRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TagRequest.Unmarshal(m, b)
+}
+func (m *TagRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TagRequest.Marshal(b, m, deterministic)
+}
+func (m *TagRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TagRequest.Merge(m, src)
+}
+func (m *TagRequest) XXX_Size() int {
+	return xxx_messageInfo_TagRequest.Size(m)
+}
+func (m *TagRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_TagRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TagRequest proto.InternalMessageInfo
+
+func (m *TagRequest) GetAccount() string {
+	if m != nil {
+		return m.Account
+	}
+	return ""
+}
+
+func (m *TagRequest) GetTag() string {
+	if m != nil {
+		return m.Tag
+	}
+	return ""
+}
+
+func (m *TagRequest) GetSignature() string {
+	if m != nil {
+		return m.Signature
+	}
+	return ""
+}
+
+type DeleteTagRequest struct {
+	Account              string   `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
+	Tag                  string   `protobuf:"bytes,2,opt,name=tag,proto3" json:"tag,omitempty"`
+	Signature            string   `protobuf:"bytes,3,opt,name=signature,proto3" json:"signature,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *DeleteTagRequest) Reset()         { *m = DeleteTagRequest{} }
+func (m *DeleteTagRequest) String() string { return proto.CompactTextString(m) }
+func (*DeleteTagRequest) ProtoMessage()    {}
+func (*DeleteTagRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_2cc4e03d2c28c490, []int{5}
+}
+
+func (m *DeleteTagRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DeleteTagRequest.Unmarshal(m, b)
+}
+func (m *DeleteTagRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DeleteTagRequest.Marshal(b, m, deterministic)
+}
+func (m *DeleteTagRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteTagRequest.Merge(m, src)
+}
+func (m *DeleteTagRequest) XXX_Size() int {
+	return xxx_messageInfo_DeleteTagRequest.Size(m)
+}
+func (m *DeleteTagRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteTagRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteTagRequest proto.InternalMessageInfo
+
+func (m *DeleteTagRequest) GetAccount() string {
+	if m != nil {
+		return m.Account
+	}
+	return ""
+}
+
+func (m *DeleteTagRequest) GetTag() string {
+	if m != nil {
+		return m.Tag
+	}
+	return ""
+}
+
+func (m *DeleteTagRequest) GetSignature() string {
+	if m != nil {
+		return m.Signature
+	}
+	return ""
+}
+
 type VersionRequest struct {
 	Message              string   `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -239,7 +349,7 @@ func (m *VersionRequest) Reset()         { *m = VersionRequest{} }
 func (m *VersionRequest) String() string { return proto.CompactTextString(m) }
 func (*VersionRequest) ProtoMessage()    {}
 func (*VersionRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_2cc4e03d2c28c490, []int{4}
+	return fileDescriptor_2cc4e03d2c28c490, []int{6}
 }
 
 func (m *VersionRequest) XXX_Unmarshal(b []byte) error {
@@ -278,7 +388,7 @@ func (m *VersionResponse) Reset()         { *m = VersionResponse{} }
 func (m *VersionResponse) String() string { return proto.CompactTextString(m) }
 func (*VersionResponse) ProtoMessage()    {}
 func (*VersionResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_2cc4e03d2c28c490, []int{5}
+	return fileDescriptor_2cc4e03d2c28c490, []int{7}
 }
 
 func (m *VersionResponse) XXX_Unmarshal(b []byte) error {
@@ -311,6 +421,8 @@ func init() {
 	proto.RegisterType((*TransactionRequest)(nil), "transaction.TransactionRequest")
 	proto.RegisterType((*DeleteRequest)(nil), "transaction.DeleteRequest")
 	proto.RegisterType((*TransactionResponse)(nil), "transaction.TransactionResponse")
+	proto.RegisterType((*TagRequest)(nil), "transaction.TagRequest")
+	proto.RegisterType((*DeleteTagRequest)(nil), "transaction.DeleteTagRequest")
 	proto.RegisterType((*VersionRequest)(nil), "transaction.VersionRequest")
 	proto.RegisterType((*VersionResponse)(nil), "transaction.VersionResponse")
 }
@@ -318,28 +430,32 @@ func init() {
 func init() { proto.RegisterFile("transaction.proto", fileDescriptor_2cc4e03d2c28c490) }
 
 var fileDescriptor_2cc4e03d2c28c490 = []byte{
-	// 329 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x52, 0xdf, 0x4e, 0xfa, 0x30,
-	0x14, 0xfe, 0x8d, 0xf1, 0x43, 0x39, 0x8b, 0x18, 0x8e, 0xd1, 0x2c, 0x48, 0x74, 0xd9, 0x15, 0x91,
-	0x04, 0x13, 0x7c, 0x02, 0x13, 0x6f, 0x34, 0xea, 0xc5, 0xfc, 0x73, 0x5f, 0xb7, 0x03, 0x69, 0xc2,
-	0x5a, 0x6c, 0xcb, 0x1b, 0xf8, 0x0a, 0xbe, 0xaf, 0x81, 0xad, 0xd0, 0xaa, 0x44, 0xee, 0xd6, 0x6f,
-	0xdf, 0xf9, 0xfe, 0xf4, 0x14, 0xba, 0x46, 0x31, 0xa1, 0x59, 0x6e, 0xb8, 0x14, 0xa3, 0xb9, 0x92,
-	0x46, 0x62, 0xe4, 0x40, 0xe9, 0x04, 0xf6, 0xef, 0xb9, 0xa0, 0x5b, 0x43, 0x25, 0x26, 0x10, 0xb1,
-	0x3c, 0x97, 0x0b, 0x61, 0x04, 0x2b, 0x29, 0x0e, 0x92, 0x60, 0xd0, 0xce, 0x5c, 0x68, 0xc9, 0x28,
-	0x48, 0xe7, 0x8a, 0xcf, 0x97, 0xc3, 0x71, 0xa3, 0x62, 0x38, 0x10, 0x9e, 0x40, 0x8b, 0x95, 0x4b,
-	0x7e, 0x1c, 0x26, 0xc1, 0x20, 0xcc, 0xea, 0x53, 0xfa, 0x19, 0x00, 0x3e, 0x6f, 0x7c, 0x33, 0x7a,
-	0x5f, 0x90, 0x36, 0x88, 0xd0, 0x2c, 0x98, 0xb1, 0x5e, 0xab, 0xef, 0x1d, 0x4c, 0x86, 0xf0, 0x7f,
-	0xc6, 0x05, 0xe9, 0x38, 0x4c, 0xc2, 0x41, 0x34, 0x3e, 0x1e, 0xb9, 0x25, 0x6d, 0x9d, 0xac, 0xe2,
-	0x60, 0x1f, 0xda, 0x9a, 0x4f, 0x05, 0x33, 0x0b, 0x45, 0x71, 0x73, 0x25, 0xb6, 0x01, 0xd2, 0x07,
-	0x38, 0xb8, 0xa1, 0x19, 0x19, 0xb2, 0x89, 0xce, 0x00, 0x78, 0x41, 0xc2, 0xf0, 0x09, 0x27, 0x55,
-	0xe7, 0x72, 0x10, 0x5f, 0xae, 0xf1, 0x5d, 0xee, 0x12, 0x8e, 0xbc, 0x96, 0x7a, 0x2e, 0x85, 0x26,
-	0x8c, 0x61, 0xaf, 0x24, 0xad, 0xd9, 0xd4, 0x36, 0xb5, 0xc7, 0xf4, 0x02, 0x3a, 0xaf, 0xa4, 0xb4,
-	0x73, 0x25, 0xdb, 0xb9, 0x43, 0x38, 0x5c, 0x73, 0xff, 0x12, 0x1e, 0x7f, 0x34, 0x00, 0x6c, 0x14,
-	0xa9, 0xf0, 0x0e, 0xa2, 0x47, 0x59, 0x50, 0x3d, 0x8f, 0xa7, 0xde, 0x95, 0xf9, 0x09, 0x7a, 0xfd,
-	0xdf, 0x7f, 0x56, 0x96, 0xe9, 0x3f, 0x7c, 0x81, 0xce, 0x75, 0x51, 0x38, 0x3d, 0xf1, 0xdc, 0x9b,
-	0xf8, 0xb9, 0xe7, 0x5e, 0xb2, 0x9d, 0xb0, 0x96, 0x7d, 0x82, 0x6e, 0xb5, 0x0a, 0x57, 0xb9, 0xe7,
-	0x0d, 0x7a, 0xab, 0xda, 0x45, 0xf4, 0xad, 0xb5, 0x7a, 0xf3, 0x57, 0x5f, 0x01, 0x00, 0x00, 0xff,
-	0xff, 0xb3, 0x1e, 0x7b, 0xe3, 0x08, 0x03, 0x00, 0x00,
+	// 395 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x54, 0x4f, 0x4f, 0xe2, 0x40,
+	0x14, 0xdf, 0x52, 0x16, 0x96, 0xd7, 0x2c, 0x0b, 0xb3, 0xd9, 0xdd, 0x86, 0x45, 0x6d, 0x7a, 0x22,
+	0x92, 0x60, 0x82, 0x9f, 0xc0, 0x44, 0x0f, 0x1a, 0xe5, 0x50, 0x91, 0x93, 0x97, 0xb1, 0x7d, 0x34,
+	0x93, 0xd0, 0x29, 0x76, 0x86, 0x8f, 0xe2, 0xc9, 0x2f, 0x6b, 0x4a, 0x3b, 0x65, 0x06, 0x21, 0xe2,
+	0xc1, 0xdb, 0xcc, 0xeb, 0xef, 0xfd, 0xfe, 0xbc, 0x37, 0x29, 0x74, 0x65, 0x46, 0xb9, 0xa0, 0xa1,
+	0x64, 0x29, 0x1f, 0x2d, 0xb3, 0x54, 0xa6, 0xc4, 0xd1, 0x4a, 0xfe, 0x1c, 0x7e, 0xdc, 0x32, 0x8e,
+	0xd7, 0x12, 0x13, 0xe2, 0x81, 0x43, 0xc3, 0x30, 0x5d, 0x71, 0xc9, 0x69, 0x82, 0xae, 0xe5, 0x59,
+	0x83, 0x56, 0xa0, 0x97, 0x72, 0x44, 0x84, 0x22, 0xcc, 0xd8, 0x32, 0x6f, 0x76, 0x6b, 0x05, 0x42,
+	0x2b, 0x91, 0xbf, 0xd0, 0xa0, 0x49, 0x8e, 0x77, 0x6d, 0xcf, 0x1a, 0xd8, 0x41, 0x79, 0xf3, 0x5f,
+	0x2c, 0x20, 0xd3, 0x8d, 0x6e, 0x80, 0xcf, 0x2b, 0x14, 0x92, 0x10, 0xa8, 0x47, 0x54, 0x2a, 0xad,
+	0xf5, 0xf9, 0x00, 0x91, 0x21, 0x7c, 0x5f, 0x30, 0x8e, 0xc2, 0xb5, 0x3d, 0x7b, 0xe0, 0x8c, 0xff,
+	0x8c, 0xf4, 0x90, 0x2a, 0x4e, 0x50, 0x60, 0x48, 0x1f, 0x5a, 0x82, 0xc5, 0x9c, 0xca, 0x55, 0x86,
+	0x6e, 0x7d, 0x4d, 0xb6, 0x29, 0xf8, 0x77, 0xf0, 0xf3, 0x12, 0x17, 0x28, 0x51, 0x39, 0x3a, 0x06,
+	0x60, 0x11, 0x72, 0xc9, 0xe6, 0x0c, 0xb3, 0xd2, 0x97, 0x56, 0x31, 0xe9, 0x6a, 0xdb, 0x74, 0x67,
+	0xf0, 0xdb, 0x48, 0x29, 0x96, 0x29, 0x17, 0x48, 0x5c, 0x68, 0x26, 0x28, 0x04, 0x8d, 0x55, 0x52,
+	0x75, 0xf5, 0x67, 0x00, 0x53, 0x1a, 0x2b, 0x71, 0x17, 0x9a, 0xe5, 0xb8, 0x15, 0xae, 0xbc, 0x92,
+	0x0e, 0xd8, 0x92, 0xc6, 0xa5, 0x60, 0x7e, 0x34, 0x8d, 0xd8, 0xdb, 0x46, 0x1e, 0xa1, 0x53, 0xe4,
+	0xfa, 0x12, 0xf6, 0x53, 0x68, 0xcf, 0x30, 0x13, 0xda, 0x22, 0xf7, 0x27, 0x1c, 0xc2, 0xaf, 0x0a,
+	0xfb, 0xd1, 0x38, 0xc6, 0xaf, 0x36, 0x80, 0x1a, 0x60, 0x9a, 0x91, 0x1b, 0x70, 0x26, 0x69, 0x84,
+	0x65, 0x3f, 0xf9, 0x6f, 0x2c, 0xda, 0x74, 0xd0, 0xeb, 0xef, 0xfe, 0x58, 0x48, 0xfa, 0xdf, 0xc8,
+	0x03, 0xb4, 0x2f, 0xa2, 0x48, 0xdb, 0x0e, 0x39, 0x31, 0x3a, 0xde, 0xbf, 0xce, 0x9e, 0xb7, 0x1f,
+	0x50, 0xd1, 0xde, 0x43, 0xb7, 0x1c, 0xb4, 0xc6, 0xdc, 0x33, 0x1a, 0x8d, 0x07, 0x76, 0x10, 0xe9,
+	0x15, 0x34, 0x72, 0xaf, 0x34, 0x26, 0xff, 0x4c, 0x74, 0xb5, 0xcc, 0x83, 0x68, 0x26, 0xd0, 0xaa,
+	0x1e, 0x01, 0x39, 0xda, 0xe1, 0xe9, 0x73, 0x7c, 0x4f, 0x8d, 0xf5, 0x0f, 0xe4, 0xfc, 0x2d, 0x00,
+	0x00, 0xff, 0xff, 0x8c, 0x7e, 0xba, 0x76, 0x55, 0x04, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -357,6 +473,8 @@ type TransactorClient interface {
 	NodeVersion(ctx context.Context, in *VersionRequest, opts ...grpc.CallOption) (*VersionResponse, error)
 	AddTransaction(ctx context.Context, in *TransactionRequest, opts ...grpc.CallOption) (*TransactionResponse, error)
 	DeleteTransaction(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*TransactionResponse, error)
+	AddTag(ctx context.Context, in *TagRequest, opts ...grpc.CallOption) (*TransactionResponse, error)
+	DeleteTag(ctx context.Context, in *DeleteTagRequest, opts ...grpc.CallOption) (*TransactionResponse, error)
 }
 
 type transactorClient struct {
@@ -394,11 +512,31 @@ func (c *transactorClient) DeleteTransaction(ctx context.Context, in *DeleteRequ
 	return out, nil
 }
 
+func (c *transactorClient) AddTag(ctx context.Context, in *TagRequest, opts ...grpc.CallOption) (*TransactionResponse, error) {
+	out := new(TransactionResponse)
+	err := c.cc.Invoke(ctx, "/transaction.Transactor/AddTag", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *transactorClient) DeleteTag(ctx context.Context, in *DeleteTagRequest, opts ...grpc.CallOption) (*TransactionResponse, error) {
+	out := new(TransactionResponse)
+	err := c.cc.Invoke(ctx, "/transaction.Transactor/DeleteTag", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TransactorServer is the server API for Transactor service.
 type TransactorServer interface {
 	NodeVersion(context.Context, *VersionRequest) (*VersionResponse, error)
 	AddTransaction(context.Context, *TransactionRequest) (*TransactionResponse, error)
 	DeleteTransaction(context.Context, *DeleteRequest) (*TransactionResponse, error)
+	AddTag(context.Context, *TagRequest) (*TransactionResponse, error)
+	DeleteTag(context.Context, *DeleteTagRequest) (*TransactionResponse, error)
 }
 
 // UnimplementedTransactorServer can be embedded to have forward compatible implementations.
@@ -413,6 +551,12 @@ func (*UnimplementedTransactorServer) AddTransaction(ctx context.Context, req *T
 }
 func (*UnimplementedTransactorServer) DeleteTransaction(ctx context.Context, req *DeleteRequest) (*TransactionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteTransaction not implemented")
+}
+func (*UnimplementedTransactorServer) AddTag(ctx context.Context, req *TagRequest) (*TransactionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddTag not implemented")
+}
+func (*UnimplementedTransactorServer) DeleteTag(ctx context.Context, req *DeleteTagRequest) (*TransactionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteTag not implemented")
 }
 
 func RegisterTransactorServer(s *grpc.Server, srv TransactorServer) {
@@ -473,6 +617,42 @@ func _Transactor_DeleteTransaction_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Transactor_AddTag_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TagRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TransactorServer).AddTag(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/transaction.Transactor/AddTag",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TransactorServer).AddTag(ctx, req.(*TagRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Transactor_DeleteTag_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteTagRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TransactorServer).DeleteTag(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/transaction.Transactor/DeleteTag",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TransactorServer).DeleteTag(ctx, req.(*DeleteTagRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Transactor_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "transaction.Transactor",
 	HandlerType: (*TransactorServer)(nil),
@@ -488,6 +668,14 @@ var _Transactor_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteTransaction",
 			Handler:    _Transactor_DeleteTransaction_Handler,
+		},
+		{
+			MethodName: "AddTag",
+			Handler:    _Transactor_AddTag_Handler,
+		},
+		{
+			MethodName: "DeleteTag",
+			Handler:    _Transactor_DeleteTag_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

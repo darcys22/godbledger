@@ -40,6 +40,7 @@ func init() {
 		commandSingleTestTransaction,
 		commandDeleteTransaction,
 		commandWizardJournal,
+		commandTagAccount,
 	}
 	//app.Action = transaction
 }

@@ -24,10 +24,8 @@ SELECT * FROM splits JOIN split_accounts ON splits.split_id = split_accounts.spl
 
 ```
 
-###TODO
-- Get the PDF generator making a profit and loss and balance sheet
-- Add a call to add a tag to an account
-- Add a call to edit a tag on an account
+### TODO
+- Add a call to delete a tag on an account
 - Add a call that returns the trial balance with all the tags on each account
 - Create another server that monitors the system and updates programmable entries
 - Add an edit transaction function

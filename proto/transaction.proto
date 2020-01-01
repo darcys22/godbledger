@@ -6,6 +6,8 @@ service Transactor {
   rpc NodeVersion(VersionRequest) returns (VersionResponse) {}
   rpc AddTransaction(TransactionRequest) returns (TransactionResponse) {}
   rpc DeleteTransaction(DeleteRequest) returns (TransactionResponse) {}
+  rpc AddTag(TagRequest) returns (TransactionResponse) {}
+  rpc DeleteTag(DeleteTagRequest) returns (TransactionResponse) {}
 }
 
 message LineItem {
@@ -28,6 +30,18 @@ message DeleteRequest {
 
 message TransactionResponse {
     string message = 1;
+}
+
+message TagRequest {
+    string account = 1;
+    string tag = 2;
+    string signature = 3;
+}
+
+message DeleteTagRequest {
+    string account = 1;
+    string tag = 2;
+    string signature = 3;
 }
 
 message VersionRequest {

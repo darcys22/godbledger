@@ -123,59 +123,65 @@ var commandPDFGenerate = cli.Command{
 				log.Fatal(err)
 			}
 			log.Debugf("%v", t)
-			if val, ok := m[name]; ok {
+			if val, ok := accounts[name]; ok {
 				accounts[name] = append(val, t)
-				totals[name] = append(totals[name], t.Amount)
+				totals[name] = totals[name] + t.Amount
 			} else {
 				accounts[name] = []PDFAccount{t}
-				totals[name] = []PDFAccount{t}
+				totals[name] = t.Amount
 			}
 		}
 		if rows.Err() != nil {
 			log.Fatal(err)
 		}
 
-		log.Debugf("%v", m)
+		for k, v := range accounts {
+			reporteroutput.Data = append(reporteroutput.Data, Tag{k, totals[k], v})
+		}
 
-		//dir := "src"
+		//TODO remove static dummy data
+		reporteroutput.Profit = -1500
+		reporteroutput.NetAssets = 1500
 
-		//if _, err := os.Stat(dir); os.IsNotExist(err) {
-		//err = os.MkdirAll(dir, 0755)
-		//if err != nil {
-		//panic(err)
-		//}
-		//}
+		dir := "src"
 
-		//outputJson, _ := json.Marshal(reporteroutput)
-		//err = ioutil.WriteFile("src/output.json", outputJson, 0644)
-		//if err != nil {
-		//panic(err)
-		//}
+		if _, err := os.Stat(dir); os.IsNotExist(err) {
+			err = os.MkdirAll(dir, 0755)
+			if err != nil {
+				panic(err)
+			}
+		}
 
-		//if err := DownloadFile("./src/financials.html", "https://raw.githubusercontent.com/darcys22/pdf-generator/master/financials.html"); err != nil {
-		//panic(err)
-		//}
+		outputJson, _ := json.Marshal(reporteroutput)
+		err = ioutil.WriteFile("src/output.json", outputJson, 0644)
+		if err != nil {
+			panic(err)
+		}
 
-		//if err := DownloadFile("./src/pdfgenerator.js", "https://raw.githubusercontent.com/darcys22/pdf-generator/master/pdfgenerator.js"); err != nil {
-		//panic(err)
-		//}
+		if err := DownloadFile("./src/financials.html", "https://raw.githubusercontent.com/darcys22/pdf-generator/master/financials.html"); err != nil {
+			panic(err)
+		}
 
-		//command := "node ./pdfgenerator.js"
-		//parts := strings.Fields(command)
-		//cmd := exec.Command(parts[0], parts[1:]...)
-		//cmd.Dir = "./src"
+		if err := DownloadFile("./src/pdfgenerator.js", "https://raw.githubusercontent.com/darcys22/pdf-generator/master/pdfgenerator.js"); err != nil {
+			panic(err)
+		}
 
-		//cmd.Run()
+		command := "node ./pdfgenerator.js"
+		parts := strings.Fields(command)
+		cmd := exec.Command(parts[0], parts[1:]...)
+		cmd.Dir = "./src"
 
-		////Restructure and Cleanup
-		//err = os.Rename("src/mypdf.pdf", "financials.pdf")
-		//if err != nil {
-		//panic(err)
-		//}
-		//err = os.RemoveAll("src")
-		//if err != nil {
-		//panic(err)
-		//}
+		cmd.Run()
+
+		//Restructure and Cleanup
+		err = os.Rename("src/mypdf.pdf", "financials.pdf")
+		if err != nil {
+			panic(err)
+		}
+		err = os.RemoveAll("src")
+		if err != nil {
+			panic(err)
+		}
 
 		return nil
 	},

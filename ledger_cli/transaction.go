@@ -83,7 +83,6 @@ func Send(t *Transaction) error {
 			Description: accChange.Description,
 			Amount:      accChange.Balance.Num().Int64(),
 		}
-
 	}
 
 	req := &pb.TransactionRequest{
