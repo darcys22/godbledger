@@ -20,9 +20,9 @@ var commandTagAccount = cli.Command{
 `,
 	Flags: []cli.Flag{
 		&cli.BoolFlag{
-			Name:    "delete",
-			Aliases: []string{"d"},
-			Usage:   "deletes tag rather than creates",
+			Name: "delete, d",
+			//Aliases: []string{"d"},
+			Usage: "deletes tag rather than creates",
 		},
 	},
 	Action: func(c *cli.Context) error {
@@ -46,6 +46,11 @@ var commandTagAccount = cli.Command{
 			}
 
 			r, err := client.DeleteTag(ctx, req)
+			if err != nil {
+				log.Fatalf("could not greet: %v", err)
+			}
+
+			log.Printf("Delete Tag Response: %s", r.GetMessage())
 		} else {
 			req := &pb.TagRequest{
 				Account:   c.Args().Get(0),
@@ -54,13 +59,16 @@ var commandTagAccount = cli.Command{
 			}
 
 			r, err := client.AddTag(ctx, req)
+			if err != nil {
+				log.Fatalf("could not greet: %v", err)
+			}
+
+			log.Printf("Create Tag Response: %s", r.GetMessage())
 		}
 
 		if err != nil {
 			log.Fatalf("could not greet: %v", err)
 		}
-
-		log.Printf("Version: %s", r.GetMessage())
 
 		return nil
 	},

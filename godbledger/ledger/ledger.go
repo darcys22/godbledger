@@ -64,13 +64,18 @@ func (l *Ledger) Insert(txn *core.Transaction) {
 }
 
 func (l *Ledger) Delete(txnID string) {
-	log.Info("Deleting Transaction: %s", txnID)
+	log.Infof("Deleting Transaction: %s", txnID)
 	l.ledgerDb.DeleteTransaction(txnID)
 }
 
 func (l *Ledger) InsertTag(account, tag string) error {
-	log.Info("Creating Tag %s on %s", tag, account)
+	log.Infof("Creating Tag %s on %s", tag, account)
 	return l.ledgerDb.SafeAddTagToAccount(account, tag)
+}
+
+func (l *Ledger) DeleteTag(account, tag string) error {
+	log.Infof("Deleting Tag %s from %s", tag, account)
+	return l.ledgerDb.DeleteTagFromAccount(account, tag)
 }
 
 func (l *Ledger) GetCurrencies(txn *core.Transaction) ([]*core.Currency, error) {

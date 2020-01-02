@@ -88,8 +88,7 @@ func (s *LedgerServer) AddTag(ctx context.Context, in *pb.TagRequest) (*pb.Trans
 
 func (s *LedgerServer) DeleteTag(ctx context.Context, in *pb.DeleteTagRequest) (*pb.TransactionResponse, error) {
 	log.Info("Received New Delete Request")
-	log.Debug("Not yet implemented")
-	//s.ld.DeleteTag(in.GetIdentifier())
+	s.ld.DeleteTag(in.GetAccount(), in.GetTag())
 
 	return &pb.TransactionResponse{Message: "Accepted"}, nil
 }

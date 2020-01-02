@@ -223,6 +223,28 @@ func (db *LedgerDB) AddTagToAccount(accountID string, tag int) error {
 
 }
 
+func (db *LedgerDB) DeleteTagFromAccount(account, tag string) error {
+
+	tagID, err := db.FindTag(tag)
+	if err != nil {
+		return err
+	}
+
+	sqlStatement := `
+	DELETE FROM account_tag
+	WHERE 
+		tag_id = $1
+	AND
+		account_id = $2
+	;`
+	_, err = db.DB.Exec(sqlStatement, tagID, account)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (db *LedgerDB) FindCurrency(cur string) (*core.Currency, error) {
 	var resp core.Currency
 	log.Info("Searching Currency in DB")
