@@ -140,11 +140,11 @@ var commandPDFGenerate = cli.Command{
 			panic(err)
 		}
 
-		//filename := "./src/financials.html"
-		filename := "./src/" + ctx.String("template") + ".html"
+		filename := "./src/financials.html"
 		//httpfile := "https://raw.githubusercontent.com/darcys22/pdf-generator/master/financials.html"
 		httpfile := "https://raw.githubusercontent.com/darcys22/pdf-generator/master/templates/" + ctx.String("template") + ".html"
 
+		log.Debugf("Downloading template: %s", httpfile)
 		if err := DownloadFile(filename, httpfile); err != nil {
 			panic(err)
 		}
