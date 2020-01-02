@@ -1,5 +1,5 @@
 ## Go DB Ledger
-Accounting system designed to have an easily accessable database
+An open source accounting system designed to have an easily accessable database and GRPC endpoints for communication.
 
 ## Executables
 

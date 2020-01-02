@@ -1,14 +1,14 @@
 package main
 
 import (
-	//"encoding/json"
+	"encoding/json"
 	"fmt"
 	"io"
-	//"io/ioutil"
+	"io/ioutil"
 	"net/http"
 	"os"
-	//"os/exec"
-	//"strings"
+	"os/exec"
+	"strings"
 
 	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
@@ -138,10 +138,6 @@ var commandPDFGenerate = cli.Command{
 		for k, v := range accounts {
 			reporteroutput.Data = append(reporteroutput.Data, Tag{k, totals[k], v})
 		}
-
-		//TODO remove static dummy data
-		reporteroutput.Profit = -1500
-		reporteroutput.NetAssets = 1500
 
 		dir := "src"
 

@@ -18,7 +18,13 @@ var commandTagAccount = cli.Command{
 	Description: `
 	Adds the tag specified in the second argument to the account specified in the first argument
 `,
-	Flags: []cli.Flag{},
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:    "delete",
+			Aliases: []string{"d"},
+			Usage:   "deletes tag rather than creates",
+		},
+	},
 	Action: func(c *cli.Context) error {
 
 		// Set up a connection to the server.
@@ -32,13 +38,24 @@ var commandTagAccount = cli.Command{
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
 
-		req := &pb.TagRequest{
-			Account:   c.Args().Get(0),
-			Tag:       c.Args().Get(1),
-			Signature: "blah",
+		if c.Bool("delete") {
+			req := &pb.DeleteTagRequest{
+				Account:   c.Args().Get(0),
+				Tag:       c.Args().Get(1),
+				Signature: "blah",
+			}
+
+			r, err := client.DeleteTag(ctx, req)
+		} else {
+			req := &pb.TagRequest{
+				Account:   c.Args().Get(0),
+				Tag:       c.Args().Get(1),
+				Signature: "blah",
+			}
+
+			r, err := client.AddTag(ctx, req)
 		}
 
-		r, err := client.AddTag(ctx, req)
 		if err != nil {
 			log.Fatalf("could not greet: %v", err)
 		}
