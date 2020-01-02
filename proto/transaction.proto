@@ -8,6 +8,7 @@ service Transactor {
   rpc DeleteTransaction(DeleteRequest) returns (TransactionResponse) {}
   rpc AddTag(TagRequest) returns (TransactionResponse) {}
   rpc DeleteTag(DeleteTagRequest) returns (TransactionResponse) {}
+  rpc GetTB(TBRequest) returns (TBResponse) {}
 }
 
 message LineItem {
@@ -42,6 +43,20 @@ message DeleteTagRequest {
     string account = 1;
     string tag = 2;
     string signature = 3;
+}
+
+message TBLine {
+  string accountname = 1;
+  repeated string tags = 2;
+  int64 amount = 3;
+}
+
+message TBRequest {
+    string date = 1;
+}
+
+message TBResponse {
+    repeated TBLine lines = 1;
 }
 
 message VersionRequest {
