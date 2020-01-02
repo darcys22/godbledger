@@ -45,31 +45,13 @@ var commandPDFGenerate = cli.Command{
 	Description: `
 `,
 	Flags: []cli.Flag{
-		csvFlag,
-		//cli.StringFlag{
-		//Name:  "privatekey",
-		//Usage: "file containing a raw private key to encrypt",
-		//},
+		cli.StringFlag{
+			Name:  "template, t",
+			Value: "profitandloss",
+			Usage: "The name of the html template to create a PDF of",
+		},
 	},
 	Action: func(ctx *cli.Context) error {
-
-		//reporteroutput.Data = append(reporteroutput.Data, Tag{"Income", -3000, []PDFAccount{
-		//PDFAccount{"Sales", -2800},
-		//PDFAccount{"Other Sales", -200},
-		//}})
-
-		//reporteroutput.Data = append(reporteroutput.Data, Tag{"Expenses", 1500, []PDFAccount{
-		//PDFAccount{"Depreciation", 1200},
-		//PDFAccount{"R&D", 200},
-		//PDFAccount{"Operations", 100},
-		//}})
-
-		//reporteroutput.Data = append(reporteroutput.Data, Tag{"Assets", 1500, []PDFAccount{
-		//PDFAccount{"Cash", 1500},
-		//}})
-
-		//reporteroutput.Profit = -1500
-		//reporteroutput.NetAssets = 1500
 
 		//Check if keyfile path given and make sure it doesn't already exist.
 		err, cfg := cmd.MakeConfig(ctx)
@@ -154,11 +136,16 @@ var commandPDFGenerate = cli.Command{
 			panic(err)
 		}
 
-		if err := DownloadFile("./src/financials.html", "https://raw.githubusercontent.com/darcys22/pdf-generator/master/financials.html"); err != nil {
+		if err := DownloadFile("./src/pdfgenerator.js", "https://raw.githubusercontent.com/darcys22/pdf-generator/master/pdfgenerator.js"); err != nil {
 			panic(err)
 		}
 
-		if err := DownloadFile("./src/pdfgenerator.js", "https://raw.githubusercontent.com/darcys22/pdf-generator/master/pdfgenerator.js"); err != nil {
+		//filename := "./src/financials.html"
+		filename := "./src/" + ctx.String("template") + ".html"
+		//httpfile := "https://raw.githubusercontent.com/darcys22/pdf-generator/master/financials.html"
+		httpfile := "https://raw.githubusercontent.com/darcys22/pdf-generator/master/templates/" + ctx.String("template") + ".html"
+
+		if err := DownloadFile(filename, httpfile); err != nil {
 			panic(err)
 		}
 
@@ -170,7 +157,7 @@ var commandPDFGenerate = cli.Command{
 		cmd.Run()
 
 		//Restructure and Cleanup
-		err = os.Rename("src/mypdf.pdf", "financials.pdf")
+		err = os.Rename("src/mypdf.pdf", ctx.String("template")+".pdf")
 		if err != nil {
 			panic(err)
 		}

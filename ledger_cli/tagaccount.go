@@ -20,8 +20,7 @@ var commandTagAccount = cli.Command{
 `,
 	Flags: []cli.Flag{
 		&cli.BoolFlag{
-			Name: "delete, d",
-			//Aliases: []string{"d"},
+			Name:  "delete, d",
 			Usage: "deletes tag rather than creates",
 		},
 	},
