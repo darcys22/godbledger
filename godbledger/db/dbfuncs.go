@@ -116,7 +116,7 @@ func (db *LedgerDB) FindTag(tag string) (int, error) {
 	log.Info("Searching Tag in DB")
 	err := db.DB.QueryRow(`SELECT tag_id FROM tags WHERE tag_name = $1 LIMIT 1`, tag).Scan(&resp)
 	if err != nil {
-		log.Debug(err)
+		log.Debug("Find Tag Failed: ", err)
 		return 0, err
 	}
 	return resp, nil
@@ -152,7 +152,7 @@ func (db *LedgerDB) AddTag(tag string) error {
 }
 
 func (db *LedgerDB) SafeAddTag(tag string) error {
-	u, _ := db.FindTag(tag)
+	u, _ := db.FindTag(strings.TrimSpace(tag))
 	//if err != nil {
 	//log.Debug(err)
 	//return err
@@ -160,7 +160,7 @@ func (db *LedgerDB) SafeAddTag(tag string) error {
 	if u != 0 {
 		return nil
 	}
-	return db.AddTag(tag)
+	return db.AddTag(strings.TrimSpace(tag))
 }
 
 func (db *LedgerDB) SafeAddTagToAccount(account, tag string) error {
@@ -311,7 +311,7 @@ func (db *LedgerDB) AddAccount(acc *core.Account) error {
 	tx, _ := db.DB.Begin()
 	stmt, _ := tx.Prepare(insertAccount)
 	log.Debug("Query: " + insertAccount)
-	res, err := stmt.Exec(acc.Code, acc.Name)
+	res, err := stmt.Exec(strings.TrimSpace(acc.Code), strings.TrimSpace(acc.Name))
 	if err != nil {
 		log.Fatal(err)
 	}

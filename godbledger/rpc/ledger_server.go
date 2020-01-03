@@ -92,3 +92,10 @@ func (s *LedgerServer) DeleteTag(ctx context.Context, in *pb.DeleteTagRequest) (
 
 	return &pb.TransactionResponse{Message: "Accepted"}, nil
 }
+
+func (s *LedgerServer) GetTB(ctx context.Context, in *pb.TBRequest) (*pb.TBResponse, error) {
+	log.Info("Received New TB Request")
+	//s.ld.DeleteTag(in.GetAccount(), in.GetTag())
+
+	return &pb.TBResponse{}, nil
+}
