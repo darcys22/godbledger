@@ -1,4 +1,4 @@
-package db
+package sqlite3db
 
 import (
 	"database/sql"
@@ -12,18 +12,18 @@ import (
 
 var log = logrus.WithField("prefix", "SQLLite ledgerdb")
 
-type LedgerDB struct {
+type Database struct {
 	DB           *sql.DB
 	DatabasePath string
 }
 
 // Close closes the underlying database.
-func (db *LedgerDB) Close() error {
+func (db *Database) Close() error {
 	return db.DB.Close()
 }
 
 // NewDB initializes a new DB.
-func NewDB(dirPath string) (*LedgerDB, error) {
+func NewDB(dirPath string) (*Database, error) {
 	log.Info("Creating DB")
 	if err := os.MkdirAll(dirPath, 0700); err != nil {
 		return nil, err
@@ -34,13 +34,13 @@ func NewDB(dirPath string) (*LedgerDB, error) {
 		return nil, err
 	}
 
-	db := &LedgerDB{DB: SqliteDB, DatabasePath: dirPath}
+	db := &Database{DB: SqliteDB, DatabasePath: dirPath}
 
 	return db, err
 
 }
 
-func (db *LedgerDB) InitDB() error {
+func (db *Database) InitDB() error {
 	log.Info("Initialising DB Table")
 
 	//USERS

@@ -6,6 +6,7 @@ import (
 	"github.com/darcys22/godbledger/godbledger/cmd"
 	"github.com/darcys22/godbledger/godbledger/core"
 	"github.com/darcys22/godbledger/godbledger/db"
+	"github.com/darcys22/godbledger/godbledger/db/sqlite3"
 
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -16,33 +17,43 @@ const ledgerDBName = "ledgerdata"
 var log = logrus.WithField("prefix", "ledger")
 
 type Ledger struct {
-	ledgerDb *db.LedgerDB
+	ledgerDb db.Database
 	config   *cmd.LedgerConfig
 }
 
 func New(ctx *cli.Context, cfg *cmd.LedgerConfig) (*Ledger, error) {
-	dbPath := path.Join(cfg.DataDirectory, ledgerDBName)
-	log.WithField("path", dbPath).Info("Checking db path")
-	if ctx.GlobalBool(cmd.ClearDB.Name) {
-		if err := db.ClearDB(dbPath); err != nil {
-			return nil, err
-		}
-	}
-
-	ledgerDb, err := db.NewDB(dbPath)
-	if err != nil {
-		return nil, err
-	}
-
-	if err != nil {
-		return nil, err
-	}
-	log.Info("Initialised database configuration")
 
 	ledger := &Ledger{
-		ledgerDb: ledgerDb,
-		config:   cfg,
+		config: cfg,
 	}
+
+	switch cfg.DatabaseType {
+	case "sqlite3":
+
+		log.Info("Using Sqlite3")
+		dbPath := path.Join(cfg.DataDirectory, ledgerDBName)
+		log.WithField("path", dbPath).Info("Checking db path")
+		if ctx.Bool(cmd.ClearDB.Name) {
+			if err := sqlite3db.ClearDB(dbPath); err != nil {
+				return nil, err
+			}
+		}
+		ledgerdb, err := sqlite3db.NewDB(dbPath)
+		ledger.ledgerDb = ledgerdb
+		if err != nil {
+			return nil, err
+		}
+	case "mysql":
+		log.Info("Using MySQL")
+		log.Fatal("MySQL not implemented")
+	case "memorydb":
+		log.Info("Using in memory database")
+		log.Fatal("In memory database not implemented")
+	default:
+		log.Println("No implementation available for that database.")
+	}
+
+	log.Info("Initialised database configuration")
 
 	return ledger, nil
 }

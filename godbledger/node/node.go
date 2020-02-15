@@ -21,7 +21,7 @@ type Node struct {
 	lock     sync.RWMutex
 	services *core.ServiceRegistry
 	stop     chan struct{} // Channel to wait for termination notifications.
-	DB       *db.LedgerDB
+	DB       *db.Database
 }
 
 func New(ctx *cli.Context) (*Node, error) {

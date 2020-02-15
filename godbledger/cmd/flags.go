@@ -43,13 +43,11 @@ var (
 	VerbosityFlag = cli.StringFlag{
 		Name:  "verbosity",
 		Usage: "Logging verbosity (debug, info=default, warn, error, fatal, panic)",
-		//Value: "debug",
 	}
 	// DataDirFlag defines a path on disk.
 	DataDirFlag = cli.StringFlag{
 		Name:  "datadir",
 		Usage: "Data directory for the databases and keystore",
-		//Value: DefaultDataDir(),
 	}
 	// ClearDB tells the node to remove any previously stored data at the data directory.
 	ClearDB = cli.BoolFlag{
@@ -64,13 +62,13 @@ var (
 
 func setConfig(ctx *cli.Context, cfg *LedgerConfig) {
 
-	if ctx.GlobalIsSet(VerbosityFlag.Name) {
+	if ctx.IsSet(VerbosityFlag.Name) {
 		cfg.LogVerbosity = ctx.String(VerbosityFlag.Name)
 	}
-	if ctx.GlobalIsSet(ConfigFileFlag.Name) {
+	if ctx.IsSet(ConfigFileFlag.Name) {
 		cfg.ConfigFile = ctx.String(ConfigFileFlag.Name)
 	}
-	if ctx.GlobalIsSet(DataDirFlag.Name) {
+	if ctx.IsSet(DataDirFlag.Name) {
 		cfg.ConfigFile = ctx.String(DataDirFlag.Name)
 	}
 }

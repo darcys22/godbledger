@@ -1,4 +1,4 @@
-package db
+package sqlite3db
 
 import (
 	"strconv"
@@ -10,7 +10,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func (db *LedgerDB) AddTransaction(txn *core.Transaction) error {
+func (db *Database) AddTransaction(txn *core.Transaction) error {
 	log.Info("Adding Transaction to DB")
 	insertTransaction := `
 		INSERT INTO transactions(transaction_id, postdate, brief)
@@ -98,7 +98,7 @@ func (db *LedgerDB) AddTransaction(txn *core.Transaction) error {
 	return err
 }
 
-func (db *LedgerDB) DeleteTransaction(txnID string) error {
+func (db *Database) DeleteTransaction(txnID string) error {
 
 	sqlStatement := `
 	DELETE FROM transactions
@@ -111,7 +111,7 @@ func (db *LedgerDB) DeleteTransaction(txnID string) error {
 	return nil
 }
 
-func (db *LedgerDB) FindTag(tag string) (int, error) {
+func (db *Database) FindTag(tag string) (int, error) {
 	var resp int
 	log.Info("Searching Tag in DB")
 	err := db.DB.QueryRow(`SELECT tag_id FROM tags WHERE tag_name = $1 LIMIT 1`, tag).Scan(&resp)
@@ -122,7 +122,7 @@ func (db *LedgerDB) FindTag(tag string) (int, error) {
 	return resp, nil
 }
 
-func (db *LedgerDB) AddTag(tag string) error {
+func (db *Database) AddTag(tag string) error {
 	log.Info("Adding Tag to DB")
 	insertTag := `
 		INSERT INTO tags(tag_name)
@@ -151,7 +151,7 @@ func (db *LedgerDB) AddTag(tag string) error {
 	return nil
 }
 
-func (db *LedgerDB) SafeAddTag(tag string) error {
+func (db *Database) SafeAddTag(tag string) error {
 	u, _ := db.FindTag(strings.TrimSpace(tag))
 	//if err != nil {
 	//log.Debug(err)
@@ -163,7 +163,7 @@ func (db *LedgerDB) SafeAddTag(tag string) error {
 	return db.AddTag(strings.TrimSpace(tag))
 }
 
-func (db *LedgerDB) SafeAddTagToAccount(account, tag string) error {
+func (db *Database) SafeAddTagToAccount(account, tag string) error {
 	err := db.SafeAddTag(tag)
 	if err != nil {
 		log.Debug(err)
@@ -181,7 +181,7 @@ func (db *LedgerDB) SafeAddTagToAccount(account, tag string) error {
 	return db.AddTagToAccount(accountID, tagID)
 }
 
-func (db *LedgerDB) AddTagToAccount(accountID string, tag int) error {
+func (db *Database) AddTagToAccount(accountID string, tag int) error {
 	var exists int
 	err := db.DB.QueryRow(`SELECT EXISTS(SELECT * FROM account_tag where (account_id = $1) AND (tag_id = $2));`, accountID, tag).Scan(&exists)
 	if err != nil {
@@ -223,7 +223,7 @@ func (db *LedgerDB) AddTagToAccount(accountID string, tag int) error {
 
 }
 
-func (db *LedgerDB) DeleteTagFromAccount(account, tag string) error {
+func (db *Database) DeleteTagFromAccount(account, tag string) error {
 
 	tagID, err := db.FindTag(tag)
 	if err != nil {
@@ -245,7 +245,7 @@ func (db *LedgerDB) DeleteTagFromAccount(account, tag string) error {
 	return nil
 }
 
-func (db *LedgerDB) FindCurrency(cur string) (*core.Currency, error) {
+func (db *Database) FindCurrency(cur string) (*core.Currency, error) {
 	var resp core.Currency
 	log.Info("Searching Currency in DB")
 	err := db.DB.QueryRow(`SELECT * FROM currencies WHERE name = $1 LIMIT 1`, cur).Scan(&resp.Name, &resp.Decimals)
@@ -255,7 +255,7 @@ func (db *LedgerDB) FindCurrency(cur string) (*core.Currency, error) {
 	return &resp, nil
 }
 
-func (db *LedgerDB) AddCurrency(cur *core.Currency) error {
+func (db *Database) AddCurrency(cur *core.Currency) error {
 	log.Info("Adding Currency to DB")
 	insertCurrency := `
 		INSERT INTO currencies(name,decimals)
@@ -284,7 +284,7 @@ func (db *LedgerDB) AddCurrency(cur *core.Currency) error {
 	return err
 }
 
-func (db *LedgerDB) SafeAddCurrency(cur *core.Currency) error {
+func (db *Database) SafeAddCurrency(cur *core.Currency) error {
 	u, _ := db.FindCurrency(cur.Name)
 	if u != nil {
 		return nil
@@ -292,7 +292,7 @@ func (db *LedgerDB) SafeAddCurrency(cur *core.Currency) error {
 	return db.AddCurrency(cur)
 }
 
-func (db *LedgerDB) FindAccount(code string) (*core.Account, error) {
+func (db *Database) FindAccount(code string) (*core.Account, error) {
 	var resp core.Account
 	log.Info("Searching Account in DB")
 	err := db.DB.QueryRow(`SELECT * FROM accounts WHERE account_id = $1 LIMIT 1`, code).Scan(&resp.Code, &resp.Name)
@@ -302,7 +302,7 @@ func (db *LedgerDB) FindAccount(code string) (*core.Account, error) {
 	return &resp, nil
 }
 
-func (db *LedgerDB) AddAccount(acc *core.Account) error {
+func (db *Database) AddAccount(acc *core.Account) error {
 	log.Info("Adding Account to DB")
 	insertAccount := `
 		INSERT INTO accounts(account_id, name)
@@ -331,7 +331,7 @@ func (db *LedgerDB) AddAccount(acc *core.Account) error {
 	return err
 }
 
-func (db *LedgerDB) SafeAddAccount(acc *core.Account) error {
+func (db *Database) SafeAddAccount(acc *core.Account) error {
 	u, _ := db.FindAccount(acc.Code)
 	if u != nil {
 		return nil
@@ -340,7 +340,7 @@ func (db *LedgerDB) SafeAddAccount(acc *core.Account) error {
 
 }
 
-func (db *LedgerDB) FindUser(pubKey string) (*core.User, error) {
+func (db *Database) FindUser(pubKey string) (*core.User, error) {
 	var resp core.User
 	log.Info("Searching User in DB")
 	err := db.DB.QueryRow(`SELECT * FROM users WHERE username = $1 LIMIT 1`, pubKey).Scan(&resp.Id, &resp.Name)
@@ -350,7 +350,7 @@ func (db *LedgerDB) FindUser(pubKey string) (*core.User, error) {
 	return &resp, nil
 }
 
-func (db *LedgerDB) AddUser(usr *core.User) error {
+func (db *Database) AddUser(usr *core.User) error {
 	log.Info("Adding User to DB")
 	insertUser := `
 		INSERT INTO users(user_id, username)
@@ -379,7 +379,7 @@ func (db *LedgerDB) AddUser(usr *core.User) error {
 	return err
 }
 
-func (db *LedgerDB) SafeAddUser(usr *core.User) error {
+func (db *Database) SafeAddUser(usr *core.User) error {
 	u, _ := db.FindUser(usr.Name)
 	if u != nil {
 		return nil
@@ -388,7 +388,7 @@ func (db *LedgerDB) SafeAddUser(usr *core.User) error {
 
 }
 
-func (db *LedgerDB) TestDB() error {
+func (db *Database) TestDB() error {
 	log.Info("Testing DB")
 	createDB := "create table if not exists pages (title text, body blob, timestamp text)"
 	log.Debug("Query: " + createDB)
