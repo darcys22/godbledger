@@ -19,6 +19,9 @@ import (
 
 func startNode(ctx *cli.Context) error {
 	err, cfg := cmd.MakeConfig(ctx)
+	if err != nil {
+		return err
+	}
 
 	fullnode, err := node.New(ctx)
 	if err != nil {
@@ -42,9 +45,10 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "Godbledger"
 	app.Usage = "Accounting Ledger Database Server"
+	app.EnableBashCompletion = true
 	app.Action = startNode
 	app.Version = version.Version
-	app.Commands = []cli.Command{
+	app.Commands = []*cli.Command{
 		// See config.go
 		cmd.DumpConfigCommand,
 	}

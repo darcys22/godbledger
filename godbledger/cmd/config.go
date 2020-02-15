@@ -4,6 +4,7 @@ import (
 	"bytes"
 	//"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/BurntSushi/toml"
 	"github.com/urfave/cli"
@@ -23,7 +24,7 @@ type LedgerConfig struct {
 }
 
 var (
-	DumpConfigCommand = cli.Command{
+	DumpConfigCommand = &cli.Command{
 		Action:      dumpConfig,
 		Name:        "dumpconfig",
 		Usage:       "Show configuration values",
@@ -53,13 +54,18 @@ func MakeConfig(cli *cli.Context) (error, *LedgerConfig) {
 		return err, nil
 	}
 	logrus.SetLevel(level)
-	fileName := config.ConfigFile
 	if len(cli.String("config")) > 0 {
-		fileName = cli.String("config")
+		config.ConfigFile = cli.String("config")
 	}
 
-	log.Debugf("Filepath to config file: %s", fileName)
-	if _, err := toml.DecodeFile(fileName, &config); err != nil {
+	log.Debugf("Filepath to config file: %s", config.ConfigFile)
+	err = InitConfig(config)
+	if err != nil {
+		log.Debugf("Error initialising config: %s", err)
+		return err, nil
+	}
+
+	if _, err := toml.DecodeFile(config.ConfigFile, &config); err != nil {
 		log.Debugf("Error decoding config file: %s", err)
 		return err, nil
 	}
@@ -75,15 +81,14 @@ func MakeConfig(cli *cli.Context) (error, *LedgerConfig) {
 	}
 	logrus.SetLevel(level)
 
-	log.Debugf("Config set successfully")
 	return nil, config
 }
 
-func InitConfig() error {
-	config := defaultLedgerConfig
+func InitConfig(config *LedgerConfig) error {
 	_, err := os.Stat(config.ConfigFile)
 	if os.IsNotExist(err) {
 		log.Infof("Config File doesn't exist creating at %s", config.ConfigFile)
+		os.MkdirAll(filepath.Dir(config.ConfigFile), os.ModePerm)
 		buf := new(bytes.Buffer)
 		if err := toml.NewEncoder(buf).Encode(config); err != nil {
 			return err

@@ -40,21 +40,21 @@ func DefaultDataDir() string {
 
 var (
 	// VerbosityFlag defines the logrus configuration.
-	VerbosityFlag = cli.StringFlag{
+	VerbosityFlag = &cli.StringFlag{
 		Name:  "verbosity",
 		Usage: "Logging verbosity (debug, info=default, warn, error, fatal, panic)",
 	}
 	// DataDirFlag defines a path on disk.
-	DataDirFlag = cli.StringFlag{
+	DataDirFlag = &cli.StringFlag{
 		Name:  "datadir",
 		Usage: "Data directory for the databases and keystore",
 	}
 	// ClearDB tells the node to remove any previously stored data at the data directory.
-	ClearDB = cli.BoolFlag{
+	ClearDB = &cli.BoolFlag{
 		Name:  "clear-db",
 		Usage: "Clears any previously stored data at the data directory",
 	}
-	ConfigFileFlag = cli.StringFlag{
+	ConfigFileFlag = &cli.StringFlag{
 		Name:  "config",
 		Usage: "TOML configuration file",
 	}
