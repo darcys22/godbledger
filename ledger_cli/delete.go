@@ -11,7 +11,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-var commandDeleteTransaction = cli.Command{
+var commandDeleteTransaction = &cli.Command{
 	Name:      "delete",
 	Usage:     "deletes a single transaction",
 	ArgsUsage: "[]",

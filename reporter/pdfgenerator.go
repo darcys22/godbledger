@@ -38,14 +38,14 @@ var reporteroutput struct {
 	NetAssets int   `json:"NetAssets"`
 }
 
-var commandPDFGenerate = cli.Command{
+var commandPDFGenerate = &cli.Command{
 	Name:      "pdf",
 	Usage:     "Creates a PDF of the Financials",
 	ArgsUsage: "[]",
 	Description: `
 `,
 	Flags: []cli.Flag{
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "template, t",
 			Value: "profitandloss",
 			Usage: "The name of the html template to create a PDF of",

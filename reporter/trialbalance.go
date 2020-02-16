@@ -23,7 +23,7 @@ var tboutput struct {
 	Data []Account `json:"data"`
 }
 
-var commandTrialBalance = cli.Command{
+var commandTrialBalance = &cli.Command{
 	Name:      "trialbalance",
 	Usage:     "List all Transactions in the Database",
 	ArgsUsage: "[]",

@@ -12,7 +12,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-var commandSingleTestTransaction = cli.Command{
+var commandSingleTestTransaction = &cli.Command{
 	Name:      "single",
 	Usage:     "submits a single transaction",
 	ArgsUsage: "[]",

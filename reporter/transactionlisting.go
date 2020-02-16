@@ -27,7 +27,7 @@ var output struct {
 	Data []Transaction `json:"data"`
 }
 
-var commandTransactionListing = cli.Command{
+var commandTransactionListing = &cli.Command{
 	Name:      "transactions",
 	Usage:     "List all Transactions in the Database",
 	ArgsUsage: "[]",

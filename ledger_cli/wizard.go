@@ -12,7 +12,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-var commandWizardJournal = cli.Command{
+var commandWizardJournal = &cli.Command{
 	Name:      "journal",
 	Usage:     "creates and submits a single transaction",
 	ArgsUsage: "[]",

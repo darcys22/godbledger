@@ -21,9 +21,12 @@ func init() {
 	app = cli.NewApp()
 	app.Name = "Reporter"
 	app.Usage = "Extracts GL and TB reports from a Godbledger database"
-	app.Commands = []cli.Command{
+	app.Commands = []*cli.Command{
+		// transactionlisting.go
 		commandTransactionListing,
+		// trialbalance.go
 		commandTrialBalance,
+		// pdfgenerator.go
 		commandPDFGenerate,
 	}
 	app.Action = reporterConsole
@@ -31,11 +34,11 @@ func init() {
 
 // Commonly used command line flags.
 var (
-	csvFlag = cli.StringFlag{
+	csvFlag = &cli.StringFlag{
 		Name:  "csv",
 		Usage: "output CSV instead of human-readable format",
 	}
-	jsonFlag = cli.StringFlag{
+	jsonFlag = &cli.StringFlag{
 		Name:  "json",
 		Usage: "output json instead of human-readable format",
 	}

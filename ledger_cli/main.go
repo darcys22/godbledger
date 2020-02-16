@@ -35,11 +35,16 @@ func init() {
 	app = cli.NewApp()
 	app.Name = "Ledger CLI"
 	app.Usage = "Command Line for GoDBLedger gRPC"
-	app.Commands = []cli.Command{
+	app.Commands = []*cli.Command{
+		// file.go
 		commandFile,
+		// transaction.go
 		commandSingleTestTransaction,
+		// delete.go
 		commandDeleteTransaction,
+		// wizard.go
 		commandWizardJournal,
+		// tagaccount.go
 		commandTagAccount,
 	}
 	//app.Action = transaction

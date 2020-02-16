@@ -11,7 +11,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-var commandTagAccount = cli.Command{
+var commandTagAccount = &cli.Command{
 	Name:      "tag",
 	Usage:     "ledger_cli tag <account> <tag>",
 	ArgsUsage: "[]",

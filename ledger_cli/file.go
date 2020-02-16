@@ -15,7 +15,7 @@ const (
 	displayPrecision      = 2
 )
 
-var commandFile = cli.Command{
+var commandFile = &cli.Command{
 	Name:      "file",
 	Usage:     "Reads a ledger file",
 	ArgsUsage: "[]",
