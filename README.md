@@ -24,8 +24,16 @@ An [example project](https://github.com/darcys22/Trading-Simulator) has been dev
 **Reporter**
 The general usage of Godbledger is not to provide information but to simply guide transactions to be recorded in a consistent manner in the database. To actually view your financial information we should query the database directly. Reporter has two SQL queries in built (Transaction Listing, and Trial Balance) that will be formatted in a table/json/csv for your viewing.
 
+```
+reporter trialbalance
+```
+
 **PDF Financial Statements**
 Reporter also has a function to generate pdf financial reports. Two templates for Profit and Loss and Balance sheet have been provided.
+
+```
+reporter pdf -template profitandloss
+```
 
 The PDF files are generated from [handlebars](https://handlebarsjs.com/) iterating over the tagged accounts. This is compiled into PDF using nodejs.
 
