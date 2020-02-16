@@ -4,7 +4,7 @@ An open source accounting system designed to have an easily accessable database 
 ## Executables
 
 | Command         | Description                                                                                             |
-|-----------------|---------------------------------------------------------------------------------------------------------| | **`Godbledger`**    | The main server. It is the access point for transactions that will be saved to the accounting database. |
+|:-----------------|---------------------------------------------------------------------------------------------------------:| | **`Godbledger`**    | The main server. It is the access point for transactions that will be saved to the accounting database. |
 | `Ledgercli`     | A CLI client that can be used to transmit transactions to the server.                             |
 | `Reporter`      | Builds basic reports from the database on the command line.                                             |
 
