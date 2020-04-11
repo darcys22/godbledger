@@ -25,4 +25,5 @@ type Database interface {
 	FindUser(pubKey string) (*core.User, error)
 	AddUser(usr *core.User) error
 	SafeAddUser(usr *core.User) error
+	GetTB(date time.Time) error
 }

@@ -14,7 +14,9 @@ An open source accounting system designed to have an easily accessable database 
 **GRPC and Proto Buffers**
 The primary way to communicate with Godbledger is through the GRPC endpoint, submitting a transaction that contains your journal entry/transaction.
 
-**Ledgercli** communicates with Godbledger using GRPC but opens up several cli commands for usage
+a python client with example calls can be found [here](https://github.com/darcys22/godbledger-pythonclient)
+
+**Ledgercli** included with this repo communicates with Godbledger using GRPC but opens up several cli commands for usage
 
 **Ledger files** the ledgercli allows for the processing of [ledger files](https://www.ledger-cli.org/). This has been roughly implemented by forking https://github.com/howeyc/ledger
 
@@ -37,7 +39,7 @@ reporter pdf -template profitandloss
 
 The PDF files are generated from [handlebars](https://handlebarsjs.com/) iterating over the tagged accounts. This is compiled into PDF using nodejs.
 
-templates can be viewed [here](https://github.com/darcys22/pdf-generator)
+Templates can be viewed [here](https://github.com/darcys22/pdf-generator)
 
 ### Database and configuration
 
@@ -70,6 +72,8 @@ SELECT * FROM accounts where account_id in (select account_id from account_tag w
 ```
 
 ### TODO
-- Add a call that returns the trial balance with all the tags on each account
-- Create another server that monitors the system and updates programmable entries
+- Create Yurnell - programmable journal entries
 - Add an edit transaction function
+- Add MySQL as a database
+- test releases from scratch 
+- run GoDBLedger on a separate server and access the open port through the network

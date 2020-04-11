@@ -135,6 +135,12 @@ func (l *Ledger) GetAccounts(txn *core.Transaction) ([]*core.Account, error) {
 	return accounts, nil
 }
 
+func (l *Ledger) GetTB(date time.Time) (int, error) {
+	accounts := []*core.Account{}
+
+	return 1, nil
+}
+
 func (l *Ledger) Start() {
 	l.ledgerDb.InitDB()
 }

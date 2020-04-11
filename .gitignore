@@ -22,3 +22,6 @@ yarn-error.log
 
 # Ignore password file
 password.txt 
+
+# Ignore Build
+build
