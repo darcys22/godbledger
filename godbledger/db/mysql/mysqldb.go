@@ -8,7 +8,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-var log = logrus.WithField("prefix", "MySQL ledgerdb")
+var log = logrus.WithField("prefix", "MySQL")
 
 type Database struct {
 	DB               *sql.DB
@@ -22,6 +22,7 @@ func (db *Database) Close() error {
 
 func DSN(DB_USER, DB_PASS, DB_HOST, DB_NAME string) string {
 	return DB_USER + ":" + DB_PASS + "@" + DB_HOST + "/" + DB_NAME + "?charset=utf8"
+	//return DB_USER + ":" + DB_PASS + "@" + DB_HOST + "/"
 }
 
 // NewDB initializes a new DB.
@@ -33,8 +34,9 @@ func NewDB(connection_string string) (*Database, error) {
 	DB_PASS := "password"
 	connection_string = DSN(DB_USER, DB_PASS, DB_HOST, DB_NAME)
 	//}
-	MySQLDB, err := sql.Open("sqlite3", connection_string)
+	MySQLDB, err := sql.Open("mysql", connection_string)
 	if err != nil {
+		log.Fatal(err.Error)
 		return nil, err
 	}
 

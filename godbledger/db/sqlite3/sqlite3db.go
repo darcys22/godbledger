@@ -10,7 +10,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var log = logrus.WithField("prefix", "SQLLite ledgerdb")
+var log = logrus.WithField("prefix", "SQLLite")
 
 type Database struct {
 	DB           *sql.DB
