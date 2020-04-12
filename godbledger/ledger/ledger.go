@@ -2,10 +2,13 @@ package ledger
 
 import (
 	"path"
+	"strings"
+	"time"
 
 	"github.com/darcys22/godbledger/godbledger/cmd"
 	"github.com/darcys22/godbledger/godbledger/core"
 	"github.com/darcys22/godbledger/godbledger/db"
+	"github.com/darcys22/godbledger/godbledger/db/mysql"
 	"github.com/darcys22/godbledger/godbledger/db/sqlite3"
 
 	"github.com/sirupsen/logrus"
@@ -27,7 +30,7 @@ func New(ctx *cli.Context, cfg *cmd.LedgerConfig) (*Ledger, error) {
 		config: cfg,
 	}
 
-	switch cfg.DatabaseType {
+	switch strings.ToLower(cfg.DatabaseType) {
 	case "sqlite3":
 
 		log.Info("Using Sqlite3")
@@ -45,7 +48,16 @@ func New(ctx *cli.Context, cfg *cmd.LedgerConfig) (*Ledger, error) {
 		}
 	case "mysql":
 		log.Info("Using MySQL")
-		log.Fatal("MySQL not implemented")
+		ledgerdb, err := mysqldb.NewDB(ledgerDBName)
+		//if ctx.Bool(cmd.ClearDB.Name) {
+		//if err := ledgerdb.ClearDB(ledgerDBName); err != nil {
+		//return nil, err
+		//}
+		//}
+		ledger.ledgerDb = ledgerdb
+		if err != nil {
+			return nil, err
+		}
 	case "memorydb":
 		log.Info("Using in memory database")
 		log.Fatal("In memory database not implemented")
@@ -136,7 +148,7 @@ func (l *Ledger) GetAccounts(txn *core.Transaction) ([]*core.Account, error) {
 }
 
 func (l *Ledger) GetTB(date time.Time) (int, error) {
-	accounts := []*core.Account{}
+	//accounts := []*core.Account{}
 
 	return 1, nil
 }

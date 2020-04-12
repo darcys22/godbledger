@@ -2,8 +2,6 @@ package mysqldb
 
 import (
 	"database/sql"
-	"os"
-	"path"
 
 	"github.com/sirupsen/logrus"
 
@@ -13,11 +11,8 @@ import (
 var log = logrus.WithField("prefix", "MySQL ledgerdb")
 
 type Database struct {
-	DB      *sql.DB
-	DB_HOST string
-	DB_NAME string
-	DB_USER string
-	DB_PASS string
+	DB               *sql.DB
+	ConnectionString string
 }
 
 // Close closes the underlying database.
@@ -25,23 +20,25 @@ func (db *Database) Close() error {
 	return db.DB.Close()
 }
 
-func DSN(DB_USER, DB_PASS, DB_HOST, DB_NAME) string {
+func DSN(DB_USER, DB_PASS, DB_HOST, DB_NAME string) string {
 	return DB_USER + ":" + DB_PASS + "@" + DB_HOST + "/" + DB_NAME + "?charset=utf8"
 }
 
 // NewDB initializes a new DB.
-func NewDB(dirPath string) (*Database, error) {
+func NewDB(connection_string string) (*Database, error) {
+	//if connection_string == "" {
 	DB_HOST := "tcp(127.0.0.1:3306)"
 	DB_NAME := "ledger"
-	DB_USER := "root"
-	DB_PASS := ""
-	dsb := (DB_HOST, DB_NAME, DB_USER, DB_PASS)
-	MySQLDB, err := sql.Open("sqlite3", dsb)
+	DB_USER := "godbledger"
+	DB_PASS := "password"
+	connection_string = DSN(DB_USER, DB_PASS, DB_HOST, DB_NAME)
+	//}
+	MySQLDB, err := sql.Open("sqlite3", connection_string)
 	if err != nil {
 		return nil, err
 	}
 
-	db := &Database{DB: MySQLDB, DB_HOST: DB_HOST, DB_NAME: DB_NAME, DB_USER: DB_USER, DB_PASS: DB_PASS}
+	db := &Database{DB: MySQLDB, ConnectionString: connection_string}
 
 	return db, nil
 }
