@@ -102,7 +102,7 @@ func (db *Database) DeleteTransaction(txnID string) error {
 
 	sqlStatement := `
 	DELETE FROM transactions
-	WHERE transaction_id = $1;`
+	WHERE transaction_id = ?;`
 	_, err := db.DB.Exec(sqlStatement, txnID)
 	if err != nil {
 		return err
@@ -114,7 +114,7 @@ func (db *Database) DeleteTransaction(txnID string) error {
 func (db *Database) FindTag(tag string) (int, error) {
 	var resp int
 	log.Info("Searching Tag in DB")
-	err := db.DB.QueryRow(`SELECT tag_id FROM tags WHERE tag_name = $1 LIMIT 1`, tag).Scan(&resp)
+	err := db.DB.QueryRow(`SELECT tag_id FROM tags WHERE tag_name = ? LIMIT 1`, tag).Scan(&resp)
 	if err != nil {
 		log.Debug("Find Tag Failed: ", err)
 		return 0, err
@@ -172,7 +172,7 @@ func (db *Database) SafeAddTagToAccount(account, tag string) error {
 	tagID, _ := db.FindTag(tag)
 
 	var accountID string
-	err = db.DB.QueryRow(`SELECT account_id FROM accounts WHERE name = $1 LIMIT 1`, account).Scan(&accountID)
+	err = db.DB.QueryRow(`SELECT account_id FROM accounts WHERE name = ? LIMIT 1`, account).Scan(&accountID)
 	if err != nil {
 		log.Debug(err)
 		return err
@@ -183,7 +183,7 @@ func (db *Database) SafeAddTagToAccount(account, tag string) error {
 
 func (db *Database) AddTagToAccount(accountID string, tag int) error {
 	var exists int
-	err := db.DB.QueryRow(`SELECT EXISTS(SELECT * FROM account_tag where (account_id = $1) AND (tag_id = $2));`, accountID, tag).Scan(&exists)
+	err := db.DB.QueryRow(`SELECT EXISTS(SELECT * FROM account_tag where (account_id = ?) AND (tag_id = ?));`, accountID, tag).Scan(&exists)
 	if err != nil {
 		log.Debug(err)
 		return err
@@ -233,9 +233,9 @@ func (db *Database) DeleteTagFromAccount(account, tag string) error {
 	sqlStatement := `
 	DELETE FROM account_tag
 	WHERE 
-		tag_id = $1
+		tag_id = ?
 	AND
-		account_id = $2
+		account_id = ?
 	;`
 	_, err = db.DB.Exec(sqlStatement, tagID, account)
 	if err != nil {
@@ -247,8 +247,8 @@ func (db *Database) DeleteTagFromAccount(account, tag string) error {
 
 func (db *Database) FindCurrency(cur string) (*core.Currency, error) {
 	var resp core.Currency
-	log.Info("Searching Currency in DB")
-	err := db.DB.QueryRow(`SELECT * FROM currencies WHERE name = $1 LIMIT 1`, cur).Scan(&resp.Name, &resp.Decimals)
+	log.Info("Searching Currency in DB: ", cur)
+	err := db.DB.QueryRow(`SELECT * FROM currencies WHERE name = ? LIMIT 1`, cur).Scan(&resp.Name, &resp.Decimals)
 	if err != nil {
 		return nil, err
 	}
@@ -295,7 +295,7 @@ func (db *Database) SafeAddCurrency(cur *core.Currency) error {
 func (db *Database) FindAccount(code string) (*core.Account, error) {
 	var resp core.Account
 	log.Info("Searching Account in DB")
-	err := db.DB.QueryRow(`SELECT * FROM accounts WHERE account_id = $1 LIMIT 1`, code).Scan(&resp.Code, &resp.Name)
+	err := db.DB.QueryRow(`SELECT * FROM accounts WHERE account_id = ? LIMIT 1`, code).Scan(&resp.Code, &resp.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -343,7 +343,7 @@ func (db *Database) SafeAddAccount(acc *core.Account) error {
 func (db *Database) FindUser(pubKey string) (*core.User, error) {
 	var resp core.User
 	log.Info("Searching User in DB")
-	err := db.DB.QueryRow(`SELECT * FROM users WHERE username = $1 LIMIT 1`, pubKey).Scan(&resp.Id, &resp.Name)
+	err := db.DB.QueryRow(`SELECT * FROM users WHERE username = ? LIMIT 1`, pubKey).Scan(&resp.Id, &resp.Name)
 	if err != nil {
 		return nil, err
 	}

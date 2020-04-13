@@ -50,7 +50,7 @@ If you want to see all the transactions in the database, or export to CSV
 			panic(fmt.Sprintf("Database does not already exist at %s.", databasefilepath))
 		}
 
-		SqliteDB, err := sql.Open("sqlite3", databasefilepath)
+		DB, err := sql.Open(cfg.DatabaseType, databasefilepath)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -68,7 +68,7 @@ If you want to see all the transactions in the database, or export to CSV
 			GROUP  BY split_accounts.account_id
 		;`
 
-		rows, err := SqliteDB.Query(queryDB)
+		rows, err := DB.Query(queryDB)
 		if err != nil {
 			log.Fatal(err)
 		}

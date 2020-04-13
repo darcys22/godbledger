@@ -51,7 +51,7 @@ func (db *Database) InitDB() error {
 	//USERS
 	createDB := `
 	CREATE TABLE IF NOT EXISTS users (
-		user_id INT NOT NULL,
+		user_id VARCHAR(255) NOT NULL,
 		username VARCHAR(255) NOT NULL,
 		PRIMARY KEY(user_id)
 	);`
@@ -77,7 +77,7 @@ func (db *Database) InitDB() error {
 	//TAGS
 	createDB = `
 	CREATE TABLE IF NOT EXISTS tags (
-		tag_id INTEGER PRIMARY KEY,
+		tag_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
 		tag_name VARCHAR(100) NOT NULL UNIQUE
 	);`
 	log.Debug("Query: " + createDB)
