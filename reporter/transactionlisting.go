@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	"database/sql"
+	//"database/sql"
 	"encoding/csv"
-	_ "github.com/mattn/go-sqlite3"
 
 	"github.com/darcys22/godbledger/godbledger/cmd"
+	"github.com/darcys22/godbledger/godbledger/ledger"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/urfave/cli"
@@ -51,14 +51,15 @@ If you want to see all the transactions in the database, or export to CSV
 		if databasefilepath == "" {
 			databasefilepath = cfg.DatabaseLocation
 		}
-		if _, err := os.Stat(databasefilepath); err != nil {
-			panic(fmt.Sprintf("Database does not already exist at %s.", databasefilepath))
-		}
+		ledger, err := ledger.New(ctx, cfg)
+		//if _, err := os.Stat(databasefilepath); err != nil {
+		//panic(fmt.Sprintf("Database does not already exist at %s.", databasefilepath))
+		//}
 
-		SqliteDB, err := sql.Open("sqlite3", databasefilepath)
-		if err != nil {
-			log.Fatal(err)
-		}
+		//SqliteDB, err := sql.Open("sqlite3", databasefilepath)
+		//if err != nil {
+		//log.Fatal(err)
+		//}
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"Date", "ID", "Account", "Description", "Currency", "Amount"})
 		table.SetBorder(false)
@@ -78,7 +79,9 @@ If you want to see all the transactions in the database, or export to CSV
 					on splits.transaction_id = transactions.transaction_id
 		;`
 
-		rows, err := SqliteDB.Query(queryDB)
+		log.Debug("Querying Database")
+		rows, err := ledger.LedgerDb.Query(queryDB)
+
 		if err != nil {
 			log.Fatal(err)
 		}

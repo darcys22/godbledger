@@ -1,6 +1,7 @@
 package sqlite3db
 
 import (
+	"database/sql"
 	"strconv"
 	"strings"
 	"time"
@@ -456,11 +457,11 @@ func (db *Database) GetTB(date time.Time) error {
 	}
 	defer rows.Close()
 
-	accounts := make(map[string][]PDFAccount)
+	accounts := make(map[string][]*core.PDFAccount)
 	totals := make(map[string]int)
 
 	for rows.Next() {
-		var t PDFAccount
+		var t *core.PDFAccount
 		var name string
 		if err := rows.Scan(&name, &t.Account, &t.Amount); err != nil {
 			log.Fatal(err)
@@ -470,7 +471,7 @@ func (db *Database) GetTB(date time.Time) error {
 			accounts[name] = append(val, t)
 			totals[name] = totals[name] + t.Amount
 		} else {
-			accounts[name] = []PDFAccount{t}
+			accounts[name] = []*core.PDFAccount{t}
 			totals[name] = t.Amount
 		}
 	}
@@ -478,8 +479,14 @@ func (db *Database) GetTB(date time.Time) error {
 		log.Fatal(err)
 	}
 
-	for k, v := range accounts {
-		reporteroutput.Data = append(reporteroutput.Data, Tag{k, totals[k], v})
-	}
+	//for k, v := range accounts {
+	////reporteroutput.Data = append(reporteroutput.Data, Tag{k, totals[k], v})
+	//}
+
+	return nil
+}
+
+func (db *Database) Query(query string, args ...interface{}) (*sql.Rows, error) {
+	return db.Query(query, args...)
 
 }
