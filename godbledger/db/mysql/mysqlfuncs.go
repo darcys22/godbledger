@@ -427,63 +427,41 @@ func (db *Database) TestDB() error {
 	return err
 }
 
-func (db *Database) GetTB(date time.Time) error {
+func (db *Database) GetTB(queryDate time.Time) (*[]core.TBAccount, error) {
 
 	queryDB := `
-			SELECT
-					tags.tag_name,
-					Table_Aggregate.account_id,
-					sums
-			FROM account_tag
-					join ((SELECT
-							split_accounts.account_id as account_id,
-							SUM(splits.amount) as sums
-						FROM splits 
-							JOIN split_accounts 
-							ON splits.split_id = split_accounts.split_id
-						GROUP  BY split_accounts.account_id
-							
-						)) AS Table_Aggregate
-						on account_tag.account_id = Table_Aggregate.account_id
-					join tags
-						on tags.tag_id = account_tag.tag_id
-			order BY tags.tag_name
+		SELECT
+		split_accounts.account_id,
+		SUM(splits.amount)
+		FROM splits
+		JOIN split_accounts
+		ON splits.split_id = split_accounts.split_id
+		WHERE splits.split_date <= ?
+		GROUP  BY split_accounts.account_id
 		;`
 
-	rows, err := db.DB.Query(queryDB)
+	log.Debug("Querying Database for Trial Balance")
+
+	rows, err := db.DB.Query(queryDB, queryDate)
 	if err != nil {
-		log.Debug(err)
-		return err
+		log.Fatal(err)
 	}
 	defer rows.Close()
 
-	accounts := make(map[string][]*core.PDFAccount)
-	totals := make(map[string]int)
+	accounts := []core.TBAccount{}
 
 	for rows.Next() {
-		var t *core.PDFAccount
-		var name string
-		if err := rows.Scan(&name, &t.Account, &t.Amount); err != nil {
+		var t core.TBAccount
+		if err := rows.Scan(&t.Account, &t.Amount); err != nil {
 			log.Fatal(err)
 		}
-		log.Debugf("%v", t)
-		if val, ok := accounts[name]; ok {
-			accounts[name] = append(val, t)
-			totals[name] = totals[name] + t.Amount
-		} else {
-			accounts[name] = []*core.PDFAccount{t}
-			totals[name] = t.Amount
-		}
+		accounts = append(accounts, t)
 	}
 	if rows.Err() != nil {
 		log.Fatal(err)
 	}
 
-	//for k, v := range accounts {
-	//reporteroutput.Data = append(reporteroutput.Data, Tag{k, totals[k], v})
-	//}
-
-	return nil
+	return &accounts, nil
 
 }
 

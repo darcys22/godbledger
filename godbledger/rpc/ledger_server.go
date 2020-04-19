@@ -95,7 +95,20 @@ func (s *LedgerServer) DeleteTag(ctx context.Context, in *pb.DeleteTagRequest) (
 
 func (s *LedgerServer) GetTB(ctx context.Context, in *pb.TBRequest) (*pb.TBResponse, error) {
 	log.Info("Received New TB Request")
-	s.ld.GetTB(time.Now())
+	accounts, err := s.ld.GetTB(time.Now())
 
-	return &pb.TBResponse{}, nil
+	//log.Debug(accounts)
+
+	response := pb.TBResponse{}
+
+	for _, account := range *accounts {
+		response.Lines = append(response.Lines,
+			&pb.TBLine{
+				Accountname: account.Account,
+				Amount:      int64(account.Amount),
+				Tags:        account.Tags,
+			})
+	}
+
+	return &response, err
 }

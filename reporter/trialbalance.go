@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	//"database/sql"
 	"encoding/csv"
@@ -56,8 +57,10 @@ If you want to see all the transactions in the database, or export to CSV
 		//if err != nil {
 		//log.Fatal(err)
 		//}
+		queryDate := time.Now()
+
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Account", "Balance"})
+		table.SetHeader([]string{"Account", fmt.Sprintf("Balance at %s", queryDate.Format("02 February 2006"))})
 		table.SetBorder(false)
 
 		queryDB := `
@@ -67,11 +70,12 @@ If you want to see all the transactions in the database, or export to CSV
 		FROM splits
 		JOIN split_accounts
 		ON splits.split_id = split_accounts.split_id
+		WHERE splits.split_date <= ?
 		GROUP  BY split_accounts.account_id
 		;`
 
 		log.Debug("Querying Database")
-		rows, err := ledger.LedgerDb.Query(queryDB)
+		rows, err := ledger.LedgerDb.Query(queryDB, queryDate)
 		if err != nil {
 			log.Fatal(err)
 		}
