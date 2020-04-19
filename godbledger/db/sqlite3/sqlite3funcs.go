@@ -1,6 +1,7 @@
 package sqlite3db
 
 import (
+	"database/sql"
 	"strconv"
 	"strings"
 	"time"
@@ -483,4 +484,9 @@ func (db *Database) GetTB(date time.Time) error {
 	//}
 
 	return nil
+}
+
+func (db *Database) Query(query string, args ...interface{}) (*sql.Rows, error) {
+	return db.Query(query, args...)
+
 }

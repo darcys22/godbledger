@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"github.com/darcys22/godbledger/godbledger/core"
 	"time"
 )
@@ -27,4 +28,5 @@ type Database interface {
 	AddUser(usr *core.User) error
 	SafeAddUser(usr *core.User) error
 	GetTB(date time.Time) error
+	Query(query string, args ...interface{}) (*sql.Rows, error)
 }

@@ -26,14 +26,16 @@ func DSN(DB_USER, DB_PASS, DB_HOST, DB_NAME string) string {
 }
 
 // NewDB initializes a new DB.
+//TODO(Sean): this should actually use the connection_string rather than hardcoded
 func NewDB(connection_string string) (*Database, error) {
 	//if connection_string == "" {
-	DB_HOST := "tcp(127.0.0.1:3306)"
-	DB_NAME := "ledger"
-	DB_USER := "godbledger"
-	DB_PASS := "password"
-	connection_string = DSN(DB_USER, DB_PASS, DB_HOST, DB_NAME)
+	//DB_HOST := "tcp(127.0.0.1:3306)"
+	//DB_NAME := "ledger"
+	//DB_USER := "godbledger"
+	//DB_PASS := "password"
+	//connection_string = DSN(DB_USER, DB_PASS, DB_HOST, DB_NAME)
 	//}
+	log.Debug(connection_string)
 	MySQLDB, err := sql.Open("mysql", connection_string)
 	if err != nil {
 		log.Fatal(err.Error)
