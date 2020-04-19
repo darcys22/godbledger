@@ -45,7 +45,9 @@ Loads a file in the ledger cli format
 			columnWidth := 80
 
 			ledgerFileName = "test/transaction-codes-2.test"
-			//ledgerFileName = c.Args().Get(0)
+			if len(ctx.Args().Get(0)) > 0 {
+				ledgerFileName = ctx.Args().Get(0)
+			}
 
 			ledgerFileReader, err := NewLedgerReader(ledgerFileName)
 			if err != nil {

@@ -20,7 +20,7 @@ type LedgerConfig struct {
 	LogVerbosity     string // LogVerbosity defines the logging level {debug, info, warn, error, fatal, panic}
 	ConfigFile       string // Location of the TOML config file, including directory path
 	DatabaseType     string // Type of Database being used
-	DatabaseLocation string // Location of the database file, including directory path
+	DatabaseLocation string // Location of the database file, including directory path or connection string
 }
 
 var (
@@ -31,6 +31,21 @@ var (
 		ArgsUsage:   "",
 		Category:    "MISCELLANEOUS COMMANDS",
 		Description: `The dumpconfig command shows configuration values.`,
+	}
+
+	InitConfigCommand = &cli.Command{
+		Action:      initConfig,
+		Name:        "init",
+		Usage:       "godbledger init [-m] [databaseLocation]",
+		ArgsUsage:   "",
+		Category:    "MISCELLANEOUS COMMANDS",
+		Description: `The init command creates configuration file.`,
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:    "mysql",
+				Aliases: []string{"m"},
+				Usage:   "set the database to use mysql rather than sqlite"},
+		},
 	}
 
 	defaultLedgerConfig = &LedgerConfig{
@@ -125,6 +140,37 @@ func dumpConfig(ctx *cli.Context) error {
 		defer dump.Close()
 	}
 	dump.Write(buf.Bytes())
+
+	return nil
+}
+
+// initConfig is the init command.
+func initConfig(ctx *cli.Context) error {
+
+	config := defaultLedgerConfig
+	if ctx.Bool("mysql") {
+		config.DatabaseType = "mysql"
+		config.DatabaseLocation = "godbledger:password@tcp(127.0.0.1:3306)/ledger?charset=utf8"
+	}
+
+	if len(ctx.Args().Get(0)) > 0 {
+		config.DatabaseLocation = ctx.Args().Get(0)
+	}
+	_, err := os.Stat(config.ConfigFile)
+	if os.IsNotExist(err) {
+		log.Infof("Config File doesn't exist creating at %s", config.ConfigFile)
+		os.MkdirAll(filepath.Dir(config.ConfigFile), os.ModePerm)
+		buf := new(bytes.Buffer)
+		if err := toml.NewEncoder(buf).Encode(config); err != nil {
+			return err
+		}
+		dump, err := os.OpenFile(config.ConfigFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+		if err != nil {
+			return err
+		}
+		defer dump.Close()
+		dump.Write(buf.Bytes())
+	}
 
 	return nil
 }
