@@ -487,6 +487,6 @@ func (db *Database) GetTB(date time.Time) error {
 }
 
 func (db *Database) Query(query string, args ...interface{}) (*sql.Rows, error) {
-	return db.Query(query, args...)
+	return db.DB.Query(query, args...)
 
 }
