@@ -461,6 +461,29 @@ func (db *Database) GetTB(queryDate time.Time) (*[]core.TBAccount, error) {
 		log.Fatal(err)
 	}
 
+	tagsQuery := `
+		SELECT tag_name
+		FROM   tags
+					 JOIN account_tag
+						 ON account_tag.tag_id = tags.tag_id
+					 JOIN accounts
+						 ON accounts.account_id = account_tag.account_id
+		WHERE  accounts.NAME = ?;
+		`
+
+	for index, element := range accounts {
+		rows, err = db.DB.Query(tagsQuery, element.Account)
+
+		for rows.Next() {
+			var tag string
+			if err := rows.Scan(&tag); err != nil {
+				log.Fatal(err)
+			}
+			accounts[index].Tags = append(accounts[index].Tags, tag)
+		}
+
+	}
+
 	return &accounts, nil
 
 }

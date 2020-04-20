@@ -427,8 +427,65 @@ func (db *Database) TestDB() error {
 	return err
 }
 
-func (db *Database) GetTB(date time.Time) (*[]core.TBAccount, error) {
-	return nil, nil
+func (db *Database) GetTB(queryDate time.Time) (*[]core.TBAccount, error) {
+
+	queryDB := `
+		SELECT
+		split_accounts.account_id,
+		SUM(splits.amount)
+		FROM splits
+		JOIN split_accounts
+		ON splits.split_id = split_accounts.split_id
+		WHERE splits.split_date <= ?
+		GROUP  BY split_accounts.account_id
+		;`
+
+	log.Debug("Querying Database for Trial Balance")
+
+	rows, err := db.DB.Query(queryDB, queryDate)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	accounts := []core.TBAccount{}
+
+	for rows.Next() {
+		var t core.TBAccount
+		if err := rows.Scan(&t.Account, &t.Amount); err != nil {
+			log.Fatal(err)
+		}
+		accounts = append(accounts, t)
+	}
+	if rows.Err() != nil {
+		log.Fatal(err)
+	}
+
+	tagsQuery := `
+		SELECT tag_name
+		FROM   tags
+					 JOIN account_tag
+						 ON account_tag.tag_id = tags.tag_id
+					 JOIN accounts
+						 ON accounts.account_id = account_tag.account_id
+		WHERE  accounts.NAME = ?;
+		`
+
+	for index, element := range accounts {
+		rows, err = db.DB.Query(tagsQuery, element.Account)
+
+		for rows.Next() {
+			var tag string
+			if err := rows.Scan(&tag); err != nil {
+				log.Fatal(err)
+			}
+			accounts[index].Tags = append(accounts[index].Tags, tag)
+		}
+
+	}
+
+	return &accounts, nil
+
 }
 
 func (db *Database) Query(query string, args ...interface{}) (*sql.Rows, error) {
