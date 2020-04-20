@@ -10,7 +10,7 @@ Checkout the [Wiki](https://github.com/darcys22/godbledger/wiki)
 | Command| Description |
 | :----------------- | :---------------------------------------------------------------------------------------------------------| 
 | **`Godbledger`**    | The main server. It is the access point for transactions that will be saved to the accounting database. |
-| `Ledgercli`     | A CLI client that can be used to transmit transactions to the server.                             |
+| `Ledger_cli`     | A CLI client that can be used to transmit transactions to the server.                             |
 | `Reporter`      | Builds basic reports from the database on the command line.                                             |
 
 ### Communicating with Godbledger and software examples
@@ -20,22 +20,23 @@ The primary way to communicate with Godbledger is through the GRPC endpoint, sub
 
 a python client with example calls can be found [here](https://github.com/darcys22/godbledger-pythonclient)
 
-**Ledgercli** included with this repo communicates with Godbledger using GRPC but opens up several cli commands for usage
+**Ledger_cli** included with this repo communicates with Godbledger using GRPC and gives some convenient CLI commands
 
-**Ledger files** the ledgercli allows for the processing of [ledger files](https://www.ledger-cli.org/). This has been roughly implemented by forking https://github.com/howeyc/ledger
+**Ledger files** `ledger_cli` allows for the processing of [ledger files](https://www.ledger-cli.org/). This has been roughly implemented by forking https://github.com/howeyc/ledger
 
 **Trading Simulator** 
-An [example project](https://github.com/darcys22/Trading-Simulator) has been developed that simulates a market trader (Random Walk) and the trades are recorded using Godbledger
+An [example project](https://github.com/darcys22/Trading-Simulator) has been developed that simulates a market trader bot and the trades are recorded using Godbledger
 
 **Reporter**
 The general usage of Godbledger is not to provide information but to simply guide transactions to be recorded in a consistent manner in the database. To actually view your financial information we should query the database directly. Reporter has two SQL queries in built (Transaction Listing, and Trial Balance) that will be formatted in a table/json/csv for your viewing.
 
 ```
 reporter trialbalance
+reporter transactions
 ```
 
 **PDF Financial Statements**
-Reporter also has a function to generate pdf financial reports. Two templates for Profit and Loss and Balance sheet have been provided.
+Reporter also has a function to generate pdf financial reports. Two templates for a Profit and Loss and a Balance sheet have been provided.
 
 ```
 reporter pdf -template profitandloss
@@ -77,5 +78,4 @@ SELECT * FROM accounts where account_id in (select account_id from account_tag w
 
 ### TODO
 - Create Yurnell - programmable journal entries
-- Add an edit transaction function
 - run GoDBLedger on a separate server and access the open port through the network
