@@ -51,6 +51,7 @@ func main() {
 	app.Commands = []*cli.Command{
 		// See config.go
 		cmd.DumpConfigCommand,
+		cmd.InitConfigCommand,
 	}
 
 	app.Flags = []cli.Flag{

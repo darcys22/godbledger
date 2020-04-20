@@ -74,6 +74,4 @@ SELECT * FROM accounts where account_id in (select account_id from account_tag w
 ### TODO
 - Create Yurnell - programmable journal entries
 - Add an edit transaction function
-- Add MySQL as a database
-- test releases from scratch 
 - run GoDBLedger on a separate server and access the open port through the network
