@@ -1,6 +1,10 @@
 ## Go DB Ledger
 An open source accounting system designed to have an easily accessable database and GRPC endpoints for communication.
 
+Checkout the [Wiki](https://github.com/darcys22/godbledger/wiki)
+
+[Quickstart](https://github.com/darcys22/godbledger/wiki/Quickstart)
+
 ## Executables
 
 | Command| Description |
