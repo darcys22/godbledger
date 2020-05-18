@@ -296,7 +296,7 @@ func (db *Database) SafeAddCurrency(cur *core.Currency) error {
 func (db *Database) FindAccount(code string) (*core.Account, error) {
 	var resp core.Account
 	log.Info("Searching Account in DB")
-	err := db.DB.QueryRow(`SELECT * FROM accounts WHERE account_id = $1 LIMIT 1`, code).Scan(&resp.Code, &resp.Name)
+	err := db.DB.QueryRow(`SELECT * FROM accounts WHERE account_id = $1 LIMIT 1`, strings.TrimSpace(code)).Scan(&resp.Code, &resp.Name)
 	if err != nil {
 		return nil, err
 	}
