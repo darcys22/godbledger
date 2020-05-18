@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"log"
 	"math/big"
@@ -80,7 +81,11 @@ var commandWizardJournal = &cli.Command{
 			Signature:      "stuff",
 		}
 
-		fmt.Printf("%v\n", req)
+		bytes, err := json.Marshal(req)
+		if err != nil {
+			fmt.Println("Can't serislize", req)
+		}
+		fmt.Printf("%v => %v, '%v'\n", req, bytes, string(bytes))
 
 		err = Send(req)
 		if err != nil {
