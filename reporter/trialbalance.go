@@ -60,7 +60,7 @@ If you want to see all the transactions in the database, or export to CSV
 		queryDate := time.Now()
 
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Account", fmt.Sprintf("Balance at %s", queryDate.Format("02 February 2006"))})
+		table.SetHeader([]string{"Account", fmt.Sprintf("Balance at %s", queryDate.Format("02 January 2006"))})
 		table.SetBorder(false)
 
 		queryDB := `
