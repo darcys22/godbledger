@@ -13,9 +13,10 @@ import (
 
 var commandDeleteTransaction = &cli.Command{
 	Name:      "delete",
-	Usage:     "deletes a single transaction",
+	Usage:     "ledger_cli delete <transaction_id>",
 	ArgsUsage: "[]",
 	Description: `
+	Deletes a transaction from the database
 `,
 	Flags: []cli.Flag{},
 	Action: func(c *cli.Context) error {
