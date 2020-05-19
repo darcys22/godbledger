@@ -28,7 +28,7 @@ func NewDB(dirPath string) (*Database, error) {
 	if err := os.MkdirAll(dirPath, 0700); err != nil {
 		return nil, err
 	}
-	datafile := path.Join(dirPath, "ledger.db")
+	datafile := path.Join(dirPath, "ledger.db?_foreign_keys=true")
 	SqliteDB, err := sql.Open("sqlite3", datafile)
 	if err != nil {
 		return nil, err
