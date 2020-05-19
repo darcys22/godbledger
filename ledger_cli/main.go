@@ -46,6 +46,8 @@ func init() {
 		commandWizardJournal,
 		// tagaccount.go
 		commandTagAccount,
+		// jsonjournal.go
+		commandJSONJournal,
 	}
 	//app.Action = transaction
 }
