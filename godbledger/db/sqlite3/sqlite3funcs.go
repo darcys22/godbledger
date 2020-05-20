@@ -44,10 +44,10 @@ func (db *Database) AddTransaction(txn *core.Transaction) error {
 
 	for _, split := range txn.Splits {
 		sqlStr += "(?, ?, ?, ?, ?, ?),"
-		vals = append(vals, txn.Id, split.Id, split.Date, string(split.Description[:]), split.Currency.Name, split.Amount.Int64())
+		vals = append(vals, txn.Id, split.Id, split.Date, string(split.Description[:]), strings.TrimSpace(split.Currency.Name), split.Amount.Int64())
 		for _, acc := range split.Accounts {
 			sqlAccStr += "(?, ?),"
-			accVals = append(accVals, split.Id, acc.Code)
+			accVals = append(accVals, split.Id, strings.TrimSpace(acc.Code))
 		}
 	}
 
@@ -79,6 +79,7 @@ func (db *Database) AddTransaction(txn *core.Transaction) error {
 	accStmt, _ := tx2.Prepare(sqlAccStr)
 	log.Debug("Query: " + sqlAccStr)
 	log.Info("Adding Split Accounts to DB")
+	log.Debug(accVals...)
 	res, err = accStmt.Exec(accVals...)
 	if err != nil {
 		log.Fatal(err)
@@ -249,7 +250,7 @@ func (db *Database) DeleteTagFromAccount(account, tag string) error {
 func (db *Database) FindCurrency(cur string) (*core.Currency, error) {
 	var resp core.Currency
 	log.Info("Searching Currency in DB")
-	err := db.DB.QueryRow(`SELECT * FROM currencies WHERE name = $1 LIMIT 1`, cur).Scan(&resp.Name, &resp.Decimals)
+	err := db.DB.QueryRow(`SELECT * FROM currencies WHERE name = $1 LIMIT 1`, strings.TrimSpace(cur)).Scan(&resp.Name, &resp.Decimals)
 	if err != nil {
 		return nil, err
 	}
@@ -265,7 +266,7 @@ func (db *Database) AddCurrency(cur *core.Currency) error {
 	tx, _ := db.DB.Begin()
 	stmt, _ := tx.Prepare(insertCurrency)
 	log.Debug("Query: " + insertCurrency)
-	res, err := stmt.Exec(cur.Name, cur.Decimals)
+	res, err := stmt.Exec(strings.TrimSpace(cur.Name), cur.Decimals)
 	if err != nil {
 		log.Fatal(err)
 	}

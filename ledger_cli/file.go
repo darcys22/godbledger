@@ -31,10 +31,10 @@ const (
 
 var commandFile = &cli.Command{
 	Name:      "file",
-	Usage:     "Reads a ledger file",
+	Usage:     "ledger_cli file ./test/transaction-codes-1.test",
 	ArgsUsage: "[]",
 	Description: `
-Loads a file in the ledger cli format
+	Loads a file in the ledger cli format
 `,
 	Flags: []cli.Flag{},
 	Action: func(ctx *cli.Context) error {

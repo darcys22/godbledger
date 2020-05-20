@@ -63,6 +63,7 @@ var commandWizardJournal = &cli.Command{
 				Name:        lineAccount,
 				Description: lineDesc,
 				Balance:     lineAmount,
+				Currency:    "USD",
 			})
 
 			fmt.Print("Would you like to enter more line items? (n to stop): ")

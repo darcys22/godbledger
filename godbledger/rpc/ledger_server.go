@@ -19,11 +19,7 @@ type LedgerServer struct {
 func (s *LedgerServer) AddTransaction(ctx context.Context, in *pb.TransactionRequest) (*pb.TransactionResponse, error) {
 	log.Printf("Received New Transaction Request")
 
-	usr, err := core.NewUser("Sean")
-	if err != nil {
-		log.Error(err)
-	}
-	aud, err := core.NewCurrency("AUD", 2)
+	usr, err := core.NewUser("MainUser")
 	if err != nil {
 		log.Error(err)
 	}
@@ -49,7 +45,13 @@ func (s *LedgerServer) AddTransaction(ctx context.Context, in *pb.TransactionReq
 			log.Error(err)
 		}
 
-		s, err := core.NewSplit(t, txn.Description, []*core.Account{acc}, aud, big.NewInt(line.GetAmount()))
+		b := line.GetCurrency()
+		curr, err := core.NewCurrency(b, 2)
+		if err != nil {
+			log.Error(err)
+		}
+
+		s, err := core.NewSplit(t, txn.Description, []*core.Account{acc}, curr, big.NewInt(line.GetAmount()))
 		if err != nil {
 			log.Error(err)
 		}
