@@ -17,7 +17,7 @@ var commandJSONJournal = &cli.Command{
 
 	Example
 
-	ledger_cli jsonjournal '{"Payee":"ijfe\n","Date":"2019-06-30T00:00:00Z","AccountChanges":[{"Name":"Cash\n","Description":"aijfe\n","Balance":"100"},{"Name":"Income\n","Description":"ijfeuhge\n","Balance":"-100"}],"Signature":"stuff"}'
+	ledger_cli jsonjournal '{"Payee":"ijfjie","Date":"2019-06-30T00:00:00Z","AccountChanges":[{"Name":"Cash","Description":"jisfeij","Currency":"USD","Balance":"100"},{"Name":"Income","Description":"another","Currency":"USD","Balance":"-100"}],"Signature":"stuff"}'
 
 `,
 	Flags: []cli.Flag{},

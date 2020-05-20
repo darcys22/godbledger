@@ -23,6 +23,7 @@ import (
 type Account struct {
 	Name        string
 	Description string
+	Currency    string
 	Balance     *big.Rat
 }
 

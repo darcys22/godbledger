@@ -14,7 +14,8 @@ service Transactor {
 message LineItem {
   string accountname = 1;
   string description = 2;
-  int64 amount = 3;
+  string currency = 3;
+  int64 amount = 4;
 }
 
 message TransactionRequest {
@@ -49,6 +50,7 @@ message TBLine {
   string accountname = 1;
   repeated string tags = 2;
   int64 amount = 3;
+  string currency = 4;
 }
 
 message TBRequest {

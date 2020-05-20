@@ -122,6 +122,7 @@ func parseLedger(ledgerReader io.Reader, callback func(t *Transaction, err error
 			}
 			lastIndex := len(nonEmptyWords) - 1
 			balErr, rationalNum := getBalance(strings.Trim(nonEmptyWords[lastIndex], whitespace))
+			accChange.Currency = "USD"
 			if !balErr {
 				// Assuming no balance and whole line is account name
 				accChange.Name = strings.Join(nonEmptyWords, " ")
