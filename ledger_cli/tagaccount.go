@@ -20,8 +20,9 @@ var commandTagAccount = &cli.Command{
 `,
 	Flags: []cli.Flag{
 		&cli.BoolFlag{
-			Name:  "delete, d",
-			Usage: "deletes tag rather than creates",
+			Name:    "delete",
+			Aliases: []string{"d"},
+			Usage:   "deletes tag rather than creates",
 		},
 	},
 	Action: func(c *cli.Context) error {

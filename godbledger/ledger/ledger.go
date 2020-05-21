@@ -124,6 +124,16 @@ func (l *Ledger) GetCurrencies(txn *core.Transaction) ([]*core.Currency, error) 
 	return currencies, nil
 }
 
+func (l *Ledger) InsertCurrency(curr *core.Currency) error {
+	log.Infof("Creating Currency %s with %s decimals", curr.Name, curr.Decimals)
+	return l.LedgerDb.SafeAddCurrency(curr)
+}
+
+func (l *Ledger) DeleteCurrency(currency string) error {
+	log.Infof("Deleting Currency %s", currency)
+	return l.LedgerDb.DeleteCurrency(currency)
+}
+
 func (l *Ledger) GetAccounts(txn *core.Transaction) ([]*core.Account, error) {
 	accounts := []*core.Account{}
 

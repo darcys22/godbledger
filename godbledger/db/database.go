@@ -21,6 +21,7 @@ type Database interface {
 	FindCurrency(cur string) (*core.Currency, error)
 	AddCurrency(cur *core.Currency) error
 	SafeAddCurrency(cur *core.Currency) error
+	DeleteCurrency(currency string) error
 	FindAccount(code string) (*core.Account, error)
 	AddAccount(*core.Account) error
 	SafeAddAccount(*core.Account) error

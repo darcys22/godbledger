@@ -36,18 +36,20 @@ func init() {
 	app.Name = "Ledger CLI"
 	app.Usage = "Command Line for GoDBLedger gRPC"
 	app.Commands = []*cli.Command{
-		// file.go
-		commandFile,
 		// transaction.go
 		commandSingleTestTransaction,
-		// delete.go
-		commandDeleteTransaction,
 		// wizard.go
 		commandWizardJournal,
-		// tagaccount.go
-		commandTagAccount,
 		// jsonjournal.go
 		commandJSONJournal,
+		// file.go
+		commandFile,
+		// delete.go
+		commandDeleteTransaction,
+		// tagaccount.go
+		commandTagAccount,
+		// addcurrency.go
+		commandAddCurrency,
 	}
 	//app.Action = transaction
 }
