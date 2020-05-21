@@ -8,6 +8,8 @@ service Transactor {
   rpc DeleteTransaction(DeleteRequest) returns (TransactionResponse) {}
   rpc AddTag(TagRequest) returns (TransactionResponse) {}
   rpc DeleteTag(DeleteTagRequest) returns (TransactionResponse) {}
+  rpc AddCurrency(CurrencyRequest) returns (TransactionResponse) {}
+  rpc DeleteCurrency(DeleteCurrencyRequest) returns (TransactionResponse) {}
   rpc GetTB(TBRequest) returns (TBResponse) {}
 }
 
@@ -44,6 +46,17 @@ message DeleteTagRequest {
     string account = 1;
     string tag = 2;
     string signature = 3;
+}
+
+message CurrencyRequest {
+    string currency = 1;
+    int64 decimals = 2;
+    string signature = 3;
+}
+
+message DeleteCurrencyRequest {
+    string currency = 1;
+    string signature = 2;
 }
 
 message TBLine {

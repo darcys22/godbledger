@@ -68,16 +68,16 @@ func (s *LedgerServer) AddTransaction(ctx context.Context, in *pb.TransactionReq
 	return &pb.TransactionResponse{Message: "Accepted"}, nil
 }
 
-func (s *LedgerServer) NodeVersion(ctx context.Context, in *pb.VersionRequest) (*pb.VersionResponse, error) {
-	log.Info("Received Version Request: %s", in)
-	return &pb.VersionResponse{Message: version.Version}, nil
-}
-
 func (s *LedgerServer) DeleteTransaction(ctx context.Context, in *pb.DeleteRequest) (*pb.TransactionResponse, error) {
 	log.Info("Received New Delete Request")
 	s.ld.Delete(in.GetIdentifier())
 
 	return &pb.TransactionResponse{Message: "Accepted"}, nil
+}
+
+func (s *LedgerServer) NodeVersion(ctx context.Context, in *pb.VersionRequest) (*pb.VersionResponse, error) {
+	log.Info("Received Version Request: %s", in)
+	return &pb.VersionResponse{Message: version.Version}, nil
 }
 
 func (s *LedgerServer) AddTag(ctx context.Context, in *pb.TagRequest) (*pb.TransactionResponse, error) {
@@ -89,8 +89,31 @@ func (s *LedgerServer) AddTag(ctx context.Context, in *pb.TagRequest) (*pb.Trans
 }
 
 func (s *LedgerServer) DeleteTag(ctx context.Context, in *pb.DeleteTagRequest) (*pb.TransactionResponse, error) {
-	log.Info("Received New Delete Request")
+	log.Info("Received New Delete Tag Request")
 	s.ld.DeleteTag(in.GetAccount(), in.GetTag())
+
+	return &pb.TransactionResponse{Message: "Accepted"}, nil
+}
+
+func (s *LedgerServer) AddCurrency(ctx context.Context, in *pb.CurrencyRequest) (*pb.TransactionResponse, error) {
+	log.Info("Received New Add Currency Request")
+
+	curr, err := core.NewCurrency(in.GetCurrency(), int(in.GetDecimals()))
+	if err != nil {
+		log.Error(err)
+	}
+
+	err = s.ld.InsertCurrency(curr)
+	if err != nil {
+		log.Error(err)
+	}
+
+	return &pb.TransactionResponse{Message: "Accepted"}, nil
+}
+
+func (s *LedgerServer) DeleteCurrency(ctx context.Context, in *pb.DeleteCurrencyRequest) (*pb.TransactionResponse, error) {
+	log.Info("Received New Delete Currency Request")
+	s.ld.DeleteCurrency(in.GetCurrency())
 
 	return &pb.TransactionResponse{Message: "Accepted"}, nil
 }

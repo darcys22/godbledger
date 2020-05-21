@@ -294,6 +294,19 @@ func (db *Database) SafeAddCurrency(cur *core.Currency) error {
 	return db.AddCurrency(cur)
 }
 
+func (db *Database) DeleteCurrency(currency string) error {
+
+	sqlStatement := `
+	DELETE FROM currencies
+	WHERE name = ?;`
+	_, err := db.DB.Exec(sqlStatement, currency)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (db *Database) FindAccount(code string) (*core.Account, error) {
 	var resp core.Account
 	log.Info("Searching Account in DB")
