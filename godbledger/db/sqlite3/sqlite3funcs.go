@@ -11,7 +11,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func (db *Database) AddTransaction(txn *core.Transaction) error {
+func (db *Database) AddTransaction(txn *core.Transaction) (string, error) {
 	log.Info("Adding Transaction to DB")
 	insertTransaction := `
 		INSERT INTO transactions(transaction_id, postdate, brief)
@@ -97,7 +97,7 @@ func (db *Database) AddTransaction(txn *core.Transaction) error {
 
 	tx2.Commit()
 
-	return err
+	return txn.Id, err
 }
 
 func (db *Database) DeleteTransaction(txnID string) error {

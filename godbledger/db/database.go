@@ -10,7 +10,7 @@ import (
 type Database interface {
 	InitDB() error
 	Close() error
-	AddTransaction(txn *core.Transaction) error
+	AddTransaction(txn *core.Transaction) (string, error)
 	DeleteTransaction(txnID string) error
 	FindTag(tag string) (int, error)
 	AddTag(tag string) error
