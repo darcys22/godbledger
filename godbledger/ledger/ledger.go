@@ -70,7 +70,7 @@ func New(ctx *cli.Context, cfg *cmd.LedgerConfig) (*Ledger, error) {
 	return ledger, nil
 }
 
-func (l *Ledger) Insert(txn *core.Transaction) {
+func (l *Ledger) Insert(txn *core.Transaction) (string, error) {
 	log.Info("Created Transaction: %s", txn)
 	l.LedgerDb.SafeAddUser(txn.Poster)
 	currencies, _ := l.GetCurrencies(txn)
@@ -83,7 +83,13 @@ func (l *Ledger) Insert(txn *core.Transaction) {
 		l.LedgerDb.SafeAddAccount(account)
 		l.LedgerDb.SafeAddTagToAccount(account.Name, "main")
 	}
-	l.LedgerDb.AddTransaction(txn)
+
+	response, err := l.LedgerDb.AddTransaction(txn)
+	if err != nil {
+		return "", err
+	}
+
+	return response, nil
 }
 
 func (l *Ledger) Delete(txnID string) {

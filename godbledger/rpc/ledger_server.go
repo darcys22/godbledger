@@ -63,9 +63,12 @@ func (s *LedgerServer) AddTransaction(ctx context.Context, in *pb.TransactionReq
 
 	}
 
-	s.ld.Insert(txn)
+	response, err := s.ld.Insert(txn)
+	if err != nil {
+		log.Error(err)
+	}
 
-	return &pb.TransactionResponse{Message: "Accepted"}, nil
+	return &pb.TransactionResponse{Message: response}, nil
 }
 
 func (s *LedgerServer) DeleteTransaction(ctx context.Context, in *pb.DeleteRequest) (*pb.TransactionResponse, error) {
