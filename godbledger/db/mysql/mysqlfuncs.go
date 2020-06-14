@@ -445,16 +445,16 @@ func (db *Database) GetTB(queryDate time.Time) (*[]core.TBAccount, error) {
 	queryDB := `
 		SELECT
 		split_accounts.account_id,
-		SUM(splits.amount)
+		SUM(splits.amount),
 		splits.currency,
-		currencies.decimals,
+		currencies.decimals
 		FROM splits
 		JOIN split_accounts
 		ON splits.split_id = split_accounts.split_id
 		JOIN currencies
 		ON splits.currency = currencies.name
 		WHERE splits.split_date <= ?
-		GROUP  BY split_accounts.account_id
+		GROUP  BY split_accounts.account_id, splits.currency
 		;`
 
 	log.Debug("Querying Database for Trial Balance")
