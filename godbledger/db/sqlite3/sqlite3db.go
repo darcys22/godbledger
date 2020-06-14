@@ -96,6 +96,21 @@ func (db *Database) InitDB() error {
 		log.Fatal(err)
 	}
 
+	//TAGS FOR Transactions
+	createDB = `
+	CREATE TABLE IF NOT EXISTS transaction_tag (
+    transaction_id VARCHAR(255) NOT NULL,
+    tag_id INTEGER NOT NULL,
+    FOREIGN KEY (transaction_id) REFERENCES transactions (transaction_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tags (tag_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    PRIMARY KEY (transaction_id, tag_id)
+	);`
+	log.Debug("Query: " + createDB)
+	_, err = db.DB.Exec(createDB)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	//CURRENCIES
 	createDB = `
 	CREATE TABLE IF NOT EXISTS currencies (
