@@ -79,6 +79,13 @@ func (s *LedgerServer) DeleteTransaction(ctx context.Context, in *pb.DeleteReque
 	return &pb.TransactionResponse{Message: "Accepted"}, nil
 }
 
+func (s *LedgerServer) VoidTransaction(ctx context.Context, in *pb.DeleteRequest) (*pb.TransactionResponse, error) {
+	log.Info("Received New Void Request")
+	_ = s.ld.Void(in.GetIdentifier())
+
+	return &pb.TransactionResponse{Message: "Accepted"}, nil
+}
+
 func (s *LedgerServer) NodeVersion(ctx context.Context, in *pb.VersionRequest) (*pb.VersionResponse, error) {
 	log.Info("Received Version Request: %s", in)
 	return &pb.VersionResponse{Message: version.Version}, nil

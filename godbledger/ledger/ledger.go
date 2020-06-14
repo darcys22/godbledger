@@ -97,6 +97,11 @@ func (l *Ledger) Delete(txnID string) {
 	l.LedgerDb.DeleteTransaction(txnID)
 }
 
+func (l *Ledger) Void(txnID string) error {
+	log.Infof("Voiding Transaction: %s", txnID)
+	return l.LedgerDb.SafeAddTagToTransaction(txnID, "Void")
+}
+
 func (l *Ledger) InsertTag(account, tag string) error {
 	log.Infof("Creating Tag %s on %s", tag, account)
 	return l.LedgerDb.SafeAddTagToAccount(account, tag)

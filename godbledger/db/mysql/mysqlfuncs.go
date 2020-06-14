@@ -99,6 +99,19 @@ func (db *Database) AddTransaction(txn *core.Transaction) (string, error) {
 	return txn.Id, err
 }
 
+func (db *Database) FindTransaction(txnID string) (*core.Transaction, error) {
+	//TODO: (sean) copy this into sqlite, also build up the splits
+	// then create a reversing transaction on the same date
+	// both tagged Void
+	var resp core.Transaction
+	log.Info("Searching Transaction in DB: ", txnID)
+	err := db.DB.QueryRow(`SELECT * FROM transactions WHERE transaction_id = ? LIMIT 1`, txnID).Scan(&resp.Id, &resp.Postdate, &resp.Description)
+	if err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
 func (db *Database) DeleteTransaction(txnID string) error {
 
 	sqlStatement := `
@@ -239,6 +252,81 @@ func (db *Database) DeleteTagFromAccount(account, tag string) error {
 		account_id = ?
 	;`
 	_, err = db.DB.Exec(sqlStatement, tagID, account)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *Database) SafeAddTagToTransaction(txnID, tag string) error {
+	err := db.SafeAddTag(tag)
+	if err != nil {
+		log.Debug(err)
+		return err
+	}
+	tagID, _ := db.FindTag(tag)
+
+	return db.AddTagToTransaction(txnID, tagID)
+}
+
+func (db *Database) AddTagToTransaction(txnID string, tag int) error {
+	var exists int
+	err := db.DB.QueryRow(`SELECT EXISTS(SELECT * FROM transaction_tag where (transaction_id = ?) AND (tag_id = ?));`, txnID, tag).Scan(&exists)
+	if err != nil {
+		log.Debug(err)
+		return err
+	}
+	if exists == 1 {
+		return nil
+	}
+
+	insertTag := `
+		INSERT INTO transaction_tag(transaction_id, tag_id)
+			VALUES(?,?);
+	`
+	tx, _ := db.DB.Begin()
+	stmt, _ := tx.Prepare(insertTag)
+	log.Debug("Query: " + insertTag)
+	res, err := stmt.Exec(txnID, tag)
+	if err != nil {
+		log.Debug(err)
+		return err
+	}
+
+	lastId, err := res.LastInsertId()
+	if err != nil {
+		log.Debug(err)
+		return err
+	}
+	rowCnt, err := res.RowsAffected()
+	if err != nil {
+		log.Debug(err)
+		return err
+	}
+	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
+
+	tx.Commit()
+
+	return nil
+
+}
+
+func (db *Database) DeleteTagFromTransaction(txnID, tag string) error {
+
+	tagID, err := db.FindTag(tag)
+	if err != nil {
+		return err
+	}
+
+	sqlStatement := `
+	DELETE FROM transaction_tag
+	WHERE 
+		tag_id = ?
+	AND
+		transaction_id = ?
+	;`
+	_, err = db.DB.Exec(sqlStatement, tagID, txnID)
 	if err != nil {
 		return err
 	}

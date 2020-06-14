@@ -247,6 +247,81 @@ func (db *Database) DeleteTagFromAccount(account, tag string) error {
 	return nil
 }
 
+func (db *Database) SafeAddTagToTransaction(transactionID, tag string) error {
+	err := db.SafeAddTag(tag)
+	if err != nil {
+		log.Debug(err)
+		return err
+	}
+	tagID, _ := db.FindTag(tag)
+
+	return db.AddTagToTransaction(transactionID, tagID)
+}
+
+func (db *Database) AddTagToTransaction(transactionID string, tag int) error {
+	var exists int
+	err := db.DB.QueryRow(`SELECT EXISTS(SELECT * FROM transaction_tag where (transaction_id = ?) AND (tag_id = ?));`, transactionID, tag).Scan(&exists)
+	if err != nil {
+		log.Debug(err)
+		return err
+	}
+	if exists == 1 {
+		return nil
+	}
+
+	insertTag := `
+		INSERT INTO transaction_tag(transaction_id, tag_id)
+			VALUES(?,?);
+	`
+	tx, _ := db.DB.Begin()
+	stmt, _ := tx.Prepare(insertTag)
+	log.Debug("Query: " + insertTag)
+	res, err := stmt.Exec(transactionID, tag)
+	if err != nil {
+		log.Debug(err)
+		return err
+	}
+
+	lastId, err := res.LastInsertId()
+	if err != nil {
+		log.Debug(err)
+		return err
+	}
+	rowCnt, err := res.RowsAffected()
+	if err != nil {
+		log.Debug(err)
+		return err
+	}
+	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
+
+	tx.Commit()
+
+	return nil
+
+}
+
+func (db *Database) DeleteTagFromTransaction(transactionID, tag string) error {
+
+	tagID, err := db.FindTag(tag)
+	if err != nil {
+		return err
+	}
+
+	sqlStatement := `
+	DELETE FROM transaction_tag
+	WHERE 
+		tag_id = ?
+	AND
+		transaction_id = ?
+	;`
+	_, err = db.DB.Exec(sqlStatement, tagID, transactionID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (db *Database) FindCurrency(cur string) (*core.Currency, error) {
 	var resp core.Currency
 	log.Info("Searching Currency in DB")
