@@ -3,6 +3,7 @@ package rpc
 import (
 	"context"
 	"math/big"
+	"strconv"
 	"time"
 
 	"github.com/darcys22/godbledger/godbledger/core"
@@ -130,11 +131,16 @@ func (s *LedgerServer) GetTB(ctx context.Context, in *pb.TBRequest) (*pb.TBRespo
 	response := pb.TBResponse{}
 
 	for _, account := range *accounts {
+		amt := strconv.Itoa(account.Amount)
+		amt = amt[:len(amt)-account.Decimals] + "." + amt[len(amt)-account.Decimals:]
 		response.Lines = append(response.Lines,
 			&pb.TBLine{
 				Accountname: account.Account,
 				Amount:      int64(account.Amount),
 				Tags:        account.Tags,
+				Currency:    account.Currency,
+				Decimals:    int64(account.Decimals),
+				AmountStr:   amt,
 			})
 	}
 

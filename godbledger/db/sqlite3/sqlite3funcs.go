@@ -447,9 +447,13 @@ func (db *Database) GetTB(queryDate time.Time) (*[]core.TBAccount, error) {
 		SELECT
 		split_accounts.account_id,
 		SUM(splits.amount)
+		splits.currency,
+		currencies.decimals,
 		FROM splits
 		JOIN split_accounts
 		ON splits.split_id = split_accounts.split_id
+		JOIN currencies
+		ON splits.currency = currencies.name
 		WHERE splits.split_date <= ?
 		GROUP  BY split_accounts.account_id
 		;`
@@ -458,7 +462,7 @@ func (db *Database) GetTB(queryDate time.Time) (*[]core.TBAccount, error) {
 
 	rows, err := db.DB.Query(queryDB, queryDate)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Trial Balance Query Failed with error: ", err)
 	}
 	defer rows.Close()
 
@@ -466,7 +470,7 @@ func (db *Database) GetTB(queryDate time.Time) (*[]core.TBAccount, error) {
 
 	for rows.Next() {
 		var t core.TBAccount
-		if err := rows.Scan(&t.Account, &t.Amount); err != nil {
+		if err := rows.Scan(&t.Account, &t.Amount, &t.Currency, &t.Decimals); err != nil {
 			log.Fatal(err)
 		}
 		accounts = append(accounts, t)

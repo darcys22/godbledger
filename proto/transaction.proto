@@ -64,6 +64,8 @@ message TBLine {
   repeated string tags = 2;
   int64 amount = 3;
   string currency = 4;
+  int64 decimals = 5;
+  string amountStr = 6;
 }
 
 message TBRequest {
