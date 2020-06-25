@@ -1,0 +1,22 @@
+language: go
+go_import_path: github.com/darcys22/godbledger
+sudo: false
+jobs:
+
+  include:
+
+    # These are the latest Go versions.
+    - stage: build
+      os: linux
+      arch: amd64
+      dist: bionic
+      go: 1.14.x
+      env:
+        - GO111MODULE=on
+      script:
+        - go run build/ci.go install
+        - go run build/ci.go test -coverage $TEST_PACKAGES
+
+
+
+
