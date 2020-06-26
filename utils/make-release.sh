@@ -5,7 +5,7 @@ build=linux
 
 if [ -z "$version" ]
 then
-  echo "Usage: $0 <version>"
+  echo "Usage: $0 <version> eg ./utils/make-release 0.3.0"
   exit
 fi
 

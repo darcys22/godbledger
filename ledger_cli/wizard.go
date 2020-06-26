@@ -36,6 +36,7 @@ var commandWizardJournal = &cli.Command{
 
 		fmt.Print("Enter the Journal Descripion: ")
 		desc, _ := reader.ReadString('\n')
+		desc = strings.TrimSpace(desc)
 		fmt.Println("")
 
 		count := 0
@@ -47,9 +48,11 @@ var commandWizardJournal = &cli.Command{
 			fmt.Printf("Line item #%d\n", count)
 			fmt.Print("Enter the line Descripion: ")
 			lineDesc, _ := reader.ReadString('\n')
+			lineDesc = strings.TrimSpace(lineDesc)
 
 			fmt.Print("Enter the Account: ")
 			lineAccount, _ := reader.ReadString('\n')
+			lineAccount = strings.TrimSpace(lineAccount)
 
 			fmt.Print("Enter the Amount: ")
 			var i int64
