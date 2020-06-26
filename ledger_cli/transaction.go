@@ -96,8 +96,8 @@ func Send(t *Transaction) error {
 	}
 	r, err := client.AddTransaction(ctx, req)
 	if err != nil {
-		log.Fatalf("could not greet: %v", err)
+		log.Fatalf("Could not send transaction: %v", err)
 	}
-	log.Printf("Version: %s", r.GetMessage())
+	log.Printf("Response: %s", r.GetMessage())
 	return nil
 }

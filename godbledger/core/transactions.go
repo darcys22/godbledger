@@ -56,6 +56,20 @@ func NewTransaction(usr *User) (*Transaction, error) {
 	return txn, nil
 }
 
+func ReverseTransaction(originalTxn *Transaction, usr *User) (*Transaction, error) {
+	guid := xid.New()
+	txn := &Transaction{guid.String(), time.Now(), usr, []byte{}, []*Split{}}
+
+	for _, split := range originalTxn.Splits {
+		newSplt, err := NewSplit(split.Date, split.Description, split.Accounts, split.Currency, big.NewInt(0).Mul(big.NewInt(-1), split.Amount))
+		if err != nil {
+			return nil, err
+		}
+		txn.AppendSplit(newSplt)
+	}
+	return txn, nil
+}
+
 func (txn *Transaction) AppendSplit(spl *Split) error {
 	txn.Splits = append(txn.Splits, spl)
 	return nil

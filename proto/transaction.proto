@@ -6,6 +6,7 @@ service Transactor {
   rpc NodeVersion(VersionRequest) returns (VersionResponse) {}
   rpc AddTransaction(TransactionRequest) returns (TransactionResponse) {}
   rpc DeleteTransaction(DeleteRequest) returns (TransactionResponse) {}
+  rpc VoidTransaction(DeleteRequest) returns (TransactionResponse) {}
   rpc AddTag(TagRequest) returns (TransactionResponse) {}
   rpc DeleteTag(DeleteTagRequest) returns (TransactionResponse) {}
   rpc AddCurrency(CurrencyRequest) returns (TransactionResponse) {}

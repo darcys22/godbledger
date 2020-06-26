@@ -21,13 +21,11 @@ func (db *Database) Close() error {
 }
 
 func DSN(DB_USER, DB_PASS, DB_HOST, DB_NAME string) string {
-	return DB_USER + ":" + DB_PASS + "@" + DB_HOST + "/" + DB_NAME + "?charset=utf8"
+	return DB_USER + ":" + DB_PASS + "@" + DB_HOST + "/" + DB_NAME + "?charset=utf8&parseTime=true"
 	//return DB_USER + ":" + DB_PASS + "@" + DB_HOST + "/"
 }
 
-// NewDB initializes a new DB.
-//TODO(Sean): this should actually use the connection_string rather than hardcoded
-func NewDB(connection_string string) (*Database, error) {
+func ValidateConnectionString(connection_string string) string {
 	//if connection_string == "" {
 	//DB_HOST := "tcp(127.0.0.1:3306)"
 	//DB_NAME := "ledger"
@@ -35,8 +33,13 @@ func NewDB(connection_string string) (*Database, error) {
 	//DB_PASS := "password"
 	//connection_string = DSN(DB_USER, DB_PASS, DB_HOST, DB_NAME)
 	//}
+	return connection_string + "?charset=utf8&parseTime=true"
+}
+
+// NewDB initializes a new DB.
+func NewDB(connection_string string) (*Database, error) {
 	log.Debug(connection_string)
-	MySQLDB, err := sql.Open("mysql", connection_string)
+	MySQLDB, err := sql.Open("mysql", ValidateConnectionString(connection_string))
 	if err != nil {
 		log.Fatal(err.Error)
 		return nil, err
@@ -60,7 +63,7 @@ func (db *Database) InitDB() error {
 	log.Debug("Query: " + createDB)
 	_, err := db.DB.Exec(createDB)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Creating users table failed: %s", err)
 	}
 
 	//ACCOUNTS
@@ -73,7 +76,7 @@ func (db *Database) InitDB() error {
 	log.Debug("Query: " + createDB)
 	_, err = db.DB.Exec(createDB)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Creating accounts table failed: %s", err)
 	}
 
 	//TAGS
@@ -85,7 +88,7 @@ func (db *Database) InitDB() error {
 	log.Debug("Query: " + createDB)
 	_, err = db.DB.Exec(createDB)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Creating tags table failed: %s", err)
 	}
 
 	//TAGS FOR ACCOUNTS
@@ -100,22 +103,7 @@ func (db *Database) InitDB() error {
 	log.Debug("Query: " + createDB)
 	_, err = db.DB.Exec(createDB)
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	//TAGS FOR Transactions
-	createDB = `
-	CREATE TABLE IF NOT EXISTS transaction_tag (
-    transaction_id VARCHAR(255) NOT NULL,
-    tag_id INTEGER NOT NULL,
-    FOREIGN KEY (transaction_id) REFERENCES transactions (transaction_id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    FOREIGN KEY (tag_id) REFERENCES tags (tag_id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    PRIMARY KEY (transaction_id, tag_id)
-	);`
-	log.Debug("Query: " + createDB)
-	_, err = db.DB.Exec(createDB)
-	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Creating Account_Tag table failed: %s", err)
 	}
 
 	//CURRENCIES
@@ -137,7 +125,9 @@ func (db *Database) InitDB() error {
 		transaction_id VARCHAR(255) NOT NULL,
 		postdate DATETIME NOT NULL,
 		brief VARCHAR(255),
-		PRIMARY KEY(transaction_id)
+		poster_user_id VARCHAR(255),
+		PRIMARY KEY(transaction_id),
+    FOREIGN KEY (poster_user_id) REFERENCES users (user_id) ON DELETE RESTRICT
 	);`
 	log.Debug("Query: " + createDB)
 	_, err = db.DB.Exec(createDB)
@@ -156,6 +146,21 @@ func (db *Database) InitDB() error {
 	_, err = db.DB.Exec(createDB)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	//TAGS FOR Transactions
+	createDB = `
+	CREATE TABLE IF NOT EXISTS transaction_tag (
+    transaction_id VARCHAR(255) NOT NULL,
+    tag_id INTEGER NOT NULL,
+    FOREIGN KEY (transaction_id) REFERENCES transactions (transaction_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tags (tag_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    PRIMARY KEY (transaction_id, tag_id)
+	);`
+	log.Debug("Query: " + createDB)
+	_, err = db.DB.Exec(createDB)
+	if err != nil {
+		log.Fatalf("Creating Transaction_Tag table failed: %s", err)
 	}
 
 	//LINE ITEMS FOR TRANSACTIONS (SPLITS)

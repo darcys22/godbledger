@@ -52,15 +52,19 @@ If you want to see all the transactions in the database, or export to CSV
 		table.SetBorder(false)
 
 		queryDB := `
-		SELECT
-		split_accounts.account_id,
-		SUM(splits.amount)
-		FROM splits
-		JOIN split_accounts
-		ON splits.split_id = split_accounts.split_id
-		WHERE splits.split_date <= ?
-		GROUP  BY split_accounts.account_id
-		;`
+			SELECT split_accounts.account_id,
+						 Sum(splits.amount)
+			FROM   splits
+						 JOIN split_accounts
+							 ON splits.split_id = split_accounts.split_id
+			WHERE  splits.split_date <= ?
+						 AND "void" NOT IN (SELECT t.tag_name
+																FROM   tags AS t
+																			 JOIN transaction_tag AS tt
+																				 ON tt.tag_id = t.tag_id
+																WHERE  tt.transaction_id = splits.transaction_id)
+			GROUP  BY split_accounts.account_id
+			;`
 
 		log.Debug("Querying Database")
 		rows, err := ledger.LedgerDb.Query(queryDB, queryDate)
