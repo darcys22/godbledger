@@ -34,6 +34,7 @@ var commandSingleTestTransaction = &cli.Command{
 			Name:        line1Account,
 			Description: line1Desc,
 			Balance:     line1Amount,
+			Currency:    "USD",
 		}
 
 		line2Account := "Assets:Checking"
@@ -44,6 +45,7 @@ var commandSingleTestTransaction = &cli.Command{
 			Name:        line2Account,
 			Description: line2Desc,
 			Balance:     line2Amount,
+			Currency:    "USD",
 		}
 
 		req := &Transaction{
@@ -82,6 +84,7 @@ func Send(t *Transaction) error {
 			Accountname: accChange.Name,
 			Description: accChange.Description,
 			Amount:      accChange.Balance.Num().Int64(),
+			Currency:    accChange.Currency,
 		}
 	}
 
@@ -93,8 +96,8 @@ func Send(t *Transaction) error {
 	}
 	r, err := client.AddTransaction(ctx, req)
 	if err != nil {
-		log.Fatalf("could not greet: %v", err)
+		log.Fatalf("Could not send transaction: %v", err)
 	}
-	log.Printf("Version: %s", r.GetMessage())
+	log.Printf("Response: %s", r.GetMessage())
 	return nil
 }

@@ -150,7 +150,7 @@ func initConfig(ctx *cli.Context) error {
 	config := defaultLedgerConfig
 	if ctx.Bool("mysql") {
 		config.DatabaseType = "mysql"
-		config.DatabaseLocation = "godbledger:password@tcp(127.0.0.1:3306)/ledger?charset=utf8"
+		config.DatabaseLocation = "godbledger:password@tcp(127.0.0.1:3306)/ledger"
 	}
 
 	if len(ctx.Args().Get(0)) > 0 {

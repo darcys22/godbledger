@@ -6,15 +6,19 @@ service Transactor {
   rpc NodeVersion(VersionRequest) returns (VersionResponse) {}
   rpc AddTransaction(TransactionRequest) returns (TransactionResponse) {}
   rpc DeleteTransaction(DeleteRequest) returns (TransactionResponse) {}
+  rpc VoidTransaction(DeleteRequest) returns (TransactionResponse) {}
   rpc AddTag(TagRequest) returns (TransactionResponse) {}
   rpc DeleteTag(DeleteTagRequest) returns (TransactionResponse) {}
+  rpc AddCurrency(CurrencyRequest) returns (TransactionResponse) {}
+  rpc DeleteCurrency(DeleteCurrencyRequest) returns (TransactionResponse) {}
   rpc GetTB(TBRequest) returns (TBResponse) {}
 }
 
 message LineItem {
   string accountname = 1;
   string description = 2;
-  int64 amount = 3;
+  string currency = 3;
+  int64 amount = 4;
 }
 
 message TransactionRequest {
@@ -45,10 +49,24 @@ message DeleteTagRequest {
     string signature = 3;
 }
 
+message CurrencyRequest {
+    string currency = 1;
+    int64 decimals = 2;
+    string signature = 3;
+}
+
+message DeleteCurrencyRequest {
+    string currency = 1;
+    string signature = 2;
+}
+
 message TBLine {
   string accountname = 1;
   repeated string tags = 2;
   int64 amount = 3;
+  string currency = 4;
+  int64 decimals = 5;
+  string amountStr = 6;
 }
 
 message TBRequest {

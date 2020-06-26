@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
-	//"database/sql"
 	"encoding/csv"
+	"encoding/json"
 
 	"github.com/darcys22/godbledger/godbledger/cmd"
 	"github.com/darcys22/godbledger/godbledger/ledger"
@@ -25,9 +25,8 @@ var tboutput struct {
 }
 
 var commandTrialBalance = &cli.Command{
-	Name:      "trialbalance",
-	Usage:     "List all Transactions in the Database",
-	ArgsUsage: "[]",
+	Name:  "trialbalance",
+	Usage: "ledger_cli trialbalance [(--json | --csv) <output-filename> ]",
 	Description: `
 Sums the value of the transactions per account in the Database
 
@@ -35,10 +34,7 @@ If you want to see all the transactions in the database, or export to CSV
 `,
 	Flags: []cli.Flag{
 		csvFlag,
-		//cli.StringFlag{
-		//Name:  "privatekey",
-		//Usage: "file containing a raw private key to encrypt",
-		//},
+		jsonFlag,
 	},
 	Action: func(ctx *cli.Context) error {
 		//Check if keyfile path given and make sure it doesn't already exist.
@@ -49,30 +45,26 @@ If you want to see all the transactions in the database, or export to CSV
 		}
 
 		ledger, err := ledger.New(ctx, cfg)
-		//if _, err := os.Stat(databasefilepath); err != nil {
-		//panic(fmt.Sprintf("Database does not already exist at %s.", databasefilepath))
-		//}
-
-		//DB, err := sql.Open(cfg.DatabaseType, databasefilepath)
-		//if err != nil {
-		//log.Fatal(err)
-		//}
 		queryDate := time.Now()
 
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Account", fmt.Sprintf("Balance at %s", queryDate.Format("02 February 2006"))})
+		table.SetHeader([]string{"Account", fmt.Sprintf("Balance at %s", queryDate.Format("02 January 2006"))})
 		table.SetBorder(false)
 
 		queryDB := `
-		SELECT
-		split_accounts.account_id,
-		SUM(splits.amount)
-		FROM splits
-		JOIN split_accounts
-		ON splits.split_id = split_accounts.split_id
-		WHERE splits.split_date <= ?
-		GROUP  BY split_accounts.account_id
-		;`
+			SELECT split_accounts.account_id,
+						 Sum(splits.amount)
+			FROM   splits
+						 JOIN split_accounts
+							 ON splits.split_id = split_accounts.split_id
+			WHERE  splits.split_date <= ?
+						 AND "void" NOT IN (SELECT t.tag_name
+																FROM   tags AS t
+																			 JOIN transaction_tag AS tt
+																				 ON tt.tag_id = t.tag_id
+																WHERE  tt.transaction_id = splits.transaction_id)
+			GROUP  BY split_accounts.account_id
+			;`
 
 		log.Debug("Querying Database")
 		rows, err := ledger.LedgerDb.Query(queryDB, queryDate)
@@ -96,12 +88,12 @@ If you want to see all the transactions in the database, or export to CSV
 
 		//Output some information.
 		if len(ctx.String(csvFlag.Name)) > 0 {
+			log.Infof("Exporting CSV to %s", ctx.String(csvFlag.Name))
 			file, err := os.OpenFile(ctx.String(csvFlag.Name), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
-			defer file.Close()
-
 			if err != nil {
-				os.Exit(1)
+				log.Fatalf("Cannot open to file: %s", err)
 			}
+			defer file.Close()
 
 			csvWriter := csv.NewWriter(file)
 			defer csvWriter.Flush()
@@ -114,17 +106,28 @@ If you want to see all the transactions in the database, or export to CSV
 				}
 			}
 
-			fmt.Println("CSV Yo")
+		} else if len(ctx.String(jsonFlag.Name)) > 0 {
+			log.Infof("Exporting JSON to %s", ctx.String(jsonFlag.Name))
+			file, err := os.OpenFile(ctx.String(jsonFlag.Name), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+
+			if err != nil {
+				log.Fatalf("Cannot open to file: %s", err)
+			}
+			defer file.Close()
+
+			bytes, err := json.Marshal(tboutput.Data)
+			if err != nil {
+				log.Fatal("Cannot serialize")
+			}
+			_, err = file.Write(bytes)
+			if err != nil {
+				log.Fatal("Cannot write to file", err)
+			}
 		} else {
 			fmt.Println()
 			table.Render()
 			fmt.Println()
 		}
-		//if ctx.Bool(jsonFlag.Name) {
-		//mustPrintJSON(out)
-		//} else {
-		//fmt.Println("Address:", out.Address)
-		//}
 		return nil
 	},
 }

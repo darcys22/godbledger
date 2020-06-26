@@ -28,7 +28,7 @@ func NewDB(dirPath string) (*Database, error) {
 	if err := os.MkdirAll(dirPath, 0700); err != nil {
 		return nil, err
 	}
-	datafile := path.Join(dirPath, "ledger.db")
+	datafile := path.Join(dirPath, "ledger.db?_foreign_keys=true&parseTime=true")
 	SqliteDB, err := sql.Open("sqlite3", datafile)
 	if err != nil {
 		return nil, err
@@ -115,7 +115,9 @@ func (db *Database) InitDB() error {
 		transaction_id VARCHAR(255) NOT NULL,
 		postdate DATETIME NOT NULL,
 		brief VARCHAR(255),
-		PRIMARY KEY(transaction_id)
+		poster_user_id VARCHAR(255),
+		PRIMARY KEY(transaction_id),
+    FOREIGN KEY (poster_user_id) REFERENCES users (user_id) ON DELETE RESTRICT
 	);`
 	log.Debug("Query: " + createDB)
 	_, err = db.DB.Exec(createDB)
@@ -129,6 +131,21 @@ func (db *Database) InitDB() error {
 		transaction_id VARCHAR(255) NOT NULL,
 		body TEXT,
 		FOREIGN KEY(transaction_id) REFERENCES transactions(transaction_id) ON DELETE CASCADE
+	);`
+	log.Debug("Query: " + createDB)
+	_, err = db.DB.Exec(createDB)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	//TAGS FOR Transactions
+	createDB = `
+	CREATE TABLE IF NOT EXISTS transaction_tag (
+    transaction_id VARCHAR(255) NOT NULL,
+    tag_id INTEGER NOT NULL,
+    FOREIGN KEY (transaction_id) REFERENCES transactions (transaction_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tags (tag_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    PRIMARY KEY (transaction_id, tag_id)
 	);`
 	log.Debug("Query: " + createDB)
 	_, err = db.DB.Exec(createDB)
@@ -184,6 +201,19 @@ func (db *Database) InitDB() error {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	//Default Currencies
+	insertCurrency := `
+		INSERT INTO currencies(name,decimals)
+			VALUES("USD",2),
+			("AUD",2),
+			("GBP",2),
+			("BTC",8),
+			("ETH",9),
+			("LOKI",9);
+	`
+	log.Debug("Query: " + insertCurrency)
+	_, _ = db.DB.Exec(insertCurrency)
 	return err
 }
 

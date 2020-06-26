@@ -27,7 +27,8 @@ const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 type LineItem struct {
 	Accountname          string   `protobuf:"bytes,1,opt,name=accountname,proto3" json:"accountname,omitempty"`
 	Description          string   `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	Amount               int64    `protobuf:"varint,3,opt,name=amount,proto3" json:"amount,omitempty"`
+	Currency             string   `protobuf:"bytes,3,opt,name=currency,proto3" json:"currency,omitempty"`
+	Amount               int64    `protobuf:"varint,4,opt,name=amount,proto3" json:"amount,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -68,6 +69,13 @@ func (m *LineItem) GetAccountname() string {
 func (m *LineItem) GetDescription() string {
 	if m != nil {
 		return m.Description
+	}
+	return ""
+}
+
+func (m *LineItem) GetCurrency() string {
+	if m != nil {
+		return m.Currency
 	}
 	return ""
 }
@@ -338,10 +346,115 @@ func (m *DeleteTagRequest) GetSignature() string {
 	return ""
 }
 
+type CurrencyRequest struct {
+	Currency             string   `protobuf:"bytes,1,opt,name=currency,proto3" json:"currency,omitempty"`
+	Decimals             int64    `protobuf:"varint,2,opt,name=decimals,proto3" json:"decimals,omitempty"`
+	Signature            string   `protobuf:"bytes,3,opt,name=signature,proto3" json:"signature,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *CurrencyRequest) Reset()         { *m = CurrencyRequest{} }
+func (m *CurrencyRequest) String() string { return proto.CompactTextString(m) }
+func (*CurrencyRequest) ProtoMessage()    {}
+func (*CurrencyRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_2cc4e03d2c28c490, []int{6}
+}
+
+func (m *CurrencyRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CurrencyRequest.Unmarshal(m, b)
+}
+func (m *CurrencyRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CurrencyRequest.Marshal(b, m, deterministic)
+}
+func (m *CurrencyRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CurrencyRequest.Merge(m, src)
+}
+func (m *CurrencyRequest) XXX_Size() int {
+	return xxx_messageInfo_CurrencyRequest.Size(m)
+}
+func (m *CurrencyRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_CurrencyRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CurrencyRequest proto.InternalMessageInfo
+
+func (m *CurrencyRequest) GetCurrency() string {
+	if m != nil {
+		return m.Currency
+	}
+	return ""
+}
+
+func (m *CurrencyRequest) GetDecimals() int64 {
+	if m != nil {
+		return m.Decimals
+	}
+	return 0
+}
+
+func (m *CurrencyRequest) GetSignature() string {
+	if m != nil {
+		return m.Signature
+	}
+	return ""
+}
+
+type DeleteCurrencyRequest struct {
+	Currency             string   `protobuf:"bytes,1,opt,name=currency,proto3" json:"currency,omitempty"`
+	Signature            string   `protobuf:"bytes,2,opt,name=signature,proto3" json:"signature,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *DeleteCurrencyRequest) Reset()         { *m = DeleteCurrencyRequest{} }
+func (m *DeleteCurrencyRequest) String() string { return proto.CompactTextString(m) }
+func (*DeleteCurrencyRequest) ProtoMessage()    {}
+func (*DeleteCurrencyRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_2cc4e03d2c28c490, []int{7}
+}
+
+func (m *DeleteCurrencyRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DeleteCurrencyRequest.Unmarshal(m, b)
+}
+func (m *DeleteCurrencyRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DeleteCurrencyRequest.Marshal(b, m, deterministic)
+}
+func (m *DeleteCurrencyRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteCurrencyRequest.Merge(m, src)
+}
+func (m *DeleteCurrencyRequest) XXX_Size() int {
+	return xxx_messageInfo_DeleteCurrencyRequest.Size(m)
+}
+func (m *DeleteCurrencyRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteCurrencyRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteCurrencyRequest proto.InternalMessageInfo
+
+func (m *DeleteCurrencyRequest) GetCurrency() string {
+	if m != nil {
+		return m.Currency
+	}
+	return ""
+}
+
+func (m *DeleteCurrencyRequest) GetSignature() string {
+	if m != nil {
+		return m.Signature
+	}
+	return ""
+}
+
 type TBLine struct {
 	Accountname          string   `protobuf:"bytes,1,opt,name=accountname,proto3" json:"accountname,omitempty"`
 	Tags                 []string `protobuf:"bytes,2,rep,name=tags,proto3" json:"tags,omitempty"`
 	Amount               int64    `protobuf:"varint,3,opt,name=amount,proto3" json:"amount,omitempty"`
+	Currency             string   `protobuf:"bytes,4,opt,name=currency,proto3" json:"currency,omitempty"`
+	Decimals             int64    `protobuf:"varint,5,opt,name=decimals,proto3" json:"decimals,omitempty"`
+	AmountStr            string   `protobuf:"bytes,6,opt,name=amountStr,proto3" json:"amountStr,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -351,7 +464,7 @@ func (m *TBLine) Reset()         { *m = TBLine{} }
 func (m *TBLine) String() string { return proto.CompactTextString(m) }
 func (*TBLine) ProtoMessage()    {}
 func (*TBLine) Descriptor() ([]byte, []int) {
-	return fileDescriptor_2cc4e03d2c28c490, []int{6}
+	return fileDescriptor_2cc4e03d2c28c490, []int{8}
 }
 
 func (m *TBLine) XXX_Unmarshal(b []byte) error {
@@ -393,6 +506,27 @@ func (m *TBLine) GetAmount() int64 {
 	return 0
 }
 
+func (m *TBLine) GetCurrency() string {
+	if m != nil {
+		return m.Currency
+	}
+	return ""
+}
+
+func (m *TBLine) GetDecimals() int64 {
+	if m != nil {
+		return m.Decimals
+	}
+	return 0
+}
+
+func (m *TBLine) GetAmountStr() string {
+	if m != nil {
+		return m.AmountStr
+	}
+	return ""
+}
+
 type TBRequest struct {
 	Date                 string   `protobuf:"bytes,1,opt,name=date,proto3" json:"date,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -404,7 +538,7 @@ func (m *TBRequest) Reset()         { *m = TBRequest{} }
 func (m *TBRequest) String() string { return proto.CompactTextString(m) }
 func (*TBRequest) ProtoMessage()    {}
 func (*TBRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_2cc4e03d2c28c490, []int{7}
+	return fileDescriptor_2cc4e03d2c28c490, []int{9}
 }
 
 func (m *TBRequest) XXX_Unmarshal(b []byte) error {
@@ -443,7 +577,7 @@ func (m *TBResponse) Reset()         { *m = TBResponse{} }
 func (m *TBResponse) String() string { return proto.CompactTextString(m) }
 func (*TBResponse) ProtoMessage()    {}
 func (*TBResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_2cc4e03d2c28c490, []int{8}
+	return fileDescriptor_2cc4e03d2c28c490, []int{10}
 }
 
 func (m *TBResponse) XXX_Unmarshal(b []byte) error {
@@ -482,7 +616,7 @@ func (m *VersionRequest) Reset()         { *m = VersionRequest{} }
 func (m *VersionRequest) String() string { return proto.CompactTextString(m) }
 func (*VersionRequest) ProtoMessage()    {}
 func (*VersionRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_2cc4e03d2c28c490, []int{9}
+	return fileDescriptor_2cc4e03d2c28c490, []int{11}
 }
 
 func (m *VersionRequest) XXX_Unmarshal(b []byte) error {
@@ -521,7 +655,7 @@ func (m *VersionResponse) Reset()         { *m = VersionResponse{} }
 func (m *VersionResponse) String() string { return proto.CompactTextString(m) }
 func (*VersionResponse) ProtoMessage()    {}
 func (*VersionResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_2cc4e03d2c28c490, []int{10}
+	return fileDescriptor_2cc4e03d2c28c490, []int{12}
 }
 
 func (m *VersionResponse) XXX_Unmarshal(b []byte) error {
@@ -556,6 +690,8 @@ func init() {
 	proto.RegisterType((*TransactionResponse)(nil), "transaction.TransactionResponse")
 	proto.RegisterType((*TagRequest)(nil), "transaction.TagRequest")
 	proto.RegisterType((*DeleteTagRequest)(nil), "transaction.DeleteTagRequest")
+	proto.RegisterType((*CurrencyRequest)(nil), "transaction.CurrencyRequest")
+	proto.RegisterType((*DeleteCurrencyRequest)(nil), "transaction.DeleteCurrencyRequest")
 	proto.RegisterType((*TBLine)(nil), "transaction.TBLine")
 	proto.RegisterType((*TBRequest)(nil), "transaction.TBRequest")
 	proto.RegisterType((*TBResponse)(nil), "transaction.TBResponse")
@@ -566,46 +702,53 @@ func init() {
 func init() { proto.RegisterFile("transaction.proto", fileDescriptor_2cc4e03d2c28c490) }
 
 var fileDescriptor_2cc4e03d2c28c490 = []byte{
-	// 467 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x54, 0xc1, 0x6e, 0xd3, 0x40,
-	0x10, 0xc5, 0x71, 0x9a, 0x92, 0x17, 0x51, 0xda, 0xa9, 0x68, 0xad, 0x50, 0xa8, 0xe5, 0x53, 0xa0,
-	0x52, 0x91, 0xca, 0x01, 0x89, 0x1b, 0x11, 0x08, 0x81, 0xa0, 0x87, 0x60, 0x72, 0xe2, 0xb2, 0xc4,
-	0x53, 0xcb, 0x52, 0xb3, 0x0e, 0xde, 0xcd, 0xa7, 0xf0, 0x6d, 0xfc, 0x0e, 0xda, 0x78, 0x37, 0xf5,
-	0xa6, 0x0d, 0x98, 0x03, 0xb7, 0xdd, 0xf1, 0x9b, 0x37, 0x6f, 0x66, 0xde, 0x1a, 0x07, 0xba, 0x12,
-	0x52, 0x89, 0x99, 0x2e, 0x4a, 0x79, 0xbe, 0xa8, 0x4a, 0x5d, 0xd2, 0xa0, 0x11, 0x4a, 0xae, 0x70,
-	0xff, 0x53, 0x21, 0xf9, 0x83, 0xe6, 0x39, 0xc5, 0x18, 0x88, 0xd9, 0xac, 0x5c, 0x4a, 0x2d, 0xc5,
-	0x9c, 0xa3, 0x20, 0x0e, 0x46, 0xfd, 0x49, 0x33, 0x64, 0x10, 0x19, 0xab, 0x59, 0x55, 0x2c, 0x4c,
-	0x72, 0xd4, 0xa9, 0x11, 0x8d, 0x10, 0x1d, 0xa1, 0x27, 0xe6, 0x06, 0x1f, 0x85, 0x71, 0x30, 0x0a,
-	0x27, 0xf6, 0x96, 0xfc, 0x0c, 0x40, 0xe9, 0x4d, 0xdd, 0x09, 0xff, 0x58, 0xb2, 0xd2, 0x44, 0xe8,
-	0x66, 0x42, 0xbb, 0x5a, 0xab, 0x73, 0x8b, 0x22, 0x67, 0xd8, 0xb9, 0x2e, 0x24, 0xab, 0x28, 0x8c,
-	0xc3, 0xd1, 0xe0, 0xe2, 0xd1, 0x79, 0xb3, 0x49, 0xd7, 0xce, 0xa4, 0xc6, 0xd0, 0x09, 0xfa, 0xaa,
-	0xc8, 0xa5, 0xd0, 0xcb, 0x8a, 0xa3, 0xee, 0x8a, 0xec, 0x26, 0x90, 0x7c, 0xc6, 0x83, 0xb7, 0x7c,
-	0xcd, 0x9a, 0x9d, 0xa2, 0xa7, 0x40, 0x91, 0xb1, 0xd4, 0xc5, 0x55, 0xc1, 0x95, 0xd5, 0xd5, 0x88,
-	0xf8, 0x74, 0x9d, 0x4d, 0xba, 0x17, 0x38, 0xf4, 0xba, 0x54, 0x8b, 0x52, 0x2a, 0xa6, 0x08, 0xbb,
-	0x73, 0x56, 0x4a, 0xe4, 0xae, 0x53, 0x77, 0x4d, 0xa6, 0x40, 0x2a, 0x72, 0x57, 0x3c, 0xc2, 0xae,
-	0x1d, 0xb7, 0xc3, 0xd9, 0x2b, 0xed, 0x23, 0xd4, 0x22, 0xb7, 0x05, 0xcd, 0xd1, 0x17, 0x12, 0x6e,
-	0x0a, 0xf9, 0x86, 0xfd, 0xba, 0xaf, 0xff, 0xc2, 0x3e, 0x45, 0x2f, 0x1d, 0x9b, 0x41, 0xb7, 0xf0,
-	0x0c, 0xa1, 0xab, 0x45, 0xae, 0xa2, 0x4e, 0x1c, 0x9a, 0x15, 0x9b, 0xf3, 0x56, 0x97, 0x9c, 0xa2,
-	0x9f, 0x8e, 0xff, 0xe0, 0x8d, 0xe4, 0x15, 0x60, 0x00, 0x76, 0xac, 0xcf, 0x9c, 0x0f, 0x82, 0x95,
-	0x0f, 0x0e, 0x3d, 0x1f, 0xd4, 0x02, 0xad, 0x0b, 0x92, 0xe7, 0xd8, 0x9b, 0x72, 0xa5, 0x1a, 0xd6,
-	0xdb, 0xbe, 0x93, 0x33, 0x3c, 0x5c, 0x63, 0xff, 0xb6, 0xc0, 0x8b, 0x5f, 0x21, 0xe0, 0x56, 0x5e,
-	0x56, 0xf4, 0x11, 0x83, 0xcb, 0x32, 0x63, 0x9b, 0x4f, 0x8f, 0x3d, 0x49, 0xbe, 0x82, 0xe1, 0xc9,
-	0xdd, 0x1f, 0xeb, 0x92, 0xc9, 0x3d, 0xfa, 0x8a, 0xbd, 0x37, 0x59, 0xd6, 0xf0, 0x13, 0x9d, 0xfa,
-	0x1d, 0xde, 0x7a, 0x4f, 0xc3, 0x78, 0x3b, 0x60, 0x4d, 0xfb, 0x05, 0x07, 0xd6, 0x1a, 0x0d, 0xe6,
-	0xa1, 0x97, 0xe8, 0x3d, 0x89, 0x56, 0xa4, 0xef, 0xd0, 0x33, 0x5a, 0x45, 0x4e, 0xc7, 0x3e, 0x7a,
-	0x6d, 0xbf, 0x56, 0x34, 0x97, 0xe8, 0xaf, 0x6d, 0x4b, 0x4f, 0xee, 0xd0, 0xf4, 0x8f, 0x7c, 0xaf,
-	0xb1, 0xf3, 0x9e, 0x75, 0x3a, 0xa6, 0xa3, 0x0d, 0x6f, 0x38, 0x92, 0xe3, 0x5b, 0x71, 0x97, 0xfb,
-	0xbd, 0xb7, 0xfa, 0x5d, 0xbe, 0xfc, 0x1d, 0x00, 0x00, 0xff, 0xff, 0xa8, 0xb3, 0x7c, 0x3b, 0x43,
-	0x05, 0x00, 0x00,
+	// 585 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x55, 0x4d, 0x6f, 0xd3, 0x40,
+	0x10, 0xc5, 0x75, 0x92, 0x36, 0x2f, 0x22, 0x69, 0xb7, 0x6a, 0x6b, 0x85, 0x42, 0x23, 0x9f, 0x02,
+	0x95, 0x8a, 0x54, 0x0e, 0x48, 0xdc, 0x9a, 0x82, 0x10, 0x08, 0x8a, 0xea, 0x86, 0x88, 0x03, 0x97,
+	0xc5, 0x1e, 0x2c, 0x4b, 0x89, 0x1d, 0xbc, 0x9b, 0x03, 0x57, 0xfe, 0x03, 0xff, 0x82, 0xbf, 0xc3,
+	0xff, 0x41, 0xfe, 0x58, 0x77, 0x37, 0x49, 0xd3, 0x14, 0xc1, 0x6d, 0x77, 0x3c, 0xf3, 0xe6, 0xcd,
+	0xee, 0x7b, 0x6b, 0xec, 0xc8, 0x94, 0xc7, 0x82, 0xfb, 0x32, 0x4a, 0xe2, 0x93, 0x69, 0x9a, 0xc8,
+	0x84, 0xb5, 0xb4, 0x90, 0xfb, 0xc3, 0xc2, 0xd6, 0xbb, 0x28, 0xa6, 0x37, 0x92, 0x26, 0xac, 0x87,
+	0x16, 0xf7, 0xfd, 0x64, 0x16, 0xcb, 0x98, 0x4f, 0xc8, 0xb1, 0x7a, 0x56, 0xbf, 0xe9, 0xe9, 0xa1,
+	0x2c, 0x23, 0x20, 0xe1, 0xa7, 0xd1, 0x34, 0xab, 0x76, 0x36, 0x8a, 0x0c, 0x2d, 0xc4, 0xba, 0xd8,
+	0xf2, 0x67, 0x69, 0x4a, 0xb1, 0xff, 0xdd, 0xb1, 0xf3, 0xcf, 0xd5, 0x9e, 0xed, 0xa3, 0xc1, 0x27,
+	0x19, 0x96, 0x53, 0xeb, 0x59, 0x7d, 0xdb, 0x2b, 0x77, 0xee, 0x4f, 0x0b, 0x6c, 0x78, 0x4d, 0xca,
+	0xa3, 0x6f, 0x33, 0x12, 0x92, 0x31, 0xd4, 0x02, 0x2e, 0x15, 0x8f, 0x7c, 0xbd, 0x06, 0x81, 0x63,
+	0xd4, 0xc7, 0x51, 0x4c, 0xc2, 0xb1, 0x7b, 0x76, 0xbf, 0x75, 0xba, 0x77, 0xa2, 0x9f, 0x80, 0x1a,
+	0xd5, 0x2b, 0x72, 0xd8, 0x21, 0x9a, 0x22, 0x0a, 0x63, 0x2e, 0x67, 0x29, 0xe5, 0xa4, 0x9a, 0xde,
+	0x75, 0xc0, 0x7d, 0x8f, 0xfb, 0x2f, 0x69, 0x4c, 0x92, 0x14, 0xa3, 0x47, 0x40, 0x14, 0x50, 0x2c,
+	0xa3, 0xaf, 0x11, 0xa5, 0x25, 0x2f, 0x2d, 0x62, 0xc2, 0x6d, 0xcc, 0xc3, 0x3d, 0xc5, 0xae, 0x31,
+	0xa5, 0x98, 0x26, 0xb1, 0x20, 0xe6, 0x60, 0x73, 0x42, 0x42, 0xf0, 0x50, 0x4d, 0xaa, 0xb6, 0xee,
+	0x08, 0x18, 0xf2, 0x50, 0x35, 0x77, 0xb0, 0x59, 0x5e, 0x85, 0xca, 0x2b, 0xb7, 0x6c, 0x1b, 0xb6,
+	0xe4, 0x61, 0xd9, 0x30, 0x5b, 0x9a, 0x44, 0xec, 0x79, 0x22, 0x9f, 0xb1, 0x5d, 0xcc, 0xf5, 0x5f,
+	0xd0, 0x43, 0x74, 0xce, 0xcb, 0x1b, 0x57, 0xe0, 0xba, 0x28, 0xac, 0x39, 0x51, 0x74, 0xb1, 0x15,
+	0x90, 0x1f, 0x4d, 0xf8, 0x58, 0xe4, 0x3d, 0x6c, 0xaf, 0xda, 0xdf, 0xd2, 0xe8, 0x12, 0x7b, 0xc5,
+	0x18, 0x77, 0x69, 0xb7, 0xfa, 0x8a, 0x7e, 0x59, 0x68, 0x0c, 0x07, 0x99, 0x4a, 0xd6, 0x30, 0x03,
+	0x43, 0x4d, 0xf2, 0x30, 0x63, 0x6d, 0x67, 0xfa, 0xcc, 0xd6, 0x9a, 0xc4, 0x6d, 0x5d, 0xe2, 0x06,
+	0xa5, 0xda, 0x8a, 0x13, 0xa8, 0x2f, 0x9e, 0x40, 0x81, 0x70, 0x25, 0x53, 0xa7, 0x51, 0xd0, 0xad,
+	0x02, 0xee, 0x11, 0x9a, 0xc3, 0xc1, 0x0a, 0xbb, 0xb8, 0xcf, 0x81, 0x2c, 0xa1, 0x54, 0xda, 0x63,
+	0x65, 0x0d, 0x2b, 0xb7, 0xc6, 0xae, 0x61, 0x8d, 0x62, 0xec, 0xd2, 0x18, 0xee, 0x13, 0xb4, 0x47,
+	0x94, 0x0a, 0xcd, 0x8d, 0x37, 0xcb, 0xf4, 0x18, 0x9d, 0x2a, 0xf7, 0x36, 0x4d, 0x9f, 0xfe, 0xae,
+	0x03, 0xca, 0x05, 0x49, 0xca, 0xde, 0xa2, 0x75, 0x91, 0x04, 0x54, 0xd6, 0xb3, 0x07, 0x06, 0x25,
+	0x93, 0x41, 0xf7, 0x70, 0xf9, 0xc7, 0xa2, 0xa5, 0x7b, 0x8f, 0x7d, 0x44, 0xfb, 0x2c, 0x08, 0x34,
+	0x8b, 0xb1, 0x23, 0x73, 0xc2, 0x85, 0x27, 0xa6, 0xdb, 0xbb, 0x39, 0xa1, 0x82, 0xbd, 0xc2, 0x4e,
+	0xe9, 0x16, 0x0d, 0xb9, 0x6b, 0x14, 0x1a, 0xaf, 0xc4, 0x5a, 0xa0, 0x97, 0xe8, 0x8c, 0x92, 0x28,
+	0xf8, 0x97, 0x90, 0xaf, 0xd0, 0xc8, 0xc6, 0xe7, 0x21, 0x3b, 0x30, 0xb3, 0x2b, 0x93, 0xaf, 0x05,
+	0x73, 0x81, 0x66, 0xf5, 0x38, 0xb0, 0x87, 0x4b, 0x38, 0xdd, 0x11, 0xef, 0x03, 0x5a, 0x67, 0x41,
+	0x70, 0x5e, 0xf9, 0xcf, 0x28, 0x99, 0x73, 0xee, 0x5a, 0x80, 0x9f, 0xd0, 0x36, 0x6d, 0xcf, 0xdc,
+	0x25, 0x2c, 0xff, 0x06, 0xf9, 0x05, 0xea, 0xaf, 0x49, 0x0e, 0x07, 0x6c, 0x7f, 0xce, 0x19, 0x0a,
+	0xe4, 0x60, 0x21, 0xae, 0x6a, 0xbf, 0x34, 0xf2, 0x9f, 0xeb, 0xb3, 0x3f, 0x01, 0x00, 0x00, 0xff,
+	0xff, 0xee, 0x23, 0xfb, 0x63, 0x71, 0x07, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
-var _ grpc.ClientConn
+var _ grpc.ClientConnInterface
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
-const _ = grpc.SupportPackageIsVersion4
+const _ = grpc.SupportPackageIsVersion6
 
 // TransactorClient is the client API for Transactor service.
 //
@@ -614,16 +757,19 @@ type TransactorClient interface {
 	NodeVersion(ctx context.Context, in *VersionRequest, opts ...grpc.CallOption) (*VersionResponse, error)
 	AddTransaction(ctx context.Context, in *TransactionRequest, opts ...grpc.CallOption) (*TransactionResponse, error)
 	DeleteTransaction(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*TransactionResponse, error)
+	VoidTransaction(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*TransactionResponse, error)
 	AddTag(ctx context.Context, in *TagRequest, opts ...grpc.CallOption) (*TransactionResponse, error)
 	DeleteTag(ctx context.Context, in *DeleteTagRequest, opts ...grpc.CallOption) (*TransactionResponse, error)
+	AddCurrency(ctx context.Context, in *CurrencyRequest, opts ...grpc.CallOption) (*TransactionResponse, error)
+	DeleteCurrency(ctx context.Context, in *DeleteCurrencyRequest, opts ...grpc.CallOption) (*TransactionResponse, error)
 	GetTB(ctx context.Context, in *TBRequest, opts ...grpc.CallOption) (*TBResponse, error)
 }
 
 type transactorClient struct {
-	cc *grpc.ClientConn
+	cc grpc.ClientConnInterface
 }
 
-func NewTransactorClient(cc *grpc.ClientConn) TransactorClient {
+func NewTransactorClient(cc grpc.ClientConnInterface) TransactorClient {
 	return &transactorClient{cc}
 }
 
@@ -654,6 +800,15 @@ func (c *transactorClient) DeleteTransaction(ctx context.Context, in *DeleteRequ
 	return out, nil
 }
 
+func (c *transactorClient) VoidTransaction(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*TransactionResponse, error) {
+	out := new(TransactionResponse)
+	err := c.cc.Invoke(ctx, "/transaction.Transactor/VoidTransaction", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *transactorClient) AddTag(ctx context.Context, in *TagRequest, opts ...grpc.CallOption) (*TransactionResponse, error) {
 	out := new(TransactionResponse)
 	err := c.cc.Invoke(ctx, "/transaction.Transactor/AddTag", in, out, opts...)
@@ -666,6 +821,24 @@ func (c *transactorClient) AddTag(ctx context.Context, in *TagRequest, opts ...g
 func (c *transactorClient) DeleteTag(ctx context.Context, in *DeleteTagRequest, opts ...grpc.CallOption) (*TransactionResponse, error) {
 	out := new(TransactionResponse)
 	err := c.cc.Invoke(ctx, "/transaction.Transactor/DeleteTag", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *transactorClient) AddCurrency(ctx context.Context, in *CurrencyRequest, opts ...grpc.CallOption) (*TransactionResponse, error) {
+	out := new(TransactionResponse)
+	err := c.cc.Invoke(ctx, "/transaction.Transactor/AddCurrency", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *transactorClient) DeleteCurrency(ctx context.Context, in *DeleteCurrencyRequest, opts ...grpc.CallOption) (*TransactionResponse, error) {
+	out := new(TransactionResponse)
+	err := c.cc.Invoke(ctx, "/transaction.Transactor/DeleteCurrency", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -686,8 +859,11 @@ type TransactorServer interface {
 	NodeVersion(context.Context, *VersionRequest) (*VersionResponse, error)
 	AddTransaction(context.Context, *TransactionRequest) (*TransactionResponse, error)
 	DeleteTransaction(context.Context, *DeleteRequest) (*TransactionResponse, error)
+	VoidTransaction(context.Context, *DeleteRequest) (*TransactionResponse, error)
 	AddTag(context.Context, *TagRequest) (*TransactionResponse, error)
 	DeleteTag(context.Context, *DeleteTagRequest) (*TransactionResponse, error)
+	AddCurrency(context.Context, *CurrencyRequest) (*TransactionResponse, error)
+	DeleteCurrency(context.Context, *DeleteCurrencyRequest) (*TransactionResponse, error)
 	GetTB(context.Context, *TBRequest) (*TBResponse, error)
 }
 
@@ -704,11 +880,20 @@ func (*UnimplementedTransactorServer) AddTransaction(ctx context.Context, req *T
 func (*UnimplementedTransactorServer) DeleteTransaction(ctx context.Context, req *DeleteRequest) (*TransactionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteTransaction not implemented")
 }
+func (*UnimplementedTransactorServer) VoidTransaction(ctx context.Context, req *DeleteRequest) (*TransactionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VoidTransaction not implemented")
+}
 func (*UnimplementedTransactorServer) AddTag(ctx context.Context, req *TagRequest) (*TransactionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddTag not implemented")
 }
 func (*UnimplementedTransactorServer) DeleteTag(ctx context.Context, req *DeleteTagRequest) (*TransactionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteTag not implemented")
+}
+func (*UnimplementedTransactorServer) AddCurrency(ctx context.Context, req *CurrencyRequest) (*TransactionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddCurrency not implemented")
+}
+func (*UnimplementedTransactorServer) DeleteCurrency(ctx context.Context, req *DeleteCurrencyRequest) (*TransactionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteCurrency not implemented")
 }
 func (*UnimplementedTransactorServer) GetTB(ctx context.Context, req *TBRequest) (*TBResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTB not implemented")
@@ -772,6 +957,24 @@ func _Transactor_DeleteTransaction_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Transactor_VoidTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TransactorServer).VoidTransaction(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/transaction.Transactor/VoidTransaction",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TransactorServer).VoidTransaction(ctx, req.(*DeleteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Transactor_AddTag_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TagRequest)
 	if err := dec(in); err != nil {
@@ -804,6 +1007,42 @@ func _Transactor_DeleteTag_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TransactorServer).DeleteTag(ctx, req.(*DeleteTagRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Transactor_AddCurrency_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CurrencyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TransactorServer).AddCurrency(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/transaction.Transactor/AddCurrency",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TransactorServer).AddCurrency(ctx, req.(*CurrencyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Transactor_DeleteCurrency_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteCurrencyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TransactorServer).DeleteCurrency(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/transaction.Transactor/DeleteCurrency",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TransactorServer).DeleteCurrency(ctx, req.(*DeleteCurrencyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -843,12 +1082,24 @@ var _Transactor_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Transactor_DeleteTransaction_Handler,
 		},
 		{
+			MethodName: "VoidTransaction",
+			Handler:    _Transactor_VoidTransaction_Handler,
+		},
+		{
 			MethodName: "AddTag",
 			Handler:    _Transactor_AddTag_Handler,
 		},
 		{
 			MethodName: "DeleteTag",
 			Handler:    _Transactor_DeleteTag_Handler,
+		},
+		{
+			MethodName: "AddCurrency",
+			Handler:    _Transactor_AddCurrency_Handler,
+		},
+		{
+			MethodName: "DeleteCurrency",
+			Handler:    _Transactor_DeleteCurrency_Handler,
 		},
 		{
 			MethodName: "GetTB",
