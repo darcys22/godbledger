@@ -72,6 +72,7 @@ func New(ctx *cli.Context, cfg *cmd.LedgerConfig) (*Ledger, error) {
 
 func (l *Ledger) Insert(txn *core.Transaction) (string, error) {
 	log.Info("Created Transaction: %s", txn)
+	log.Debug("Creating Safely added user: %s", txn.Poster)
 	l.LedgerDb.SafeAddUser(txn.Poster)
 	currencies, _ := l.GetCurrencies(txn)
 	for _, currency := range currencies {
@@ -97,9 +98,39 @@ func (l *Ledger) Delete(txnID string) {
 	l.LedgerDb.DeleteTransaction(txnID)
 }
 
-func (l *Ledger) Void(txnID string) error {
+func (l *Ledger) Void(txnID string, usr *core.User) error {
 	log.Infof("Voiding Transaction: %s", txnID)
-	return l.LedgerDb.SafeAddTagToTransaction(txnID, "Void")
+
+	txn, err := l.LedgerDb.FindTransaction(txnID)
+	if err != nil {
+		return err
+	}
+
+	log.Debugf("Transaction: %+v", txn)
+
+	newTxn, err := core.ReverseTransaction(txn, usr)
+
+	log.Debugf("Reversed Transaction: %+v", newTxn)
+
+	newJournalID, err := l.Insert(newTxn)
+	if err != nil {
+		return err
+	}
+	log.Debug("Successful insert of reversing transaction")
+
+	err = l.LedgerDb.SafeAddTagToTransaction(newJournalID, "Void")
+	if err != nil {
+		return err
+	}
+	log.Debug("New Transaction Tagged Void")
+
+	err = l.LedgerDb.SafeAddTagToTransaction(txnID, "Void")
+	if err != nil {
+		return err
+	}
+	log.Debug("Original Transaction Tagged Void")
+
+	return nil
 }
 
 func (l *Ledger) InsertTag(account, tag string) error {

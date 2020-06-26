@@ -46,6 +46,7 @@ func init() {
 		commandFile,
 		// delete.go
 		commandDeleteTransaction,
+		commandVoidTransaction,
 		// tagaccount.go
 		commandTagAccount,
 		// addcurrency.go

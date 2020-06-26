@@ -81,9 +81,19 @@ func (s *LedgerServer) DeleteTransaction(ctx context.Context, in *pb.DeleteReque
 
 func (s *LedgerServer) VoidTransaction(ctx context.Context, in *pb.DeleteRequest) (*pb.TransactionResponse, error) {
 	log.Info("Received New Void Request")
-	_ = s.ld.Void(in.GetIdentifier())
 
-	return &pb.TransactionResponse{Message: "Accepted"}, nil
+	usr, err := core.NewUser("MainUser")
+	if err != nil {
+		log.Error(err)
+	}
+
+	message := "Accepted"
+	err = s.ld.Void(in.GetIdentifier(), usr)
+	if err != nil {
+		message = err.Error()
+	}
+
+	return &pb.TransactionResponse{Message: message}, nil
 }
 
 func (s *LedgerServer) NodeVersion(ctx context.Context, in *pb.VersionRequest) (*pb.VersionResponse, error) {
@@ -133,13 +143,21 @@ func (s *LedgerServer) GetTB(ctx context.Context, in *pb.TBRequest) (*pb.TBRespo
 	log.Info("Received New TB Request")
 	accounts, err := s.ld.GetTB(time.Now())
 
-	//log.Debug(accounts)
-
 	response := pb.TBResponse{}
 
+	log.Debug("Building TB Response")
 	for _, account := range *accounts {
+		log.Debugf("Account: %s", account.Account)
 		amt := strconv.Itoa(account.Amount)
-		amt = amt[:len(amt)-account.Decimals] + "." + amt[len(amt)-account.Decimals:]
+		if len(amt) > account.Decimals {
+			amt = amt[:len(amt)-account.Decimals] + "." + amt[len(amt)-account.Decimals:]
+		} else {
+			prefix := "0."
+			for i := 1; i <= account.Decimals-len(amt); i++ {
+				prefix = prefix + "0"
+			}
+			amt = prefix + amt
+		}
 		response.Lines = append(response.Lines,
 			&pb.TBLine{
 				Accountname: account.Account,

@@ -2,6 +2,7 @@ package mysqldb
 
 import (
 	"database/sql"
+	"math/big"
 	"strconv"
 	"strings"
 	"time"
@@ -13,14 +14,21 @@ import (
 
 func (db *Database) AddTransaction(txn *core.Transaction) (string, error) {
 	log.Info("Adding Transaction to DB")
+
+	posterID := ""
+	err := db.DB.QueryRow(`SELECT user_id FROM users WHERE username = ? LIMIT 1`, txn.Poster.Name).Scan(&posterID)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	insertTransaction := `
-		INSERT INTO transactions(transaction_id, postdate, brief)
-			VALUES(?,?,?);
+		INSERT INTO transactions(transaction_id, postdate, brief,poster_user_id)
+			VALUES(?,?,?,?);
 	`
 	tx, _ := db.DB.Begin()
 	stmt, _ := tx.Prepare(insertTransaction)
 	log.Debug("Query: " + insertTransaction)
-	res, err := stmt.Exec(txn.Id, txn.Postdate, string(txn.Description[:]))
+	res, err := stmt.Exec(txn.Id, txn.Postdate, string(txn.Description[:]), posterID)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -100,23 +108,77 @@ func (db *Database) AddTransaction(txn *core.Transaction) (string, error) {
 }
 
 func (db *Database) FindTransaction(txnID string) (*core.Transaction, error) {
-	//TODO: (sean) copy this into sqlite, also build up the splits
-	// then create a reversing transaction on the same date
-	// both tagged Void
 	var resp core.Transaction
+	var poster core.User
 	log.Info("Searching Transaction in DB: ", txnID)
-	err := db.DB.QueryRow(`SELECT * FROM transactions WHERE transaction_id = ? LIMIT 1`, txnID).Scan(&resp.Id, &resp.Postdate, &resp.Description)
+
+	// Find the transaction body
+	err := db.DB.QueryRow(`
+			SELECT t.transaction_id,
+						 t.postdate,
+						 t.brief,
+						 u.user_id,
+						 u.username
+			FROM   transactions AS t
+						 JOIN users AS u
+							 ON t.poster_user_id = u.user_id
+			WHERE  t.transaction_id = ?
+			LIMIT  1 
+			`, txnID).Scan(&resp.Id, &resp.Postdate, &resp.Description, &poster.Id, &poster.Name)
 	if err != nil {
 		return nil, err
 	}
+
+	log.Info("Searching Transaction splits in DB")
+
+	// Find all splits relating to that transaction
+	splits, err := db.Query(`
+			SELECT s.split_id,
+						 s.split_date,
+						 s.description,
+						 a.account_id,
+						 a.NAME,
+						 s.currency,
+						 c.decimals,
+						 s.amount
+			FROM   splits AS s
+						 JOIN split_accounts AS sa
+							 ON s.split_id = sa.split_id
+						 JOIN accounts AS a
+							 ON sa.account_id = a. account_id
+						 JOIN currencies AS c
+							 ON s.currency = c.NAME
+			WHERE  s.transaction_id = ?
+			`, txnID)
+	if err != nil {
+		return nil, err
+	}
+
+	for splits.Next() {
+		var split core.Split
+		var account core.Account
+		var cur core.Currency
+		var amount int64
+		// for each row, scan the result into our split object
+		err = splits.Scan(&split.Id, &split.Date, &split.Description, &account.Code, &account.Name, &cur.Name, &cur.Decimals, &amount)
+		if err != nil {
+			return nil, err
+		}
+		split.Amount = big.NewInt(amount)
+		split.Accounts = append(split.Accounts, &account)
+		split.Currency = &cur
+		resp.Splits = append(resp.Splits, &split)
+
+	}
+
 	return &resp, nil
 }
 
 func (db *Database) DeleteTransaction(txnID string) error {
 
 	sqlStatement := `
-	DELETE FROM transactions
-	WHERE transaction_id = ?;`
+		DELETE FROM transactions
+		WHERE transaction_id = ?;`
 	_, err := db.DB.Exec(sqlStatement, txnID)
 	if err != nil {
 		return err
@@ -337,7 +399,7 @@ func (db *Database) DeleteTagFromTransaction(txnID, tag string) error {
 func (db *Database) FindCurrency(cur string) (*core.Currency, error) {
 	var resp core.Currency
 	log.Info("Searching Currency in DB: ", cur)
-	err := db.DB.QueryRow(`SELECT * FROM currencies WHERE name = ? LIMIT 1`, cur).Scan(&resp.Name, &resp.Decimals)
+	err := db.DB.QueryRow(`SELECT * FROM currencies WHERE name = ? LIMIT 1`, strings.TrimSpace(cur)).Scan(&resp.Name, &resp.Decimals)
 	if err != nil {
 		return nil, err
 	}
@@ -353,7 +415,7 @@ func (db *Database) AddCurrency(cur *core.Currency) error {
 	tx, _ := db.DB.Begin()
 	stmt, _ := tx.Prepare(insertCurrency)
 	log.Debug("Query: " + insertCurrency)
-	res, err := stmt.Exec(cur.Name, cur.Decimals)
+	res, err := stmt.Exec(strings.TrimSpace(cur.Name), cur.Decimals)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -531,17 +593,21 @@ func (db *Database) TestDB() error {
 func (db *Database) GetTB(queryDate time.Time) (*[]core.TBAccount, error) {
 
 	queryDB := `
-		SELECT
-		split_accounts.account_id,
-		SUM(splits.amount),
-		splits.currency,
-		currencies.decimals
-		FROM splits
-		JOIN split_accounts
-		ON splits.split_id = split_accounts.split_id
-		JOIN currencies
-		ON splits.currency = currencies.name
-		WHERE splits.split_date <= ?
+		SELECT split_accounts.account_id,
+					 Sum(splits.amount),
+					 splits.currency,
+					 currencies.decimals
+		FROM   splits
+					 JOIN split_accounts
+						 ON splits.split_id = split_accounts.split_id
+					 JOIN currencies
+						 ON splits.currency = currencies.name
+		WHERE  splits.split_date <= ?
+					 AND "void" NOT IN (SELECT t.tag_name
+															FROM   tags AS t
+																		 JOIN transaction_tag AS tt
+																			 ON tt.tag_id = t.tag_id
+															WHERE  tt.transaction_id = splits.transaction_id)
 		GROUP  BY split_accounts.account_id, splits.currency
 		;`
 
@@ -549,7 +615,7 @@ func (db *Database) GetTB(queryDate time.Time) (*[]core.TBAccount, error) {
 
 	rows, err := db.DB.Query(queryDB, queryDate)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Trial Balance Query Failed with error: ", err)
 	}
 	defer rows.Close()
 
