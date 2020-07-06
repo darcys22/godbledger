@@ -41,24 +41,23 @@ For all commands, -n prevents execution of external programs (dry run mode).
 package main
 
 import (
-	"bufio"
-	"bytes"
+	//"bufio"
+	//"bytes"
 	"encoding/base64"
-	"flag"
-	"fmt"
-	"go/parser"
-	"go/token"
+	//"flag"
+	//"fmt"
+	//"go/parser"
+	//"go/token"
 	"io/ioutil"
 	"log"
 	"os"
-	"os/exec"
+	//"os/exec"
 	"path/filepath"
-	"regexp"
+	//"regexp"
 	"runtime"
-	"strings"
-	"time"
-
-	"github.com/cespare/cp"
+	//"strings"
+	//"time"
+	//"github.com/cespare/cp"
 )
 
 var (
@@ -165,7 +164,7 @@ func executablePath(name string) string {
 func main() {
 	log.SetFlags(log.Lshortfile)
 
-	if _, err := os.Stat(filepath.Join("build", "ci.go")); os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join("utils", "ci.go")); os.IsNotExist(err) {
 		log.Fatal("this script must be run from the root of the repository")
 	}
 	if len(os.Args) < 2 {
@@ -200,256 +199,256 @@ func main() {
 // Compiling
 
 func doInstall(cmdline []string) {
-	var (
-		arch = flag.String("arch", "", "Architecture to cross build for")
-		cc   = flag.String("cc", "", "C compiler to cross build with")
-	)
-	flag.CommandLine.Parse(cmdline)
+	//var (
+	//arch = flag.String("arch", "", "Architecture to cross build for")
+	//cc   = flag.String("cc", "", "C compiler to cross build with")
+	//)
+	//flag.CommandLine.Parse(cmdline)
 	//env := build.Env()
 
 	// Check Go version. People regularly open issues about compilation
 	// failure with outdated Go. This should save them the trouble.
-	if !strings.Contains(runtime.Version(), "devel") {
-		// Figure out the minor version number since we can't textually compare (1.10 < 1.9)
-		var minor int
-		fmt.Sscanf(strings.TrimPrefix(runtime.Version(), "go1."), "%d", &minor)
+	//if !strings.Contains(runtime.Version(), "devel") {
+	//// Figure out the minor version number since we can't textually compare (1.10 < 1.9)
+	//var minor int
+	//fmt.Sscanf(strings.TrimPrefix(runtime.Version(), "go1."), "%d", &minor)
 
-		if minor < 11 {
-			log.Println("You have Go version", runtime.Version())
-			log.Println("goDBLedger requires at least Go version 1.14 and cannot")
-			log.Println("be compiled with an earlier version. Please upgrade your Go installation.")
-			os.Exit(1)
-		}
-	}
+	//if minor < 11 {
+	//log.Println("You have Go version", runtime.Version())
+	//log.Println("goDBLedger requires at least Go version 1.14 and cannot")
+	//log.Println("be compiled with an earlier version. Please upgrade your Go installation.")
+	//os.Exit(1)
+	//}
+	//}
 	// Compile packages given as arguments, or everything if there are no arguments.
-	packages := []string{"./..."}
-	if flag.NArg() > 0 {
-		packages = flag.Args()
-	}
+	//packages := []string{"./..."}
+	//if flag.NArg() > 0 {
+	//packages = flag.Args()
+	//}
 
-	if *arch == "" || *arch == runtime.GOARCH {
-		goinstall := goTool("install", buildFlags(env)...)
-		if runtime.GOARCH == "arm64" {
-			goinstall.Args = append(goinstall.Args, "-p", "1")
-		}
-		goinstall.Args = append(goinstall.Args, "-v")
-		goinstall.Args = append(goinstall.Args, packages...)
-		build.MustRun(goinstall)
-		return
-	}
+	//if *arch == "" || *arch == runtime.GOARCH {
+	//goinstall := goTool("install", buildFlags(env)...)
+	//if runtime.GOARCH == "arm64" {
+	//goinstall.Args = append(goinstall.Args, "-p", "1")
+	//}
+	//goinstall.Args = append(goinstall.Args, "-v")
+	//goinstall.Args = append(goinstall.Args, packages...)
+	//build.MustRun(goinstall)
+	//return
+	//}
 
 	// Seems we are cross compiling, work around forbidden GOBIN
-	goinstall := goToolArch(*arch, *cc, "install", buildFlags(env)...)
-	goinstall.Args = append(goinstall.Args, "-v")
-	goinstall.Args = append(goinstall.Args, []string{"-buildmode", "archive"}...)
-	goinstall.Args = append(goinstall.Args, packages...)
-	build.MustRun(goinstall)
+	//goinstall := goToolArch(*arch, *cc, "install", buildFlags(env)...)
+	//goinstall.Args = append(goinstall.Args, "-v")
+	//goinstall.Args = append(goinstall.Args, []string{"-buildmode", "archive"}...)
+	//goinstall.Args = append(goinstall.Args, packages...)
+	//build.MustRun(goinstall)
 
-	if cmds, err := ioutil.ReadDir("cmd"); err == nil {
-		for _, cmd := range cmds {
-			pkgs, err := parser.ParseDir(token.NewFileSet(), filepath.Join(".", "cmd", cmd.Name()), nil, parser.PackageClauseOnly)
-			if err != nil {
-				log.Fatal(err)
-			}
-			for name := range pkgs {
-				if name == "main" {
-					gobuild := goToolArch(*arch, *cc, "build", buildFlags(env)...)
-					gobuild.Args = append(gobuild.Args, "-v")
-					gobuild.Args = append(gobuild.Args, []string{"-o", executablePath(cmd.Name())}...)
-					gobuild.Args = append(gobuild.Args, "."+string(filepath.Separator)+filepath.Join("cmd", cmd.Name()))
-					build.MustRun(gobuild)
-					break
-				}
-			}
-		}
-	}
+	//if cmds, err := ioutil.ReadDir("cmd"); err == nil {
+	//for _, cmd := range cmds {
+	//pkgs, err := parser.ParseDir(token.NewFileSet(), filepath.Join(".", "cmd", cmd.Name()), nil, parser.PackageClauseOnly)
+	//if err != nil {
+	//log.Fatal(err)
+	//}
+	//for name := range pkgs {
+	//if name == "main" {
+	// gobuild := goToolArch(*arch, *cc, "build", buildFlags(env)...)
+	//gobuild.Args = append(gobuild.Args, "-v")
+	//gobuild.Args = append(gobuild.Args, []string{"-o", executablePath(cmd.Name())}...)
+	//gobuild.Args = append(gobuild.Args, "."+string(filepath.Separator)+filepath.Join("cmd", cmd.Name()))
+	//build.MustRun(gobuild)
+	//break
+	//}
+	//}
+	//}
+	//}
 }
 
-func buildFlags(env build.Environment) (flags []string) {
-	var ld []string
-	if env.Commit != "" {
-		ld = append(ld, "-X", "main.gitCommit="+env.Commit)
-		ld = append(ld, "-X", "main.gitDate="+env.Date)
-	}
-	if runtime.GOOS == "darwin" {
-		ld = append(ld, "-s")
-	}
+//func buildFlags(env build.Environment) (flags []string) {
+//var ld []string
+//if env.Commit != "" {
+//ld = append(ld, "-X", "main.gitCommit="+env.Commit)
+//ld = append(ld, "-X", "main.gitDate="+env.Date)
+//}
+//if runtime.GOOS == "darwin" {
+//ld = append(ld, "-s")
+//}
 
-	if len(ld) > 0 {
-		flags = append(flags, "-ldflags", strings.Join(ld, " "))
-	}
-	return flags
-}
+//if len(ld) > 0 {
+//flags = append(flags, "-ldflags", strings.Join(ld, " "))
+//}
+//return flags
+//}
 
-func goTool(subcmd string, args ...string) *exec.Cmd {
-	return goToolArch(runtime.GOARCH, os.Getenv("CC"), subcmd, args...)
-}
+//func goTool(subcmd string, args ...string) *exec.Cmd {
+//return goToolArch(runtime.GOARCH, os.Getenv("CC"), subcmd, args...)
+//}
 
-func goToolArch(arch string, cc string, subcmd string, args ...string) *exec.Cmd {
-	cmd := build.GoTool(subcmd, args...)
-	if arch == "" || arch == runtime.GOARCH {
-		cmd.Env = append(cmd.Env, "GOBIN="+GOBIN)
-	} else {
-		cmd.Env = append(cmd.Env, "CGO_ENABLED=1")
-		cmd.Env = append(cmd.Env, "GOARCH="+arch)
-	}
-	if cc != "" {
-		cmd.Env = append(cmd.Env, "CC="+cc)
-	}
-	for _, e := range os.Environ() {
-		if strings.HasPrefix(e, "GOBIN=") {
-			continue
-		}
-		cmd.Env = append(cmd.Env, e)
-	}
-	return cmd
-}
+//func goToolArch(arch string, cc string, subcmd string, args ...string) *exec.Cmd {
+//cmd := build.GoTool(subcmd, args...)
+//if arch == "" || arch == runtime.GOARCH {
+//cmd.Env = append(cmd.Env, "GOBIN="+GOBIN)
+//} else {
+//cmd.Env = append(cmd.Env, "CGO_ENABLED=1")
+//cmd.Env = append(cmd.Env, "GOARCH="+arch)
+//}
+//if cc != "" {
+//cmd.Env = append(cmd.Env, "CC="+cc)
+//}
+//for _, e := range os.Environ() {
+//if strings.HasPrefix(e, "GOBIN=") {
+//continue
+//}
+//cmd.Env = append(cmd.Env, e)
+//}
+//return cmd
+//}
 
 // Running The Tests
 //
 // "tests" also includes static analysis tools such as vet.
 
 func doTest(cmdline []string) {
-	coverage := flag.Bool("coverage", false, "Whether to record code coverage")
-	verbose := flag.Bool("v", false, "Whether to log verbosely")
-	flag.CommandLine.Parse(cmdline)
-	env := build.Env()
+	//coverage := flag.Bool("coverage", false, "Whether to record code coverage")
+	//verbose := flag.Bool("v", false, "Whether to log verbosely")
+	//flag.CommandLine.Parse(cmdline)
+	//env := build.Env()
 
-	packages := []string{"./..."}
-	if len(flag.CommandLine.Args()) > 0 {
-		packages = flag.CommandLine.Args()
-	}
+	//packages := []string{"./..."}
+	//if len(flag.CommandLine.Args()) > 0 {
+	//packages = flag.CommandLine.Args()
+	//}
 
 	// Run the actual tests.
 	// Test a single package at a time. CI builders are slow
 	// and some tests run into timeouts under load.
-	gotest := goTool("test", buildFlags(env)...)
-	gotest.Args = append(gotest.Args, "-p", "1")
-	if *coverage {
-		gotest.Args = append(gotest.Args, "-covermode=atomic", "-cover")
-	}
-	if *verbose {
-		gotest.Args = append(gotest.Args, "-v")
-	}
+	//gotest := goTool("test", buildFlags(env)...)
+	//gotest.Args = append(gotest.Args, "-p", "1")
+	//if *coverage {
+	//gotest.Args = append(gotest.Args, "-covermode=atomic", "-cover")
+	//}
+	//if *verbose {
+	//gotest.Args = append(gotest.Args, "-v")
+	//}
 
-	gotest.Args = append(gotest.Args, packages...)
-	build.MustRun(gotest)
+	//gotest.Args = append(gotest.Args, packages...)
+	//build.MustRun(gotest)
 }
 
 // doLint runs golangci-lint on requested packages.
 func doLint(cmdline []string) {
-	var (
-		cachedir = flag.String("cachedir", "./build/cache", "directory for caching golangci-lint binary.")
-	)
-	flag.CommandLine.Parse(cmdline)
-	packages := []string{"./..."}
-	if len(flag.CommandLine.Args()) > 0 {
-		packages = flag.CommandLine.Args()
-	}
+	//var (
+	//cachedir = flag.String("cachedir", "./build/cache", "directory for caching golangci-lint binary.")
+	//)
+	//flag.CommandLine.Parse(cmdline)
+	//packages := []string{"./..."}
+	//if len(flag.CommandLine.Args()) > 0 {
+	//packages = flag.CommandLine.Args()
+	//}
 
-	linter := downloadLinter(*cachedir)
-	lflags := []string{"run", "--config", ".golangci.yml"}
-	build.MustRunCommand(linter, append(lflags, packages...)...)
-	fmt.Println("You have achieved perfection.")
+	//linter := downloadLinter(*cachedir)
+	//lflags := []string{"run", "--config", ".golangci.yml"}
+	//build.MustRunCommand(linter, append(lflags, packages...)...)
+	//fmt.Println("You have achieved perfection.")
 }
 
 // downloadLinter downloads and unpacks golangci-lint.
-func downloadLinter(cachedir string) string {
-	const version = "1.27.0"
+//func downloadLinter(cachedir string) string {
+//const version = "1.27.0"
 
-	csdb := build.MustLoadChecksums("build/checksums.txt")
-	base := fmt.Sprintf("golangci-lint-%s-%s-%s", version, runtime.GOOS, runtime.GOARCH)
-	url := fmt.Sprintf("https://github.com/golangci/golangci-lint/releases/download/v%s/%s.tar.gz", version, base)
-	archivePath := filepath.Join(cachedir, base+".tar.gz")
-	if err := csdb.DownloadFile(url, archivePath); err != nil {
-		log.Fatal(err)
-	}
-	if err := build.ExtractTarballArchive(archivePath, cachedir); err != nil {
-		log.Fatal(err)
-	}
-	return filepath.Join(cachedir, base, "golangci-lint")
-}
+//csdb := build.MustLoadChecksums("build/checksums.txt")
+//base := fmt.Sprintf("golangci-lint-%s-%s-%s", version, runtime.GOOS, runtime.GOARCH)
+//url := fmt.Sprintf("https://github.com/golangci/golangci-lint/releases/download/v%s/%s.tar.gz", version, base)
+//archivePath := filepath.Join(cachedir, base+".tar.gz")
+//if err := csdb.DownloadFile(url, archivePath); err != nil {
+//log.Fatal(err)
+//}
+//if err := build.ExtractTarballArchive(archivePath, cachedir); err != nil {
+//log.Fatal(err)
+//}
+//return filepath.Join(cachedir, base, "golangci-lint")
+//}
 
 // Release Packaging
-func doArchive(cmdline []string) {
-	//var (
-	//arch   = flag.String("arch", runtime.GOARCH, "Architecture cross packaging")
-	//atype  = flag.String("type", "zip", "Type of archive to write (zip|tar)")
-	//signer = flag.String("signer", "", `Environment variable holding the signing key (e.g. LINUX_SIGNING_KEY)`)
-	//upload = flag.String("upload", "", `Destination to upload the archives (usually "gethstore/builds")`)
-	//ext    string
-	//)
-	//flag.CommandLine.Parse(cmdline)
-	//switch *atype {
-	//case "zip":
-	//ext = ".zip"
-	//case "tar":
-	//ext = ".tar.gz"
-	//default:
-	//log.Fatal("unknown archive type: ", atype)
-	//}
+//func doArchive(cmdline []string) {
+//var (
+//arch   = flag.String("arch", runtime.GOARCH, "Architecture cross packaging")
+//atype  = flag.String("type", "zip", "Type of archive to write (zip|tar)")
+//signer = flag.String("signer", "", `Environment variable holding the signing key (e.g. LINUX_SIGNING_KEY)`)
+//upload = flag.String("upload", "", `Destination to upload the archives (usually "gethstore/builds")`)
+//ext    string
+//)
+//flag.CommandLine.Parse(cmdline)
+//switch *atype {
+//case "zip":
+//ext = ".zip"
+//case "tar":
+//ext = ".tar.gz"
+//default:
+//log.Fatal("unknown archive type: ", atype)
+//}
 
-	//var (
-	////env = build.Env()
+//var (
+////env = build.Env()
 
-	////basegeth = archiveBasename(*arch, params.ArchiveVersion(env.Commit))
-	////geth     = "geth-" + basegeth + ext
-	////alltools = "geth-alltools-" + basegeth + ext
-	//)
-	////maybeSkipArchive(env)
-	//if err := build.WriteArchive(geth, gethArchiveFiles); err != nil {
-	//log.Fatal(err)
-	//}
-	//if err := build.WriteArchive(alltools, allToolsArchiveFiles); err != nil {
-	//log.Fatal(err)
-	//}
-	//for _, archive := range []string{geth, alltools} {
-	//if err := archiveUpload(archive, *upload, *signer); err != nil {
-	//log.Fatal(err)
-	//}
-	//}
-}
+////basegeth = archiveBasename(*arch, params.ArchiveVersion(env.Commit))
+////geth     = "geth-" + basegeth + ext
+////alltools = "geth-alltools-" + basegeth + ext
+//)
+////maybeSkipArchive(env)
+//if err := build.WriteArchive(geth, gethArchiveFiles); err != nil {
+//log.Fatal(err)
+//}
+//if err := build.WriteArchive(alltools, allToolsArchiveFiles); err != nil {
+//log.Fatal(err)
+//}
+//for _, archive := range []string{geth, alltools} {
+//if err := archiveUpload(archive, *upload, *signer); err != nil {
+//log.Fatal(err)
+//}
+//}
+//}
 
-func archiveBasename(arch string, archiveVersion string) string {
-	platform := runtime.GOOS + "-" + arch
-	if arch == "arm" {
-		platform += os.Getenv("GOARM")
-	}
-	if arch == "android" {
-		platform = "android-all"
-	}
-	if arch == "ios" {
-		platform = "ios-all"
-	}
-	return platform + "-" + archiveVersion
-}
+//func archiveBasename(arch string, archiveVersion string) string {
+//platform := runtime.GOOS + "-" + arch
+//if arch == "arm" {
+//platform += os.Getenv("GOARM")
+//}
+//if arch == "android" {
+//platform = "android-all"
+//}
+//if arch == "ios" {
+//platform = "ios-all"
+//}
+//return platform + "-" + archiveVersion
+//}
 
-func archiveUpload(archive string, blobstore string, signer string) error {
-	//If signing was requested, generate the signature files
-	//if signer != "" {
-	//key := getenvBase64(signer)
-	//if err := build.PGPSignFile(archive, archive+".asc", string(key)); err != nil {
-	//return err
-	//}
-	//}
-	//If uploading to Azure was requested, push the archive possibly with its signature
-	//if blobstore != "" {
-	//auth := build.AzureBlobstoreConfig{
-	//Account:   strings.Split(blobstore, "/")[0],
-	//Token:     os.Getenv("AZURE_BLOBSTORE_TOKEN"),
-	//Container: strings.SplitN(blobstore, "/", 2)[1],
-	//}
-	//if err := build.AzureBlobstoreUpload(archive, filepath.Base(archive), auth); err != nil {
-	//return err
-	//}
-	//if signer != "" {
-	//if err := build.AzureBlobstoreUpload(archive+".asc", filepath.Base(archive+".asc"), auth); err != nil {
-	//return err
-	//}
-	//}
-	//}
-	//return nil
-}
+//func archiveUpload(archive string, blobstore string, signer string) error {
+//If signing was requested, generate the signature files
+//if signer != "" {
+//key := getenvBase64(signer)
+//if err := build.PGPSignFile(archive, archive+".asc", string(key)); err != nil {
+//return err
+//}
+//}
+//If uploading to Azure was requested, push the archive possibly with its signature
+//if blobstore != "" {
+//auth := build.AzureBlobstoreConfig{
+//Account:   strings.Split(blobstore, "/")[0],
+//Token:     os.Getenv("AZURE_BLOBSTORE_TOKEN"),
+//Container: strings.SplitN(blobstore, "/", 2)[1],
+//}
+//if err := build.AzureBlobstoreUpload(archive, filepath.Base(archive), auth); err != nil {
+//return err
+//}
+//if signer != "" {
+//if err := build.AzureBlobstoreUpload(archive+".asc", filepath.Base(archive+".asc"), auth); err != nil {
+//return err
+//}
+//}
+//}
+//return nil
+//}
 
 // skips archiving for some build configurations.
 //func maybeSkipArchive(env build.Environment) {
@@ -542,16 +541,16 @@ func doDebianSource(cmdline []string) {
 	//}
 }
 
-func downloadGoSources(version string, cachedir string) string {
-	//csdb := build.MustLoadChecksums("build/checksums.txt")
-	//file := fmt.Sprintf("go%s.src.tar.gz", version)
-	//url := "https://dl.google.com/go/" + file
-	//dst := filepath.Join(cachedir, file)
-	//if err := csdb.DownloadFile(url, dst); err != nil {
-	//log.Fatal(err)
-	//}
-	//return dst
-}
+//func downloadGoSources(version string, cachedir string) string {
+//csdb := build.MustLoadChecksums("build/checksums.txt")
+//file := fmt.Sprintf("go%s.src.tar.gz", version)
+//url := "https://dl.google.com/go/" + file
+//dst := filepath.Join(cachedir, file)
+//if err := csdb.DownloadFile(url, dst); err != nil {
+//log.Fatal(err)
+//}
+//return dst
+//}
 
 func ppaUpload(workdir, ppa, sshUser string, files []string) {
 	//p := strings.Split(ppa, "/")
@@ -1076,53 +1075,53 @@ func (d debExecutable) Package() string {
 
 // Binary distribution cleanups
 
-func doPurge(cmdline []string) {
-	var (
-		store = flag.String("store", "", `Destination from where to purge archives (usually "gethstore/builds")`)
-		limit = flag.Int("days", 30, `Age threshold above which to delete unstable archives`)
-	)
-	flag.CommandLine.Parse(cmdline)
+//func doPurge(cmdline []string) {
+//var (
+//store = flag.String("store", "", `Destination from where to purge archives (usually "gethstore/builds")`)
+//limit = flag.Int("days", 30, `Age threshold above which to delete unstable archives`)
+//)
+//flag.CommandLine.Parse(cmdline)
 
-	//if env := build.Env(); !env.IsCronJob {
-	//log.Printf("skipping because not a cron job")
-	//os.Exit(0)
-	//}
-	//// Create the azure authentication and list the current archives
-	//auth := build.AzureBlobstoreConfig{
-	//Account:   strings.Split(*store, "/")[0],
-	//Token:     os.Getenv("AZURE_BLOBSTORE_TOKEN"),
-	//Container: strings.SplitN(*store, "/", 2)[1],
-	//}
-	//blobs, err := build.AzureBlobstoreList(auth)
-	//if err != nil {
-	//log.Fatal(err)
-	//}
-	//fmt.Printf("Found %d blobs\n", len(blobs))
+//if env := build.Env(); !env.IsCronJob {
+//log.Printf("skipping because not a cron job")
+//os.Exit(0)
+//}
+//// Create the azure authentication and list the current archives
+//auth := build.AzureBlobstoreConfig{
+//Account:   strings.Split(*store, "/")[0],
+//Token:     os.Getenv("AZURE_BLOBSTORE_TOKEN"),
+//Container: strings.SplitN(*store, "/", 2)[1],
+//}
+//blobs, err := build.AzureBlobstoreList(auth)
+//if err != nil {
+//log.Fatal(err)
+//}
+//fmt.Printf("Found %d blobs\n", len(blobs))
 
-	// Iterate over the blobs, collect and sort all unstable builds
-	for i := 0; i < len(blobs); i++ {
-		if !strings.Contains(blobs[i].Name, "unstable") {
-			blobs = append(blobs[:i], blobs[i+1:]...)
-			i--
-		}
-	}
-	for i := 0; i < len(blobs); i++ {
-		for j := i + 1; j < len(blobs); j++ {
-			if blobs[i].Properties.LastModified.After(blobs[j].Properties.LastModified) {
-				blobs[i], blobs[j] = blobs[j], blobs[i]
-			}
-		}
-	}
-	// Filter out all archives more recent that the given threshold
-	for i, blob := range blobs {
-		if time.Since(blob.Properties.LastModified) < time.Duration(*limit)*24*time.Hour {
-			blobs = blobs[:i]
-			break
-		}
-	}
-	fmt.Printf("Deleting %d blobs\n", len(blobs))
-	// Delete all marked as such and return
-	//if err := build.AzureBlobstoreDelete(auth, blobs); err != nil {
-	//log.Fatal(err)
-	//}
-}
+// Iterate over the blobs, collect and sort all unstable builds
+//for i := 0; i < len(blobs); i++ {
+//if !strings.Contains(blobs[i].Name, "unstable") {
+//blobs = append(blobs[:i], blobs[i+1:]...)
+//i--
+//}
+//}
+//for i := 0; i < len(blobs); i++ {
+//for j := i + 1; j < len(blobs); j++ {
+//if blobs[i].Properties.LastModified.After(blobs[j].Properties.LastModified) {
+//blobs[i], blobs[j] = blobs[j], blobs[i]
+//}
+//}
+//}
+// Filter out all archives more recent that the given threshold
+//for i, blob := range blobs {
+//if time.Since(blob.Properties.LastModified) < time.Duration(*limit)*24*time.Hour {
+//blobs = blobs[:i]
+//break
+//}
+//}
+//fmt.Printf("Deleting %d blobs\n", len(blobs))
+// Delete all marked as such and return
+//if err := build.AzureBlobstoreDelete(auth, blobs); err != nil {
+//log.Fatal(err)
+//}
+//}
