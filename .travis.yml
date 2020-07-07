@@ -5,12 +5,34 @@ jobs:
 
   include:
 
+    - stage: lint
+      os: linux
+      dist: xenial
+      go: 1.14.x
+      env:
+        - lint
+      git:
+        submodules: false # avoid cloning ethereum/tests
+      script:
+        - go run build/ci.go lint
+
     # These are the latest Go versions.
     - stage: build
       os: linux
       arch: amd64
       dist: bionic
       go: 1.13.x
+      env:
+        - GO111MODULE=on
+      script:
+        - go run utils/ci.go install
+        - go run utils/ci.go test -coverage $TEST_PACKAGES
+
+    - stage: build
+      os: linux
+      arch: amd64
+      dist: bionic
+      go: 1.14.x
       env:
         - GO111MODULE=on
       script:
