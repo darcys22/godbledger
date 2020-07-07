@@ -14,3 +14,7 @@ release: linux
 PHONY: clean
 clean:
 	rm -rf release/
+
+travis:
+	GO111MODULE=on go run utils/ci.go install
+	GO111MODULE=on go run utils/ci.go test -coverage $$TEST_PACKAGES

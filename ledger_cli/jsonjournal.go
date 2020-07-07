@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/urfave/cli"
+	//"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 var commandJSONJournal = &cli.Command{

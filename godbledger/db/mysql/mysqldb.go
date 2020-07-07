@@ -41,7 +41,7 @@ func NewDB(connection_string string) (*Database, error) {
 	log.Debug(connection_string)
 	MySQLDB, err := sql.Open("mysql", ValidateConnectionString(connection_string))
 	if err != nil {
-		log.Fatal(err.Error)
+		log.Fatal(err.Error())
 		return nil, err
 	}
 
@@ -214,11 +214,25 @@ func (db *Database) InitDB() error {
 	return err
 }
 
-// ClearDB removes the previously stored directory at the data directory.
-func ClearDB(dirPath string) error {
-	//if _, err := os.Stat(dirPath); os.IsNotExist(err) {
-	//return nil
-	//}
-	//return os.RemoveAll(dirPath)
+// ClearDB drops all tables
+func (db *Database) ClearDB() error {
+
+	//DROP TABLES
+	dropDB := `
+				SET foreign_key_checks = 0;
+				SELECT
+					 'DROP TABLE IF EXISTS ' + table_name + ';'
+				FROM
+						information_schema.tables
+				WHERE
+						table_schema = "ledger";
+				SET foreign_key_checks = 0;
+			`
+	log.Debug("Query: " + dropDB)
+	_, err := db.DB.Exec(dropDB)
+	if err != nil {
+		log.Fatalf("Dropping table failed with: %s", err)
+		return err
+	}
 	return nil
 }

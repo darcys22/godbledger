@@ -13,7 +13,8 @@ import (
 	"github.com/darcys22/godbledger/godbledger/version"
 
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
+	//"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
 
@@ -28,6 +29,9 @@ func startNode(ctx *cli.Context) error {
 		return err
 	}
 	ledger, err := ledger.New(ctx, cfg)
+	if err != nil {
+		return err
+	}
 	fullnode.Register(ledger)
 	rpc := rpc.NewRPCService(context.Background(), &rpc.Config{Port: cfg.RPCPort}, ledger)
 	fullnode.Register(rpc)

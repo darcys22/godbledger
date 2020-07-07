@@ -44,101 +44,64 @@ import (
 	//"bufio"
 	//"bytes"
 	"encoding/base64"
-	//"flag"
-	//"fmt"
-	//"go/parser"
-	//"go/token"
+	"flag"
+	"fmt"
+	"go/parser"
+	"go/token"
 	"io/ioutil"
 	"log"
 	"os"
-	//"os/exec"
+	"os/exec"
 	"path/filepath"
 	//"regexp"
 	"runtime"
-	//"strings"
+	"strings"
 	//"time"
 	//"github.com/cespare/cp"
+	"github.com/darcys22/godbledger/godbledger/version"
+	"github.com/darcys22/godbledger/internal/build"
 )
 
 var (
-	// Files that end up in the geth*.zip archive.
+	// Files that end up in the godbledger*.zip archive.
 	gethArchiveFiles = []string{
 		"COPYING",
-		executablePath("geth"),
-	}
-
-	// Files that end up in the geth-alltools*.zip archive.
-	allToolsArchiveFiles = []string{
-		"COPYING",
-		executablePath("abigen"),
-		executablePath("bootnode"),
-		executablePath("evm"),
-		executablePath("geth"),
-		executablePath("puppeth"),
-		executablePath("rlpdump"),
-		executablePath("wnode"),
-		executablePath("clef"),
+		executablePath("godbledger"),
+		executablePath("ledger_cli"),
+		executablePath("reporter"),
 	}
 
 	// A debian package is created for all executables listed here.
 	debExecutables = []debExecutable{
 		{
-			BinaryName:  "abigen",
-			Description: "Source code generator to convert Ethereum contract definitions into easy to use, compile-time type-safe Go packages.",
+			BinaryName:  "godbledger",
+			Description: "Accounting server to manage financial databases and record double entry bookkeeping transactions",
 		},
 		{
-			BinaryName:  "bootnode",
-			Description: "Ethereum bootnode.",
+			BinaryName:  "ledger_cli",
+			Description: "Godbledger grpc client",
 		},
 		{
-			BinaryName:  "evm",
-			Description: "Developer utility version of the EVM (Ethereum Virtual Machine) that is capable of running bytecode snippets within a configurable environment and execution mode.",
-		},
-		{
-			BinaryName:  "geth",
-			Description: "Ethereum CLI client.",
-		},
-		{
-			BinaryName:  "puppeth",
-			Description: "Ethereum private network manager.",
-		},
-		{
-			BinaryName:  "rlpdump",
-			Description: "Developer utility tool that prints RLP structures.",
-		},
-		{
-			BinaryName:  "wnode",
-			Description: "Ethereum Whisper diagnostic tool",
-		},
-		{
-			BinaryName:  "clef",
-			Description: "Ethereum account management tool.",
+			BinaryName:  "reporter",
+			Description: "basic reporting queries on SQL databases associated with godbledger servers",
 		},
 	}
 
 	// A debian package is created for all executables listed here.
 
-	debEthereum = debPackage{
-		Name: "GoDBLedger",
-		//Version:     params.Version,
-		Version:     "0.3.0",
+	debGoDBLedger = debPackage{
+		Name:        "GoDBLedger",
+		Version:     version.Version,
 		Executables: debExecutables,
 	}
 
 	// Debian meta packages to build and push to Ubuntu PPA
 	debPackages = []debPackage{
-		debEthereum,
+		debGoDBLedger,
 	}
 
 	// Distros for which packages are created.
-	// Note: vivid is unsupported because there is no golang-1.6 package for it.
-	// Note: wily is unsupported because it was officially deprecated on Launchpad.
-	// Note: yakkety is unsupported because it was officially deprecated on Launchpad.
-	// Note: zesty is unsupported because it was officially deprecated on Launchpad.
-	// Note: artful is unsupported because it was officially deprecated on Launchpad.
-	// Note: cosmic is unsupported because it was officially deprecated on Launchpad.
 	debDistroGoBoots = map[string]string{
-		"trusty": "golang-1.11",
 		"xenial": "golang-go",
 		"bionic": "golang-go",
 		"disco":  "golang-go",
@@ -147,8 +110,7 @@ var (
 	}
 
 	debGoBootPaths = map[string]string{
-		"golang-1.11": "/usr/lib/go-1.11",
-		"golang-go":   "/usr/lib/go",
+		"golang-go": "/usr/lib/go",
 	}
 )
 
@@ -172,7 +134,7 @@ func main() {
 	}
 	switch os.Args[1] {
 	case "install":
-		//doInstall(os.Args[2:])
+		doInstall(os.Args[2:])
 	case "test":
 		//doTest(os.Args[2:])
 	case "lint":
@@ -199,140 +161,140 @@ func main() {
 // Compiling
 
 func doInstall(cmdline []string) {
-	//var (
-	//arch = flag.String("arch", "", "Architecture to cross build for")
-	//cc   = flag.String("cc", "", "C compiler to cross build with")
-	//)
-	//flag.CommandLine.Parse(cmdline)
-	//env := build.Env()
+	var (
+		arch = flag.String("arch", "", "Architecture to cross build for")
+		cc   = flag.String("cc", "", "C compiler to cross build with")
+	)
+	flag.CommandLine.Parse(cmdline)
+	env := build.Env()
 
 	// Check Go version. People regularly open issues about compilation
 	// failure with outdated Go. This should save them the trouble.
-	//if !strings.Contains(runtime.Version(), "devel") {
-	//// Figure out the minor version number since we can't textually compare (1.10 < 1.9)
-	//var minor int
-	//fmt.Sscanf(strings.TrimPrefix(runtime.Version(), "go1."), "%d", &minor)
+	if !strings.Contains(runtime.Version(), "devel") {
+		// Figure out the minor version number since we can't textually compare (1.10 < 1.9)
+		var minor int
+		fmt.Sscanf(strings.TrimPrefix(runtime.Version(), "go1."), "%d", &minor)
 
-	//if minor < 11 {
-	//log.Println("You have Go version", runtime.Version())
-	//log.Println("goDBLedger requires at least Go version 1.14 and cannot")
-	//log.Println("be compiled with an earlier version. Please upgrade your Go installation.")
-	//os.Exit(1)
-	//}
-	//}
+		if minor < 11 {
+			log.Println("You have Go version", runtime.Version())
+			log.Println("goDBLedger requires at least Go version 1.14 and cannot")
+			log.Println("be compiled with an earlier version. Please upgrade your Go installation.")
+			os.Exit(1)
+		}
+	}
 	// Compile packages given as arguments, or everything if there are no arguments.
-	//packages := []string{"./..."}
-	//if flag.NArg() > 0 {
-	//packages = flag.Args()
-	//}
+	packages := []string{"./..."}
+	if flag.NArg() > 0 {
+		packages = flag.Args()
+	}
 
-	//if *arch == "" || *arch == runtime.GOARCH {
-	//goinstall := goTool("install", buildFlags(env)...)
-	//if runtime.GOARCH == "arm64" {
-	//goinstall.Args = append(goinstall.Args, "-p", "1")
-	//}
-	//goinstall.Args = append(goinstall.Args, "-v")
-	//goinstall.Args = append(goinstall.Args, packages...)
-	//build.MustRun(goinstall)
-	//return
-	//}
+	if *arch == "" || *arch == runtime.GOARCH {
+		goinstall := goTool("install", buildFlags(env)...)
+		if runtime.GOARCH == "arm64" {
+			goinstall.Args = append(goinstall.Args, "-p", "1")
+		}
+		goinstall.Args = append(goinstall.Args, "-v")
+		goinstall.Args = append(goinstall.Args, packages...)
+		build.MustRun(goinstall)
+		return
+	}
 
 	// Seems we are cross compiling, work around forbidden GOBIN
-	//goinstall := goToolArch(*arch, *cc, "install", buildFlags(env)...)
-	//goinstall.Args = append(goinstall.Args, "-v")
-	//goinstall.Args = append(goinstall.Args, []string{"-buildmode", "archive"}...)
-	//goinstall.Args = append(goinstall.Args, packages...)
-	//build.MustRun(goinstall)
+	goinstall := goToolArch(*arch, *cc, "install", buildFlags(env)...)
+	goinstall.Args = append(goinstall.Args, "-v")
+	goinstall.Args = append(goinstall.Args, []string{"-buildmode", "archive"}...)
+	goinstall.Args = append(goinstall.Args, packages...)
+	build.MustRun(goinstall)
 
-	//if cmds, err := ioutil.ReadDir("cmd"); err == nil {
-	//for _, cmd := range cmds {
-	//pkgs, err := parser.ParseDir(token.NewFileSet(), filepath.Join(".", "cmd", cmd.Name()), nil, parser.PackageClauseOnly)
-	//if err != nil {
-	//log.Fatal(err)
-	//}
-	//for name := range pkgs {
-	//if name == "main" {
-	// gobuild := goToolArch(*arch, *cc, "build", buildFlags(env)...)
-	//gobuild.Args = append(gobuild.Args, "-v")
-	//gobuild.Args = append(gobuild.Args, []string{"-o", executablePath(cmd.Name())}...)
-	//gobuild.Args = append(gobuild.Args, "."+string(filepath.Separator)+filepath.Join("cmd", cmd.Name()))
-	//build.MustRun(gobuild)
-	//break
-	//}
-	//}
-	//}
-	//}
+	if cmds, err := ioutil.ReadDir("cmd"); err == nil {
+		for _, cmd := range cmds {
+			pkgs, err := parser.ParseDir(token.NewFileSet(), filepath.Join(".", "cmd", cmd.Name()), nil, parser.PackageClauseOnly)
+			if err != nil {
+				log.Fatal(err)
+			}
+			for name := range pkgs {
+				if name == "main" {
+					gobuild := goToolArch(*arch, *cc, "build", buildFlags(env)...)
+					gobuild.Args = append(gobuild.Args, "-v")
+					gobuild.Args = append(gobuild.Args, []string{"-o", executablePath(cmd.Name())}...)
+					gobuild.Args = append(gobuild.Args, "."+string(filepath.Separator)+filepath.Join("cmd", cmd.Name()))
+					build.MustRun(gobuild)
+					break
+				}
+			}
+		}
+	}
 }
 
-//func buildFlags(env build.Environment) (flags []string) {
-//var ld []string
-//if env.Commit != "" {
-//ld = append(ld, "-X", "main.gitCommit="+env.Commit)
-//ld = append(ld, "-X", "main.gitDate="+env.Date)
-//}
-//if runtime.GOOS == "darwin" {
-//ld = append(ld, "-s")
-//}
+func buildFlags(env build.Environment) (flags []string) {
+	var ld []string
+	if env.Commit != "" {
+		ld = append(ld, "-X", "main.gitCommit="+env.Commit)
+		ld = append(ld, "-X", "main.gitDate="+env.Date)
+	}
+	if runtime.GOOS == "darwin" {
+		ld = append(ld, "-s")
+	}
 
-//if len(ld) > 0 {
-//flags = append(flags, "-ldflags", strings.Join(ld, " "))
-//}
-//return flags
-//}
+	if len(ld) > 0 {
+		flags = append(flags, "-ldflags", strings.Join(ld, " "))
+	}
+	return flags
+}
 
-//func goTool(subcmd string, args ...string) *exec.Cmd {
-//return goToolArch(runtime.GOARCH, os.Getenv("CC"), subcmd, args...)
-//}
+func goTool(subcmd string, args ...string) *exec.Cmd {
+	return goToolArch(runtime.GOARCH, os.Getenv("CC"), subcmd, args...)
+}
 
-//func goToolArch(arch string, cc string, subcmd string, args ...string) *exec.Cmd {
-//cmd := build.GoTool(subcmd, args...)
-//if arch == "" || arch == runtime.GOARCH {
-//cmd.Env = append(cmd.Env, "GOBIN="+GOBIN)
-//} else {
-//cmd.Env = append(cmd.Env, "CGO_ENABLED=1")
-//cmd.Env = append(cmd.Env, "GOARCH="+arch)
-//}
-//if cc != "" {
-//cmd.Env = append(cmd.Env, "CC="+cc)
-//}
-//for _, e := range os.Environ() {
-//if strings.HasPrefix(e, "GOBIN=") {
-//continue
-//}
-//cmd.Env = append(cmd.Env, e)
-//}
-//return cmd
-//}
+func goToolArch(arch string, cc string, subcmd string, args ...string) *exec.Cmd {
+	cmd := build.GoTool(subcmd, args...)
+	if arch == "" || arch == runtime.GOARCH {
+		cmd.Env = append(cmd.Env, "GOBIN="+GOBIN)
+	} else {
+		cmd.Env = append(cmd.Env, "CGO_ENABLED=1")
+		cmd.Env = append(cmd.Env, "GOARCH="+arch)
+	}
+	if cc != "" {
+		cmd.Env = append(cmd.Env, "CC="+cc)
+	}
+	for _, e := range os.Environ() {
+		if strings.HasPrefix(e, "GOBIN=") {
+			continue
+		}
+		cmd.Env = append(cmd.Env, e)
+	}
+	return cmd
+}
 
 // Running The Tests
 //
 // "tests" also includes static analysis tools such as vet.
 
 func doTest(cmdline []string) {
-	//coverage := flag.Bool("coverage", false, "Whether to record code coverage")
-	//verbose := flag.Bool("v", false, "Whether to log verbosely")
-	//flag.CommandLine.Parse(cmdline)
-	//env := build.Env()
+	coverage := flag.Bool("coverage", false, "Whether to record code coverage")
+	verbose := flag.Bool("v", false, "Whether to log verbosely")
+	flag.CommandLine.Parse(cmdline)
+	env := build.Env()
 
-	//packages := []string{"./..."}
-	//if len(flag.CommandLine.Args()) > 0 {
-	//packages = flag.CommandLine.Args()
-	//}
+	packages := []string{"./..."}
+	if len(flag.CommandLine.Args()) > 0 {
+		packages = flag.CommandLine.Args()
+	}
 
 	// Run the actual tests.
 	// Test a single package at a time. CI builders are slow
 	// and some tests run into timeouts under load.
-	//gotest := goTool("test", buildFlags(env)...)
-	//gotest.Args = append(gotest.Args, "-p", "1")
-	//if *coverage {
-	//gotest.Args = append(gotest.Args, "-covermode=atomic", "-cover")
-	//}
-	//if *verbose {
-	//gotest.Args = append(gotest.Args, "-v")
-	//}
+	gotest := goTool("test", buildFlags(env)...)
+	gotest.Args = append(gotest.Args, "-p", "1")
+	if *coverage {
+		gotest.Args = append(gotest.Args, "-covermode=atomic", "-cover")
+	}
+	if *verbose {
+		gotest.Args = append(gotest.Args, "-v")
+	}
 
-	//gotest.Args = append(gotest.Args, packages...)
-	//build.MustRun(gotest)
+	gotest.Args = append(gotest.Args, packages...)
+	build.MustRun(gotest)
 }
 
 // doLint runs golangci-lint on requested packages.
