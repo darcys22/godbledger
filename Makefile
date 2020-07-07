@@ -6,7 +6,7 @@ os = $(word 1, $@)
 .PHONY: $(PLATFORMS)
 $(PLATFORMS):
 		mkdir -p release/$(BINARY)-$(os)-x64-v$(VERSION)/
-		GOOS=$(os) GOARCH=amd64 go build -o release/$(BINARY)-$(os)-x64-v$(VERSION)/ ./...
+		GOOS=$(os) GOARCH=amd64 GO111MODULE=on go build -o release/$(BINARY)-$(os)-x64-v$(VERSION)/ ./...
 
 .PHONY: release
 release: linux
