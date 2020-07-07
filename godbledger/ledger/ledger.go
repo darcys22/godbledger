@@ -12,7 +12,8 @@ import (
 	"github.com/darcys22/godbledger/godbledger/db/sqlite3"
 
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
+	//"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 const ledgerDBName = "ledgerdata"
@@ -49,11 +50,12 @@ func New(ctx *cli.Context, cfg *cmd.LedgerConfig) (*Ledger, error) {
 	case "mysql":
 		log.Debug("Using MySQL")
 		ledgerdb, err := mysqldb.NewDB(cfg.DatabaseLocation)
-		//if ctx.Bool(cmd.ClearDB.Name) {
-		//if err := ledgerdb.ClearDB(ledgerDBName); err != nil {
-		//return nil, err
-		//}
-		//}
+		if ctx.Bool(cmd.ClearDB.Name) {
+			log.Info("Clearing MySQL DB")
+			if err := ledgerdb.ClearDB(); err != nil {
+				return nil, err
+			}
+		}
 		ledger.LedgerDb = ledgerdb
 		if err != nil {
 			return nil, err
@@ -71,8 +73,8 @@ func New(ctx *cli.Context, cfg *cmd.LedgerConfig) (*Ledger, error) {
 }
 
 func (l *Ledger) Insert(txn *core.Transaction) (string, error) {
-	log.Info("Created Transaction: %s", txn)
-	log.Debug("Creating Safely added user: %s", txn.Poster)
+	log.Infof("Created Transaction: %v", txn)
+	log.Debugf("Creating Safely added user: %v", txn.Poster)
 	l.LedgerDb.SafeAddUser(txn.Poster)
 	currencies, _ := l.GetCurrencies(txn)
 	for _, currency := range currencies {
@@ -167,7 +169,7 @@ func (l *Ledger) GetCurrencies(txn *core.Transaction) ([]*core.Currency, error) 
 }
 
 func (l *Ledger) InsertCurrency(curr *core.Currency) error {
-	log.Infof("Creating Currency %s with %s decimals", curr.Name, curr.Decimals)
+	log.Infof("Creating Currency %s with %d decimals", curr.Name, curr.Decimals)
 	return l.LedgerDb.SafeAddCurrency(curr)
 }
 

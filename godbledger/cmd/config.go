@@ -7,7 +7,8 @@ import (
 	"path/filepath"
 
 	"github.com/BurntSushi/toml"
-	"github.com/urfave/cli"
+	//"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 
 	"github.com/sirupsen/logrus"
 )

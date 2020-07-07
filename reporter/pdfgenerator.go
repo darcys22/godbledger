@@ -16,7 +16,8 @@ import (
 	"github.com/darcys22/godbledger/godbledger/cmd"
 
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
+	//"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 var log = logrus.WithField("prefix", "Reporter")

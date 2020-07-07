@@ -11,7 +11,8 @@ import (
 	"github.com/darcys22/godbledger/godbledger/ledger"
 
 	"github.com/olekukonko/tablewriter"
-	"github.com/urfave/cli"
+	//"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 type Transaction struct {
