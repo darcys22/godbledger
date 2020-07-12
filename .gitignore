@@ -1,8 +1,22 @@
 # Ignore bazel directories
 bazel-*
 
+/tmp
+*/**/*un~
+*/**/*.test
+*un~
 .DS_Store
+*/**/.DS_Store
 .swp
+.project
+.settings
+
+# travis
+profile.tmp
+profile.cov
+
+# VS Code
+.vscode
 
 # IntelliJ
 .idea
@@ -18,11 +32,15 @@ profile.out
 # Nodejs
 node_modules
 yarn-error.log
+**/yarn-error.log
 .vscode/
 
 # Ignore password file
 password.txt 
 
 # Ignore Build
-/build/bin
 release
+/build/_workspace/
+/build/cache/
+/build/bin/
+build/_vendor/pkg

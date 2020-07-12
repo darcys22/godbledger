@@ -1,0 +1,48 @@
+{
+  "add1": {
+    "_info": {
+      "comment": "A test for submitting a single transaction"
+    },
+    "//comment": "multiple transaction description that will be applied",
+    "expect": [
+      {
+        "indexes": {
+          "//comment": "-1 for transaction with any data from this field. or a particular index, or range [0, 1, 2]",
+          "transactions": 1,
+          "splits": 2,
+          "accounts": 2
+        },
+        "result": {
+          "//comment": "Account in expect section would be checked for the fields specified here (balance,tags)",
+          "Cash": {
+            "balance": "100"
+          },
+          "Income": {
+            "balance": "-100"
+          }
+        }
+      }
+    ],
+    "transactions": [
+      {
+        "Payee": "ijfjie",
+        "Date": "2019-06-30T00:00:00Z",
+        "AccountChanges": [
+          {
+            "Name": "Cash",
+            "Description": "jisfeij",
+            "Currency": "USD",
+            "Balance": "100"
+          },
+          {
+            "Name": "Income",
+            "Description": "another",
+            "Currency": "USD",
+            "Balance": "-100"
+          }
+        ],
+        "Signature": "stuff"
+      }
+    ]
+  }
+}
