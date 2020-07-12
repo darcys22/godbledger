@@ -34,9 +34,7 @@ var commandDeleteTransaction = &cli.Command{
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
 
-			var signature string
-
-			signature = "test"
+			signature := "test"
 			req := &pb.DeleteRequest{
 				Identifier: c.Args().Get(0),
 				Signature:  signature,
@@ -77,9 +75,7 @@ var commandVoidTransaction = &cli.Command{
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
 
-			var signature string
-
-			signature = "test"
+			signature := "test"
 			req := &pb.DeleteRequest{
 				Identifier: c.Args().Get(0),
 				Signature:  signature,

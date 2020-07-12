@@ -60,7 +60,6 @@ func (c *Console) Evaluate(statement string) error {
 	switch strings.TrimSpace(statement) {
 	case "quit":
 		os.Exit(1)
-		break
 	case "tb":
 		fmt.Println("Today is 5th. Clean your house.")
 	case "gl":
@@ -76,7 +75,7 @@ func (c *Console) Evaluate(statement string) error {
 // data to be entered, returning the input of the user.
 func (c *Console) PromptInput(prompt string) (string, error) {
 	fmt.Print(prompt)
-	prompt = ""
+	//prompt = ""
 	defer fmt.Println()
 
 	return c.prompter.ReadString('\n')

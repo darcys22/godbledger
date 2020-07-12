@@ -557,6 +557,9 @@ func (db *Database) TestDB() error {
 	createDB := "create table if not exists pages (title text, body blob, timestamp text)"
 	log.Debug("Query: " + createDB)
 	res, err := db.DB.Exec(createDB)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	lastId, err := res.LastInsertId()
 	if err != nil {
@@ -574,6 +577,9 @@ func (db *Database) TestDB() error {
 	stmt, _ := tx.Prepare("insert into pages (title, body, timestamp) values (?, ?, ?)")
 	log.Debug("Query: Insert")
 	res, err = stmt.Exec("Sean", "Body", timestamp)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	lastId, err = res.LastInsertId()
 	if err != nil {
@@ -644,6 +650,9 @@ func (db *Database) GetTB(queryDate time.Time) (*[]core.TBAccount, error) {
 
 	for index, element := range accounts {
 		rows, err = db.DB.Query(tagsQuery, element.Account)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		for rows.Next() {
 			var tag string

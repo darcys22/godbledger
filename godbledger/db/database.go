@@ -2,8 +2,9 @@ package db
 
 import (
 	"database/sql"
-	"github.com/darcys22/godbledger/godbledger/core"
 	"time"
+
+	"github.com/darcys22/godbledger/godbledger/core"
 )
 
 // Database wraps all database operations.
