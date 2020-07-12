@@ -14,7 +14,7 @@ jobs:
       git:
         submodules: false # avoid cloning ethereum/tests
       script:
-        - go run build/ci.go lint
+        - go run utils/ci.go lint
 
     # These are the latest Go versions.
     - stage: build
