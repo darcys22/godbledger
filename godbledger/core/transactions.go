@@ -1,10 +1,10 @@
 package core
 
 import (
+	"math/big"
 	"time"
 
 	"github.com/rs/xid"
-	"math/big"
 )
 
 type User struct {

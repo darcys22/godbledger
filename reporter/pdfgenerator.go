@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,14 +11,11 @@ import (
 	"os/exec"
 	"strings"
 
-	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/sirupsen/logrus"
+	"github.com/urfave/cli/v2"
 
 	"github.com/darcys22/godbledger/godbledger/cmd"
-
-	"github.com/sirupsen/logrus"
-	//"github.com/urfave/cli"
-	"github.com/urfave/cli/v2"
 )
 
 var log = logrus.WithField("prefix", "Reporter")
@@ -56,6 +54,9 @@ var commandPDFGenerate = &cli.Command{
 
 		//Check if keyfile path given and make sure it doesn't already exist.
 		err, cfg := cmd.MakeConfig(ctx)
+		if err != nil {
+			log.Fatal(err)
+		}
 		databasefilepath := ctx.Args().First()
 		if databasefilepath == "" {
 			databasefilepath = cfg.DatabaseLocation

@@ -1,21 +1,18 @@
 package main
 
 import (
-	//"fmt"
 	"context"
 	"os"
-	//"strconv"
+
+	"github.com/sirupsen/logrus"
+	"github.com/urfave/cli/v2"
+	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 
 	"github.com/darcys22/godbledger/godbledger/cmd"
 	"github.com/darcys22/godbledger/godbledger/ledger"
 	"github.com/darcys22/godbledger/godbledger/node"
 	"github.com/darcys22/godbledger/godbledger/rpc"
 	"github.com/darcys22/godbledger/godbledger/version"
-
-	"github.com/sirupsen/logrus"
-	//"github.com/urfave/cli"
-	"github.com/urfave/cli/v2"
-	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
 
 func startNode(ctx *cli.Context) error {
