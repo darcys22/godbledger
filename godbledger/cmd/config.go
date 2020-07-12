@@ -124,6 +124,10 @@ func InitConfig(config *LedgerConfig) error {
 func dumpConfig(ctx *cli.Context) error {
 
 	err, cfg := MakeConfig(ctx)
+	if err != nil {
+		log.Fatalf("Could not open the config file: %v", err)
+		return err
+	}
 
 	buf := new(bytes.Buffer)
 	if err := toml.NewEncoder(buf).Encode(cfg); err != nil {

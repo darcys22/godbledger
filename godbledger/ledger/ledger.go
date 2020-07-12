@@ -5,15 +5,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/sirupsen/logrus"
+	"github.com/urfave/cli/v2"
+
 	"github.com/darcys22/godbledger/godbledger/cmd"
 	"github.com/darcys22/godbledger/godbledger/core"
 	"github.com/darcys22/godbledger/godbledger/db"
-	"github.com/darcys22/godbledger/godbledger/db/mysql"
-	"github.com/darcys22/godbledger/godbledger/db/sqlite3"
-
-	"github.com/sirupsen/logrus"
-	//"github.com/urfave/cli"
-	"github.com/urfave/cli/v2"
+	"github.com/darcys22/godbledger/godbledger/db/mysqldb"
+	"github.com/darcys22/godbledger/godbledger/db/sqlite3db"
 )
 
 const ledgerDBName = "ledgerdata"
@@ -111,6 +110,9 @@ func (l *Ledger) Void(txnID string, usr *core.User) error {
 	log.Debugf("Transaction: %+v", txn)
 
 	newTxn, err := core.ReverseTransaction(txn, usr)
+	if err != nil {
+		return err
+	}
 
 	log.Debugf("Reversed Transaction: %+v", newTxn)
 
@@ -159,7 +161,7 @@ func (l *Ledger) GetCurrencies(txn *core.Transaction) ([]*core.Currency, error) 
 			}
 		}
 
-		if exists == false {
+		if !exists {
 			currencies = append(currencies, cur)
 		}
 
@@ -191,7 +193,7 @@ func (l *Ledger) GetAccounts(txn *core.Transaction) ([]*core.Account, error) {
 					exists = true
 				}
 			}
-			if exists == false {
+			if !exists {
 				accounts = append(accounts, a)
 			}
 		}

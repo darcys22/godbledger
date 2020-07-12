@@ -40,12 +40,14 @@ If you want to see all the transactions in the database, or export to CSV
 	Action: func(ctx *cli.Context) error {
 		//Check if keyfile path given and make sure it doesn't already exist.
 		err, cfg := cmd.MakeConfig(ctx)
-		databasefilepath := ctx.Args().First()
-		if databasefilepath == "" {
-			databasefilepath = cfg.DatabaseLocation
+		if err != nil {
+			log.Fatal(err)
 		}
 
 		ledger, err := ledger.New(ctx, cfg)
+		if err != nil {
+			log.Fatal(err)
+		}
 		queryDate := time.Now()
 
 		table := tablewriter.NewWriter(os.Stdout)

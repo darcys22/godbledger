@@ -44,11 +44,17 @@ If you want to see all the transactions in the database, or export to CSV/JSON
 		//Check if keyfile path given and make sure it doesn't already exist.
 
 		err, cfg := cmd.MakeConfig(ctx)
+		if err != nil {
+			log.Fatal(err)
+		}
 		databasefilepath := ctx.Args().First()
 		if databasefilepath == "" {
 			databasefilepath = cfg.DatabaseLocation
 		}
 		ledger, err := ledger.New(ctx, cfg)
+		if err != nil {
+			log.Fatal(err)
+		}
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"Date", "ID", "Account", "Description", "Currency", "Amount"})
 		table.SetBorder(false)
