@@ -2,7 +2,7 @@
 
 GoDBLedger is an Open Source Accounting System that aims to provide the user with normal programming goodies that finance systems tend to lack. It includes GRPC endpoints so you can communicate to it from your scripts (Automation!). It also includes a MySQL database backend so you can actually analyse your financial data using third party analysis software.
 
-[![Watch the video](https://img.youtube.com/vi/svyw9EOZuuc/maxresdefault.jpg)](https://youtu.be/svyw9EOZuuc)
+[![Watch the demo video](https://img.youtube.com/vi/svyw9EOZuuc/maxresdefault.jpg)](https://youtu.be/svyw9EOZuuc)
 
 To get started begin here:
 
