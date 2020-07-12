@@ -30,8 +30,6 @@ import (
 	"sort"
 	"strings"
 	"testing"
-
-	"github.com/ethereum/go-ethereum/params"
 )
 
 func TestMain(m *testing.M) {
@@ -97,8 +95,8 @@ type testMatcher struct {
 }
 
 type testConfig struct {
-	p      *regexp.Regexp
-	config params.ChainConfig
+	p *regexp.Regexp
+	//config params.ChainConfig
 }
 
 type testFailure struct {
@@ -129,9 +127,9 @@ func (tm *testMatcher) whitelist(pattern string) {
 }
 
 // config defines chain config for tests matching the pattern.
-func (tm *testMatcher) config(pattern string, cfg params.ChainConfig) {
-	tm.configpat = append(tm.configpat, testConfig{regexp.MustCompile(pattern), cfg})
-}
+//func (tm *testMatcher) config(pattern string, cfg params.ChainConfig) {
+//tm.configpat = append(tm.configpat, testConfig{regexp.MustCompile(pattern), cfg})
+//}
 
 // findSkip matches name against test skip patterns.
 func (tm *testMatcher) findSkip(name string) (reason string, skipload bool) {
@@ -155,15 +153,15 @@ func (tm *testMatcher) findSkip(name string) (reason string, skipload bool) {
 }
 
 // findConfig returns the chain config matching defined patterns.
-func (tm *testMatcher) findConfig(name string) *params.ChainConfig {
-	// TODO(fjl): name can be derived from testing.T when min Go version is 1.8
-	for _, m := range tm.configpat {
-		if m.p.MatchString(name) {
-			return &m.config
-		}
-	}
-	return new(params.ChainConfig)
-}
+//func (tm *testMatcher) findConfig(name string) *params.ChainConfig {
+//// TODO(fjl): name can be derived from testing.T when min Go version is 1.8
+//for _, m := range tm.configpat {
+//if m.p.MatchString(name) {
+//return &m.config
+//}
+//}
+//return new(params.ChainConfig)
+//}
 
 // checkFailure checks whether a failure is expected.
 func (tm *testMatcher) checkFailure(t *testing.T, name string, err error) error {

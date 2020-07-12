@@ -26,11 +26,8 @@ func TestBasic(t *testing.T) {
 	bt := new(testMatcher)
 
 	bt.walk(t, basicTestDir, func(t *testing.T, name string, test *BasicTest) {
-		if err := bt.checkFailure(t, name+"/trie", test.Run(false)); err != nil {
-			t.Errorf("test without snapshotter failed: %v", err)
-		}
-		if err := bt.checkFailure(t, name+"/snap", test.Run(true)); err != nil {
-			t.Errorf("test with snapshotter failed: %v", err)
+		if err := bt.checkFailure(t, name, test.Run(false)); err != nil {
+			t.Errorf("test failed: %v", err)
 		}
 	})
 }
