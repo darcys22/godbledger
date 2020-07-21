@@ -85,7 +85,7 @@ var commandWizardJournal = &cli.Command{
 
 		bytes, err := json.Marshal(req)
 		if err != nil {
-			fmt.Println("Can't serislize", req)
+			fmt.Println("Can't serialize", req)
 		}
 		fmt.Printf("%v => %v, '%v'\n", req, bytes, string(bytes))
 
