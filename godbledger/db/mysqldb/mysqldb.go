@@ -219,19 +219,34 @@ func (db *Database) ClearDB() error {
 
 	//DROP TABLES
 	dropDB := `
-				SET foreign_key_checks = 0;
-				SELECT
-					 'DROP TABLE IF EXISTS ' + table_name + ';'
-				FROM
-						information_schema.tables
-				WHERE
-						table_schema = "ledger";
-				SET foreign_key_checks = 0;
+				DROP DATABASE ledger;
 			`
 	log.Debug("Query: " + dropDB)
 	_, err := db.DB.Exec(dropDB)
 	if err != nil {
 		log.Fatalf("Dropping table failed with: %s", err)
+		return err
+	}
+
+	//CREATE NEW DATABASE
+	newDB := `
+				CREATE DATABASE ledger;
+			`
+	log.Debug("Query: " + newDB)
+	_, err = db.DB.Exec(newDB)
+	if err != nil {
+		log.Fatalf("Creating table failed with: %s", err)
+		return err
+	}
+
+	//USE NEW DATABASE
+	newDB = `
+				USE ledger;
+			`
+	log.Debug("Query: " + newDB)
+	_, err = db.DB.Exec(newDB)
+	if err != nil {
+		log.Fatalf("Creating table failed with: %s", err)
 		return err
 	}
 	return nil
