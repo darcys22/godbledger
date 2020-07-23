@@ -38,8 +38,8 @@ func TestMain(m *testing.M) {
 }
 
 var (
-	baseDir      = filepath.Join(".", "testdata")
-	basicTestDir = filepath.Join(baseDir, "BasicTests")
+//baseDir = filepath.Join(".", "testdata")
+//basicTestDir = filepath.Join(baseDir, "BasicTests")
 )
 
 func readJSON(reader io.Reader, value interface{}) error {
