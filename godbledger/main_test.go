@@ -1,11 +1,16 @@
 package main
 
 import (
-	"github.com/darcys22/godbledger/godbledger/core"
-	//"github.com/darcys22/godbledger/godbledger/ledger"
+	"flag"
 	"math/big"
 	"testing"
 	"time"
+
+	"github.com/urfave/cli/v2"
+
+	"github.com/darcys22/godbledger/godbledger/cmd"
+	"github.com/darcys22/godbledger/godbledger/core"
+	"github.com/darcys22/godbledger/godbledger/ledger"
 )
 
 func TestNewTransaction(t *testing.T) {
@@ -43,19 +48,36 @@ func TestNewTransaction(t *testing.T) {
 		t.Fatalf("Appending Second Split Failed: %v", err)
 	}
 
-	//ledger, err := ledger.NewLedgerDB()
-	//if err != nil {
-	//t.Fatalf("New ledger Failed: %v", err)
-	//}
+	set := flag.NewFlagSet("test", 0)
+	set.String("config", "", "doc")
 
-	//err = ledger.AppendTransaction(txn)
-	//if err != nil {
-	//t.Fatalf("Appending to ledger Failed: %v", err)
-	//}
+	ctx := cli.NewContext(nil, set, nil)
+
+	err, cfg := cmd.MakeConfig(ctx)
+	if err != nil {
+		t.Fatalf("New Config Failed: %v", err)
+	}
+
+	cfg.DatabaseType = "sqlite3"
+	cfg.DatabaseLocation = ":memory:"
+
+	ledger, err := ledger.New(ctx, cfg)
+	if err != nil {
+		t.Fatalf("New ledger Failed: %v", err)
+	}
+	ledger.Start()
+
+	//response, err := ledger.Insert(txn)
+	_, err = ledger.Insert(txn)
+	if err != nil {
+		t.Fatalf("Inserting to ledger Failed: %v", err)
+	}
 
 	//_, valid := ledger.Transactions[0].Balance()
 	//if !valid {
 	//t.Fatalf("Invalid Transaction")
 	//}
+
+	ledger.Stop()
 
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"encoding/csv"
 	"encoding/json"
@@ -47,10 +48,6 @@ If you want to see all the transactions in the database, or export to CSV/JSON
 		if err != nil {
 			log.Fatal(err)
 		}
-		databasefilepath := ctx.Args().First()
-		if databasefilepath == "" {
-			databasefilepath = cfg.DatabaseLocation
-		}
 		ledger, err := ledger.New(ctx, cfg)
 		if err != nil {
 			log.Fatal(err)
@@ -59,23 +56,37 @@ If you want to see all the transactions in the database, or export to CSV/JSON
 		table.SetHeader([]string{"Date", "ID", "Account", "Description", "Currency", "Amount"})
 		table.SetBorder(false)
 
+		queryDateStart := time.Now().Add(time.Hour * 24 * 365 * -100)
+		queryDateEnd := time.Now().Add(time.Hour * 24 * 365 * 100)
+
 		queryDB := `
-			SELECT 
+			SELECT
 				transactions.transaction_id,
 				splits.split_date,
 				splits.description,
 				splits.currency,
 				splits.amount,
 				split_accounts.account_id
-			FROM splits 
-				JOIN split_accounts 
-					ON splits.split_id = split_accounts.split_id
-				JOIN transactions
-					on splits.transaction_id = transactions.transaction_id
+			FROM
+				splits
+				JOIN split_accounts ON splits.split_id = split_accounts.split_id
+				JOIN transactions on splits.transaction_id = transactions.transaction_id
+			WHERE
+				splits.split_date >= ?
+				AND splits.split_date <= ?
+				AND "void" NOT IN(
+					SELECT
+						t.tag_name
+					FROM
+						tags AS t
+						JOIN transaction_tag AS tt ON tt.tag_id = t.tag_id
+					WHERE
+						tt.transaction_id = splits.transaction_id
+				)
 		;`
 
 		log.Debug("Querying Database")
-		rows, err := ledger.LedgerDb.Query(queryDB)
+		rows, err := ledger.LedgerDb.Query(queryDB, queryDateStart, queryDateEnd)
 
 		if err != nil {
 			log.Fatal(err)
@@ -86,14 +97,13 @@ If you want to see all the transactions in the database, or export to CSV/JSON
 			// Scan one customer record
 			var t Transaction
 			if err := rows.Scan(&t.ID, &t.Date, &t.Description, &t.Currency, &t.Amount, &t.Account); err != nil {
-				// handle error
+				return err
 			}
 			output.Data = append(output.Data, t)
 			table.Append([]string{t.Date, t.ID, t.Account, t.Description, t.Currency, t.Amount})
 		}
-		fmt.Printf("Database does not already exist at %s.\n", databasefilepath)
 		if rows.Err() != nil {
-			// handle error
+			return err
 		}
 
 		//Output some information.

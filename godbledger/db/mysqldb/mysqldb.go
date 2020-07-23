@@ -2,10 +2,11 @@ package mysqldb
 
 import (
 	"database/sql"
+	"errors"
 
 	"github.com/sirupsen/logrus"
 
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-sql-driver/mysql"
 )
 
 var log = logrus.WithField("prefix", "MySQL")
@@ -20,26 +21,51 @@ func (db *Database) Close() error {
 	return db.DB.Close()
 }
 
-func DSN(DB_USER, DB_PASS, DB_HOST, DB_NAME string) string {
-	return DB_USER + ":" + DB_PASS + "@" + DB_HOST + "/" + DB_NAME + "?charset=utf8&parseTime=true"
-	//return DB_USER + ":" + DB_PASS + "@" + DB_HOST + "/"
-}
+func ValidateConnectionString(dsn string) (string, error) {
 
-func ValidateConnectionString(connection_string string) string {
-	//if connection_string == "" {
-	//DB_HOST := "tcp(127.0.0.1:3306)"
-	//DB_NAME := "ledger"
-	//DB_USER := "godbledger"
-	//DB_PASS := "password"
-	//connection_string = DSN(DB_USER, DB_PASS, DB_HOST, DB_NAME)
-	//}
-	return connection_string + "?charset=utf8&parseTime=true"
+	if dsn == "" {
+		return "", errors.New("Connection string not provided")
+	}
+
+	cfg, err := mysql.ParseDSN(dsn)
+	if err != nil {
+		log.Warnf("Connection string could not be parsed: %s", err.Error())
+		return "", err
+	}
+	log.Debugf("DB_ADDR := %s", cfg.Addr)
+	log.Debugf("DB_NET := %s", cfg.Net)
+	log.Debugf("DB_DBNAME := %s", cfg.DBName)
+	log.Debugf("DB_USER := %s", cfg.User)
+	log.Debugf("DB_PASSWORD := %s", cfg.Passwd)
+	log.Debugf("PARAMS := %v", cfg.Params)
+	if !cfg.ParseTime {
+		cfg.ParseTime = true
+	}
+	charset, ok := cfg.Params["charset"]
+	if !(ok && charset == "utf8") {
+		if cfg.Params == nil {
+			cfg.Params = make(map[string]string)
+		}
+		cfg.Params["charset"] = "utf8"
+	}
+
+	log.Debugf("ParseTime := %v", cfg.ParseTime)
+	log.Debugf("Charset := %s", cfg.Params["charset"])
+
+	dsnstring := cfg.FormatDSN()
+	log.Debugf("DSN := %s", dsnstring)
+
+	return dsnstring, nil
 }
 
 // NewDB initializes a new DB.
 func NewDB(connection_string string) (*Database, error) {
-	log.Debug(connection_string)
-	MySQLDB, err := sql.Open("mysql", ValidateConnectionString(connection_string))
+	validatedString, err := ValidateConnectionString(connection_string)
+	if err != nil {
+		log.Fatal(err.Error())
+		return nil, err
+	}
+	MySQLDB, err := sql.Open("mysql", validatedString)
 	if err != nil {
 		log.Fatal(err.Error())
 		return nil, err
@@ -219,19 +245,34 @@ func (db *Database) ClearDB() error {
 
 	//DROP TABLES
 	dropDB := `
-				SET foreign_key_checks = 0;
-				SELECT
-					 'DROP TABLE IF EXISTS ' + table_name + ';'
-				FROM
-						information_schema.tables
-				WHERE
-						table_schema = "ledger";
-				SET foreign_key_checks = 0;
+				DROP DATABASE ledger;
 			`
 	log.Debug("Query: " + dropDB)
 	_, err := db.DB.Exec(dropDB)
 	if err != nil {
 		log.Fatalf("Dropping table failed with: %s", err)
+		return err
+	}
+
+	//CREATE NEW DATABASE
+	newDB := `
+				CREATE DATABASE ledger;
+			`
+	log.Debug("Query: " + newDB)
+	_, err = db.DB.Exec(newDB)
+	if err != nil {
+		log.Fatalf("Creating table failed with: %s", err)
+		return err
+	}
+
+	//USE NEW DATABASE
+	newDB = `
+				USE ledger;
+			`
+	log.Debug("Query: " + newDB)
+	_, err = db.DB.Exec(newDB)
+	if err != nil {
+		log.Fatalf("Creating table failed with: %s", err)
 		return err
 	}
 	return nil

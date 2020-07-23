@@ -16,6 +16,7 @@ require (
 	github.com/olekukonko/tablewriter v0.0.4
 	github.com/rs/xid v1.2.1
 	github.com/sirupsen/logrus v1.6.0
+	github.com/stretchr/testify v1.4.0
 	github.com/urfave/cli/v2 v2.2.0
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2
 	google.golang.org/grpc v1.30.0

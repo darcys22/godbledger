@@ -523,9 +523,10 @@ func (db *Database) AddUser(usr *core.User) error {
 	tx, _ := db.DB.Begin()
 	stmt, _ := tx.Prepare(insertUser)
 	log.Debug("Query: " + insertUser)
+	log.Debugf("Values: %s, %s", usr.Id, usr.Name)
 	res, err := stmt.Exec(usr.Id, usr.Name)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed Executing Insert into users table with :%v", err)
 	}
 
 	lastId, err := res.LastInsertId()
