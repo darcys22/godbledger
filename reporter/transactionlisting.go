@@ -48,10 +48,6 @@ If you want to see all the transactions in the database, or export to CSV/JSON
 		if err != nil {
 			log.Fatal(err)
 		}
-		databasefilepath := ctx.Args().First()
-		if databasefilepath == "" {
-			databasefilepath = cfg.DatabaseLocation
-		}
 		ledger, err := ledger.New(ctx, cfg)
 		if err != nil {
 			log.Fatal(err)
