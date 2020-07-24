@@ -63,18 +63,6 @@ requires Nodejs on the machine and also handlebars (npm install -g handlebars) a
 		if err != nil {
 			log.Fatal(err)
 		}
-		//databasefilepath := ctx.Args().First()
-		//if databasefilepath == "" {
-		//databasefilepath = cfg.DatabaseLocation
-		//}
-		//if _, err := os.Stat(databasefilepath); err != nil {
-		//log.Fatal(fmt.Sprintf("Database does not already exist at %s.", databasefilepath))
-		//}
-
-		//SqliteDB, err := sql.Open("sqlite3", databasefilepath)
-		//if err != nil {
-		//log.Fatal(err)
-		//}
 
 		queryDB := `
 			SELECT
