@@ -55,7 +55,7 @@ func (db *Database) AddTransaction(txn *core.Transaction) (string, error) {
 		vals = append(vals, txn.Id, split.Id, split.Date, string(split.Description[:]), split.Currency.Name, split.Amount.Int64())
 		for _, acc := range split.Accounts {
 			sqlAccStr += "(?, ?),"
-			accVals = append(accVals, split.Id, acc.Code)
+			accVals = append(accVals, split.Id, strings.TrimSpace(acc.Code))
 		}
 	}
 
@@ -496,7 +496,7 @@ func (db *Database) AddAccount(acc *core.Account) error {
 }
 
 func (db *Database) SafeAddAccount(acc *core.Account) error {
-	u, _ := db.FindAccount(acc.Code)
+	u, _ := db.FindAccount(strings.TrimSpace(acc.Code))
 	if u != nil {
 		return nil
 	}
