@@ -37,8 +37,7 @@ var reporteroutput struct {
 
 var commandPDFGenerate = &cli.Command{
 	Name:  "pdf",
-	Usage: "Creates a PDF of the Financials",
-	Usage: "ledger_cli pdf <output-filename> ]",
+	Usage: "ledger_cli pdf",
 	Description: `
 Creates a pdf report using nodejs and handlebars templates
 
