@@ -1,9 +1,7 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -11,11 +9,11 @@ import (
 	"os/exec"
 	"strings"
 
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 
 	"github.com/darcys22/godbledger/godbledger/cmd"
+	"github.com/darcys22/godbledger/godbledger/ledger"
 )
 
 var log = logrus.WithField("prefix", "Reporter")
@@ -38,10 +36,15 @@ var reporteroutput struct {
 }
 
 var commandPDFGenerate = &cli.Command{
-	Name:      "pdf",
-	Usage:     "Creates a PDF of the Financials",
-	ArgsUsage: "[]",
+	Name:  "pdf",
+	Usage: "Creates a PDF of the Financials",
+	Usage: "ledger_cli pdf <output-filename> ]",
 	Description: `
+Creates a pdf report using nodejs and handlebars templates
+
+Downloads a premade handlebars template and creates reports using the tagged accounts.
+
+requires Nodejs on the machine and also handlebars (npm install -g handlebars) and puppeteer 
 `,
 	Flags: []cli.Flag{
 		&cli.StringFlag{
@@ -57,18 +60,22 @@ var commandPDFGenerate = &cli.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		databasefilepath := ctx.Args().First()
-		if databasefilepath == "" {
-			databasefilepath = cfg.DatabaseLocation
-		}
-		if _, err := os.Stat(databasefilepath); err != nil {
-			log.Fatal(fmt.Sprintf("Database does not already exist at %s.", databasefilepath))
-		}
-
-		SqliteDB, err := sql.Open("sqlite3", databasefilepath)
+		ledger, err := ledger.New(ctx, cfg)
 		if err != nil {
 			log.Fatal(err)
 		}
+		//databasefilepath := ctx.Args().First()
+		//if databasefilepath == "" {
+		//databasefilepath = cfg.DatabaseLocation
+		//}
+		//if _, err := os.Stat(databasefilepath); err != nil {
+		//log.Fatal(fmt.Sprintf("Database does not already exist at %s.", databasefilepath))
+		//}
+
+		//SqliteDB, err := sql.Open("sqlite3", databasefilepath)
+		//if err != nil {
+		//log.Fatal(err)
+		//}
 
 		queryDB := `
 			SELECT
@@ -92,7 +99,7 @@ var commandPDFGenerate = &cli.Command{
 		;`
 
 		log.Debugf("Quering the Database")
-		rows, err := SqliteDB.Query(queryDB)
+		rows, err := ledger.LedgerDb.Query(queryDB)
 		if err != nil {
 			log.Fatal(err)
 		}
