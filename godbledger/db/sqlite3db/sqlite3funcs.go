@@ -682,7 +682,7 @@ func (db *Database) GetListing(startDate, endDate time.Time) (*[]core.Transactio
 
 	var txns []core.Transaction
 
-	log.Info("Searching Transactions in DB between %s & %s", startDate.Format("2006-01-02"), endDate.Format("2006-01-02"))
+	log.Infof("Searching Transactions in DB between %s & %s", startDate.Format("2006-01-02"), endDate.Format("2006-01-02"))
 
 	// Find the transaction bodys
 	rows, err := db.DB.Query(`
