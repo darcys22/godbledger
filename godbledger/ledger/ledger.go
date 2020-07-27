@@ -207,6 +207,10 @@ func (l *Ledger) GetTB(date time.Time) (*[]core.TBAccount, error) {
 	return l.LedgerDb.GetTB(date)
 }
 
+func (l *Ledger) GetListing(enddate, startdate time.Time) (*[]core.Transaction, error) {
+	return l.LedgerDb.GetListing(enddate, startdate)
+}
+
 func (l *Ledger) Start() {
 	l.LedgerDb.InitDB()
 }

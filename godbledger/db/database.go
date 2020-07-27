@@ -34,5 +34,6 @@ type Database interface {
 	AddUser(usr *core.User) error
 	SafeAddUser(usr *core.User) error
 	GetTB(date time.Time) (*[]core.TBAccount, error)
+	GetListing(startdate, enddate time.Time) (*[]core.Transaction, error)
 	Query(query string, args ...interface{}) (*sql.Rows, error)
 }

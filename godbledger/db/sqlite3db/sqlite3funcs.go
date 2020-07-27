@@ -677,3 +677,88 @@ func (db *Database) Query(query string, args ...interface{}) (*sql.Rows, error) 
 	return db.DB.Query(query, args...)
 
 }
+
+func (db *Database) GetListing(startDate, endDate time.Time) (*[]core.Transaction, error) {
+
+	var txns []core.Transaction
+
+	log.Info("Searching Transactions in DB between %s & %s", startDate.Format("2006-01-02"), endDate.Format("2006-01-02"))
+
+	// Find the transaction bodys
+	rows, err := db.DB.Query(`
+		SELECT
+        t.transaction_id
+        ,t.postdate
+        ,t.brief
+        ,u.user_id
+        ,u.username
+    FROM
+        transactions AS t JOIN users AS u
+            ON t.poster_user_id = u.user_id
+			;`)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var t core.Transaction
+		var poster core.User
+
+		if err := rows.Scan(&t.Id, &t.Postdate, &t.Description, &poster.Id, &poster.Name); err != nil {
+			log.Fatal(err)
+		}
+
+		// Find all splits relating to that transaction
+		splits, err := db.Query(`
+				SELECT s.split_id,
+							 s.split_date,
+							 s.description,
+							 a.account_id,
+							 a.NAME,
+							 s.currency,
+							 c.decimals,
+							 s.amount
+				FROM   splits AS s
+							 JOIN split_accounts AS sa
+								 ON s.split_id = sa.split_id
+							 JOIN accounts AS a
+								 ON sa.account_id = a. account_id
+							 JOIN currencies AS c
+								 ON s.currency = c.NAME
+				WHERE  s.transaction_id = ?
+        AND    s.split_date BETWEEN ? AND ?
+				;`,
+			t.Id,
+			startDate.Format("2006-01-02"),
+			endDate.Format("2006-01-02"))
+		if err != nil {
+			return nil, err
+		}
+
+		for splits.Next() {
+			var split core.Split
+			var account core.Account
+			var cur core.Currency
+			var amount int64
+			// for each row, scan the result into our split object
+			err = splits.Scan(&split.Id, &split.Date, &split.Description, &account.Code, &account.Name, &cur.Name, &cur.Decimals, &amount)
+			if err != nil {
+				return nil, err
+			}
+			split.Amount = big.NewInt(amount)
+			split.Accounts = append(split.Accounts, &account)
+			split.Currency = &cur
+			t.Splits = append(t.Splits, &split)
+
+		}
+		if len(t.Splits) > 0 {
+			txns = append(txns, t)
+		}
+	}
+	if rows.Err() != nil {
+		log.Fatal(err)
+	}
+
+	return &txns, nil
+}
