@@ -141,9 +141,16 @@ func (s *LedgerServer) DeleteCurrency(ctx context.Context, in *pb.DeleteCurrency
 
 func (s *LedgerServer) GetTB(ctx context.Context, in *pb.TBRequest) (*pb.TBResponse, error) {
 	log.Info("Received New TB Request")
-	accounts, err := s.ld.GetTB(time.Now())
-
 	response := pb.TBResponse{}
+
+	querydate, err := time.Parse("2006-01-02", in.Date)
+	if err != nil {
+		return &response, err
+	}
+	accounts, err := s.ld.GetTB(querydate)
+	if err != nil {
+		return &response, err
+	}
 
 	log.Debug("Building TB Response")
 	for _, account := range *accounts {
@@ -169,5 +176,53 @@ func (s *LedgerServer) GetTB(ctx context.Context, in *pb.TBRequest) (*pb.TBRespo
 			})
 	}
 
-	return &response, err
+	return &response, nil
+}
+
+func (s *LedgerServer) GetListing(ctx context.Context, in *pb.ReportRequest) (*pb.ListingResponse, error) {
+	log.Info("Received New Listing Request")
+	response := pb.ListingResponse{}
+
+	startdate, err := time.Parse("2006-01-02", in.Startdate)
+	if err != nil {
+		return &response, err
+	}
+	enddate, err := time.Parse("2006-01-02", in.Date)
+	if err != nil {
+		return &response, err
+	}
+	txns, err := s.ld.GetListing(startdate, enddate)
+	if err != nil {
+		return &response, err
+	}
+
+	log.Debug("Building Listing Response")
+
+	for _, txn := range *txns {
+		splits := []*pb.LineItem{}
+		date := ""
+
+		if len(txn.Splits) > 0 {
+			date = txn.Splits[0].Date.Format("2006-01-02 15:04:05")
+			for _, split := range txn.Splits {
+				splits = append(splits,
+					&pb.LineItem{
+						Accountname: split.Accounts[0].Name,
+						Description: string(split.Description),
+						Currency:    split.Currency.Name,
+						Amount:      split.Amount.Int64(),
+					})
+			}
+		} else {
+			date = txn.Postdate.Format("2006-01-02 15:04:05")
+		}
+		response.Transactions = append(response.Transactions,
+			&pb.Transaction{
+				Date:        date,
+				Description: string(txn.Description),
+				Lines:       splits,
+			})
+	}
+
+	return &response, nil
 }
