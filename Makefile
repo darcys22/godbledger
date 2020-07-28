@@ -18,3 +18,8 @@ clean:
 travis:
 	GO111MODULE=on go run utils/ci.go install
 	GO111MODULE=on go run utils/ci.go test -coverage $$TEST_PACKAGES
+
+arm:
+		mkdir -p release/$(BINARY)-arm-x64-v$(VERSION)/
+		GOOS=linux GOARCH=arm GOARM=5 GO111MODULE=on go build -o release/$(BINARY)-$(os)-x64-v$(VERSION)/ ./...
+
