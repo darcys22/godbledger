@@ -25,10 +25,12 @@ type Service struct {
 	grpcServer *grpc.Server
 	listener   net.Listener
 	port       string
+	host       string
 }
 
 type Config struct {
 	Port string
+	Host string
 }
 
 func NewRPCService(ctx context.Context, cfg *Config, l *ledger.Ledger) *Service {
@@ -38,15 +40,17 @@ func NewRPCService(ctx context.Context, cfg *Config, l *ledger.Ledger) *Service 
 		ctx:    ctx,
 		cancel: cancel,
 		port:   cfg.Port,
+		host:   cfg.Host,
 	}
 }
 
 // Start the gRPC server.
 func (s *Service) Start() {
 	log.Info("Starting service")
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", s.port))
+	address := fmt.Sprintf("%s:%s", s.host, s.port)
+	lis, err := net.Listen("tcp", address)
 	if err != nil {
-		log.Errorf("Could not listen to port in Start() :%s: %v", s.port, err)
+		log.Errorf("Could not listen to port in Start() %s: %v", address, err)
 	}
 	s.listener = lis
 	log.WithField("port", s.port).Info("Listening on port")

@@ -16,6 +16,7 @@ import (
 var log = logrus.WithField("prefix", "Config")
 
 type LedgerConfig struct {
+	Host             string // Host defines the address that the RPC will be opened on. Combined with RPC Port
 	RPCPort          string // RPCPort defines the port that the server will listen for transactions on
 	DataDirectory    string // DataDirectory defines the host systems folder directory holding the database and config files
 	LogVerbosity     string // LogVerbosity defines the logging level {debug, info, warn, error, fatal, panic}
@@ -50,6 +51,7 @@ var (
 	}
 
 	defaultLedgerConfig = &LedgerConfig{
+		Host:             "127.0.0.1",
 		RPCPort:          "50051",
 		DataDirectory:    DefaultDataDir(),
 		LogVerbosity:     "debug",
