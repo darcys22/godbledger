@@ -64,12 +64,13 @@ import (
 
 var (
 	// Files that end up in the godbledger*.zip archive.
-	gethArchiveFiles = []string{
-		"COPYING",
+	godbledgerArchiveFiles = []string{
 		executablePath("godbledger"),
 		executablePath("ledger_cli"),
 		executablePath("reporter"),
 	}
+
+	allToolsArchiveFiles = godbledgerArchiveFiles
 
 	// A debian package is created for all executables listed here.
 	debExecutables = []debExecutable{
@@ -146,7 +147,7 @@ func main() {
 	case "nsis":
 		//doWindowsInstaller(os.Args[2:])
 	case "xgo":
-		//doXgo(os.Args[2:])
+		doXgo(os.Args[2:])
 	case "purge":
 		//doPurge(os.Args[2:])
 	default:
@@ -749,9 +750,9 @@ func (d debExecutable) Package() string {
 //if err := cp.CopyFile(filepath.Join(*workdir, "COPYING"), "COPYING"); err != nil {
 //log.Fatal("Failed to copy copyright note: %v", err)
 //}
-//// Build the installer. This assumes that all the needed files have been previously
-//// built (don't mix building and packaging to keep cross compilation complexity to a
-//// minimum).
+// Build the installer. This assumes that all the needed files have been previously
+// built (don't mix building and packaging to keep cross compilation complexity to a
+// minimum).
 //version := strings.Split(params.Version, ".")
 //if env.Commit != "" {
 //version[2] += "-" + env.Commit[:8]
@@ -765,7 +766,7 @@ func (d debExecutable) Package() string {
 //"/DARCH="+*arch,
 //filepath.Join(*workdir, "geth.nsi"),
 //)
-//// Sign and publish installer.
+// Sign and publish installer.
 //if err := archiveUpload(installer, *upload, *signer); err != nil {
 //log.Fatal(err)
 //}
@@ -773,49 +774,50 @@ func (d debExecutable) Package() string {
 
 //// Cross compilation
 
-//func doXgo(cmdline []string) {
-//var (
-//alltools = flag.Bool("alltools", false, `Flag whether we're building all known tools, or only on in particular`)
-//)
-//flag.CommandLine.Parse(cmdline)
-//env := build.Env()
+func doXgo(cmdline []string) {
+	var (
+		alltools = flag.Bool("alltools", false, `Flag whether we're building all known tools, or only on in particular`)
+	)
+	flag.CommandLine.Parse(cmdline)
+	env := build.Env()
 
-//// Make sure xgo is available for cross compilation
-//gogetxgo := goTool("get", "github.com/karalabe/xgo")
-//build.MustRun(gogetxgo)
+	// Make sure xgo is available for cross compilation
+	//gogetxgo := goTool("get", "github.com/techknowlogick/xgo")
+	gogetxgo := goTool("get", "src.techknowlogick.com/xgo")
+	build.MustRun(gogetxgo)
 
-//// If all tools building is requested, build everything the builder wants
-//args := append(buildFlags(env), flag.Args()...)
+	// If all tools building is requested, build everything the builder wants
+	args := append(buildFlags(env), flag.Args()...)
 
-//if *alltools {
-//args = append(args, []string{"--dest", GOBIN}...)
-//for _, res := range allToolsArchiveFiles {
-//if strings.HasPrefix(res, GOBIN) {
-//// Binary tool found, cross build it explicitly
-//args = append(args, "./"+filepath.Join("cmd", filepath.Base(res)))
-//xgo := xgoTool(args)
-//build.MustRun(xgo)
-//args = args[:len(args)-1]
-//}
-//}
-//return
-//}
-//// Otherwise xxecute the explicit cross compilation
-//path := args[len(args)-1]
-//args = append(args[:len(args)-1], []string{"--dest", GOBIN, path}...)
+	if *alltools {
+		args = append(args, []string{"--dest", GOBIN}...)
+		for _, res := range allToolsArchiveFiles {
+			if strings.HasPrefix(res, GOBIN) {
+				// Binary tool found, cross build it explicitly
+				args = append(args, "./"+filepath.Base(res))
+				xgo := xgoTool(args)
+				build.MustRun(xgo)
+				args = args[:len(args)-1]
+			}
+		}
+		return
+	}
+	// Otherwise xxecute the explicit cross compilation
+	path := args[len(args)-1]
+	args = append(args[:len(args)-1], []string{"--dest", GOBIN, path}...)
 
-//xgo := xgoTool(args)
-//build.MustRun(xgo)
-//}
+	xgo := xgoTool(args)
+	build.MustRun(xgo)
+}
 
-//func xgoTool(args []string) *exec.Cmd {
-//cmd := exec.Command(filepath.Join(GOBIN, "xgo"), args...)
-//cmd.Env = os.Environ()
-//cmd.Env = append(cmd.Env, []string{
-//"GOBIN=" + GOBIN,
-//}...)
-//return cmd
-//}
+func xgoTool(args []string) *exec.Cmd {
+	cmd := exec.Command(filepath.Join(GOBIN, "xgo"), args...)
+	cmd.Env = os.Environ()
+	cmd.Env = append(cmd.Env, []string{
+		"GOBIN=" + GOBIN,
+	}...)
+	return cmd
+}
 
 // Binary distribution cleanups
 
