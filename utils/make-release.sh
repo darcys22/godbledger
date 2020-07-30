@@ -1,7 +1,8 @@
 #!/bin/bash
 
 version=$1
-build=linux
+#build=linux
+build=arm
 
 if [ -z "$version" ]
 then
