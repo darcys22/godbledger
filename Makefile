@@ -23,9 +23,13 @@ travis:
 	GO111MODULE=on go run utils/ci.go install
 	GO111MODULE=on go run utils/ci.go test -coverage $$TEST_PACKAGES
 
-arm:
-		mkdir -p release/$(BINARY)-arm-x64-v$(VERSION)/
-		env CC=arm-linux-gnueabihf-gcc CXX=arm-linux-gnueabihf-g++ CGO_ENABLED=1 GOOS=linux GOARCH=arm GOARM=7 GO111MODULE=on go build -o release/$(BINARY)-$(os)-x64-v$(VERSION)/ ./...
+linux-arm-7:
+		mkdir -p release/$(BINARY)-arm7-v$(VERSION)/
+		env CC=arm-linux-gnueabihf-gcc CXX=arm-linux-gnueabihf-g++ CGO_ENABLED=1 GOOS=linux GOARCH=arm GOARM=7 GO111MODULE=on go build -o release/$(BINARY)-arm7-v$(VERSION)/ ./...
+
+linux-arm-64:
+		mkdir -p release/$(BINARY)-arm64-v$(VERSION)/
+		env CC=aarch64-linux-gnu-gcc CXX=aarch-linux-gnu-g++ CGO_ENABLED=1 GOOS=linux GOARCH=arm64 GO111MODULE=on go build -o release/$(BINARY)-arm64-v$(VERSION)/ ./...
 
 godbledger-linux-arm: godbledger-linux-arm-5 godbledger-linux-arm-6 godbledger-linux-arm-7 godbledger-linux-arm64
 	@echo "Linux ARM cross compilation done:"
