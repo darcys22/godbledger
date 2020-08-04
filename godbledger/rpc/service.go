@@ -8,6 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/reflection"
 
 	"github.com/darcys22/godbledger/godbledger/ledger"
@@ -64,7 +65,10 @@ func (s *Service) Start() {
 	s.listener = lis
 	log.WithField("address", address).Info("GRPC Listening on port")
 
-	opts := []grpc.ServerOption{}
+	opts := []grpc.ServerOption{
+		grpc.UnaryInterceptor(s.unaryConnectionInterceptor),
+		grpc.StreamInterceptor(s.streamConnectionInterceptor),
+	}
 
 	if s.withCert != "" && s.withKey != "" {
 		creds, err := credentials.NewServerTLSFromFile(s.withCert, s.withKey)
@@ -115,4 +119,34 @@ func (s *Service) Status() error {
 		return s.credentialError
 	}
 	return nil
+}
+
+// Stream interceptor for new stream client connections to GRPC.
+func (s *Service) streamConnectionInterceptor(
+	srv interface{},
+	ss grpc.ServerStream,
+	_ *grpc.StreamServerInfo,
+	handler grpc.StreamHandler,
+) error {
+	s.logNewClientConnection(ss.Context())
+	return handler(srv, ss)
+}
+
+// Unary interceptor for new unary client connections to GRPC.
+func (s *Service) unaryConnectionInterceptor(
+	ctx context.Context,
+	req interface{},
+	_ *grpc.UnaryServerInfo,
+	handler grpc.UnaryHandler,
+) (interface{}, error) {
+	s.logNewClientConnection(ctx)
+	return handler(ctx, req)
+}
+
+func (s *Service) logNewClientConnection(ctx context.Context) {
+	if clientInfo, ok := peer.FromContext(ctx); ok {
+		log.WithFields(logrus.Fields{
+			"addr": clientInfo.Addr.String(),
+		}).Infof("New gRPC client connected to GoDBLedger")
+	}
 }
