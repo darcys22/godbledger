@@ -59,6 +59,26 @@ var (
 		Name:  "config",
 		Usage: "TOML configuration file",
 	}
+	// RPCHost defines the host on which the RPC server should listen.
+	RPCHost = &cli.StringFlag{
+		Name:  "rpc-host",
+		Usage: "Host on which the RPC server should listen",
+	}
+	// RPCPort defines a beacon node RPC port to open.
+	RPCPort = &cli.StringFlag{
+		Name:  "rpc-port",
+		Usage: "RPC port exposed by GoDBLedger",
+	}
+	// CertFlag defines a flag for the node's TLS certificate.
+	CertFlag = &cli.StringFlag{
+		Name:  "tls-cert",
+		Usage: "Certificate for secure gRPC. Pass this and the tls-key flag in order to use gRPC securely.",
+	}
+	// KeyFlag defines a flag for the node's TLS key.
+	KeyFlag = &cli.StringFlag{
+		Name:  "tls-key",
+		Usage: "Key for secure gRPC. Pass this and the tls-cert flag in order to use gRPC securely.",
+	}
 )
 
 func setConfig(ctx *cli.Context, cfg *LedgerConfig) {
@@ -71,5 +91,17 @@ func setConfig(ctx *cli.Context, cfg *LedgerConfig) {
 	}
 	if ctx.IsSet(DataDirFlag.Name) {
 		cfg.ConfigFile = ctx.String(DataDirFlag.Name)
+	}
+	if ctx.IsSet(RPCHost.Name) {
+		cfg.Host = ctx.String(RPCHost.Name)
+	}
+	if ctx.IsSet(RPCPort.Name) {
+		cfg.RPCPort = ctx.String(RPCPort.Name)
+	}
+	if ctx.IsSet(CertFlag.Name) {
+		cfg.Cert = ctx.String(CertFlag.Name)
+	}
+	if ctx.IsSet(KeyFlag.Name) {
+		cfg.Key = ctx.String(KeyFlag.Name)
 	}
 }

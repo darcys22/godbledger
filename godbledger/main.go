@@ -30,7 +30,12 @@ func startNode(ctx *cli.Context) error {
 		return err
 	}
 	fullnode.Register(ledger)
-	rpc := rpc.NewRPCService(context.Background(), &rpc.Config{Port: cfg.RPCPort, Host: cfg.Host}, ledger)
+	rpc := rpc.NewRPCService(context.Background(), &rpc.Config{
+		Host:     cfg.Host,
+		Port:     cfg.RPCPort,
+		CertFlag: cfg.Cert,
+		KeyFlag:  cfg.Key,
+	}, ledger)
 	fullnode.Register(rpc)
 	fullnode.Start()
 
