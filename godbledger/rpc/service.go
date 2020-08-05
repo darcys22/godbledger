@@ -56,7 +56,7 @@ func NewRPCService(ctx context.Context, cfg *Config, l *ledger.Ledger) *Service 
 
 // Start the gRPC server.
 func (s *Service) Start() {
-	log.Info("Starting service")
+	log.Debug("Starting service")
 	address := fmt.Sprintf("%s:%s", s.host, s.port)
 	lis, err := net.Listen("tcp", address)
 	if err != nil {

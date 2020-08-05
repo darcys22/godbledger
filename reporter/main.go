@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sirupsen/logrus"
-	//"github.com/urfave/cli"
+	"github.com/darcys22/godbledger/godbledger/cmd"
+
 	"github.com/urfave/cli/v2"
+
+	"github.com/sirupsen/logrus"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
 
@@ -29,6 +31,14 @@ func init() {
 		commandTrialBalance,
 		// pdfgenerator.go
 		commandPDFGenerate,
+	}
+	app.Flags = []cli.Flag{
+		cmd.VerbosityFlag,
+		cmd.ConfigFileFlag,
+		cmd.RPCHost,
+		cmd.RPCPort,
+		cmd.CertFlag,
+		cmd.KeyFlag,
 	}
 	app.Action = reporterConsole
 }

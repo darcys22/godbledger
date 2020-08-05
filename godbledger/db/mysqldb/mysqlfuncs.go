@@ -13,7 +13,7 @@ import (
 )
 
 func (db *Database) AddTransaction(txn *core.Transaction) (string, error) {
-	log.Info("Adding Transaction to DB")
+	log.Debug("Adding Transaction to DB")
 
 	posterID := ""
 	err := db.DB.QueryRow(`SELECT user_id FROM users WHERE username = ? LIMIT 1`, txn.Poster.Name).Scan(&posterID)
@@ -64,7 +64,7 @@ func (db *Database) AddTransaction(txn *core.Transaction) (string, error) {
 	stmt, _ = tx.Prepare(sqlStr)
 	log.Debug("Query: " + sqlStr)
 	log.Debugf("NumberVals = %d", len(vals))
-	log.Info("Adding Split to DB")
+	log.Debug("Adding Split to DB")
 	res, err = stmt.Exec(vals...)
 	if err != nil {
 		log.Fatal(err)
@@ -86,7 +86,7 @@ func (db *Database) AddTransaction(txn *core.Transaction) (string, error) {
 	tx2, _ := db.DB.Begin()
 	accStmt, _ := tx2.Prepare(sqlAccStr)
 	log.Debug("Query: " + sqlAccStr)
-	log.Info("Adding Split Accounts to DB")
+	log.Debug("Adding Split Accounts to DB")
 	res, err = accStmt.Exec(accVals...)
 	if err != nil {
 		log.Fatal(err)
@@ -110,7 +110,7 @@ func (db *Database) AddTransaction(txn *core.Transaction) (string, error) {
 func (db *Database) FindTransaction(txnID string) (*core.Transaction, error) {
 	var resp core.Transaction
 	var poster core.User
-	log.Info("Searching Transaction in DB: ", txnID)
+	log.Debugf("Searching Transaction in DB: %s", txnID)
 
 	// Find the transaction body
 	err := db.DB.QueryRow(`
@@ -129,7 +129,7 @@ func (db *Database) FindTransaction(txnID string) (*core.Transaction, error) {
 		return nil, err
 	}
 
-	log.Info("Searching Transaction splits in DB")
+	log.Debug("Searching Transaction splits in DB")
 
 	// Find all splits relating to that transaction
 	splits, err := db.Query(`
@@ -189,7 +189,7 @@ func (db *Database) DeleteTransaction(txnID string) error {
 
 func (db *Database) FindTag(tag string) (int, error) {
 	var resp int
-	log.Info("Searching Tag in DB")
+	log.Debug("Searching Tag in DB")
 	err := db.DB.QueryRow(`SELECT tag_id FROM tags WHERE tag_name = ? LIMIT 1`, tag).Scan(&resp)
 	if err != nil {
 		log.Debug("Find Tag Failed: ", err)
@@ -199,7 +199,7 @@ func (db *Database) FindTag(tag string) (int, error) {
 }
 
 func (db *Database) AddTag(tag string) error {
-	log.Info("Adding Tag to DB")
+	log.Debug("Adding Tag to DB")
 	insertTag := `
 		INSERT INTO tags(tag_name)
 			VALUES(?);
@@ -398,7 +398,7 @@ func (db *Database) DeleteTagFromTransaction(txnID, tag string) error {
 
 func (db *Database) FindCurrency(cur string) (*core.Currency, error) {
 	var resp core.Currency
-	log.Info("Searching Currency in DB: ", cur)
+	log.Debugf("Searching Currency in DB: %s", cur)
 	err := db.DB.QueryRow(`SELECT * FROM currencies WHERE name = ? LIMIT 1`, strings.TrimSpace(cur)).Scan(&resp.Name, &resp.Decimals)
 	if err != nil {
 		return nil, err
@@ -407,7 +407,7 @@ func (db *Database) FindCurrency(cur string) (*core.Currency, error) {
 }
 
 func (db *Database) AddCurrency(cur *core.Currency) error {
-	log.Info("Adding Currency to DB")
+	log.Debug("Adding Currency to DB")
 	insertCurrency := `
 		INSERT INTO currencies(name,decimals)
 			VALUES(?,?);
@@ -458,7 +458,7 @@ func (db *Database) DeleteCurrency(currency string) error {
 
 func (db *Database) FindAccount(code string) (*core.Account, error) {
 	var resp core.Account
-	log.Info("Searching Account in DB")
+	log.Debug("Searching Account in DB")
 	err := db.DB.QueryRow(`SELECT * FROM accounts WHERE account_id = ? LIMIT 1`, strings.TrimSpace(code)).Scan(&resp.Code, &resp.Name)
 	if err != nil {
 		return nil, err
@@ -467,7 +467,7 @@ func (db *Database) FindAccount(code string) (*core.Account, error) {
 }
 
 func (db *Database) AddAccount(acc *core.Account) error {
-	log.Info("Adding Account to DB")
+	log.Debug("Adding Account to DB")
 	insertAccount := `
 		INSERT INTO accounts(account_id, name)
 			VALUES(?,?);
@@ -506,7 +506,7 @@ func (db *Database) SafeAddAccount(acc *core.Account) error {
 
 func (db *Database) FindUser(pubKey string) (*core.User, error) {
 	var resp core.User
-	log.Info("Searching User in DB")
+	log.Debug("Searching User in DB")
 	err := db.DB.QueryRow(`SELECT * FROM users WHERE username = ? LIMIT 1`, pubKey).Scan(&resp.Id, &resp.Name)
 	if err != nil {
 		return nil, err
@@ -515,7 +515,7 @@ func (db *Database) FindUser(pubKey string) (*core.User, error) {
 }
 
 func (db *Database) AddUser(usr *core.User) error {
-	log.Info("Adding User to DB")
+	log.Debug("Adding User to DB")
 	insertUser := `
 		INSERT INTO users(user_id, username)
 			VALUES(?,?);
@@ -553,7 +553,7 @@ func (db *Database) SafeAddUser(usr *core.User) error {
 }
 
 func (db *Database) TestDB() error {
-	log.Info("Testing DB")
+	log.Debug("Testing DB")
 	createDB := "create table if not exists pages (title text, body blob, timestamp text)"
 	log.Debug("Query: " + createDB)
 	res, err := db.DB.Exec(createDB)
@@ -677,7 +677,7 @@ func (db *Database) GetListing(startDate, endDate time.Time) (*[]core.Transactio
 
 	var txns []core.Transaction
 
-	log.Infof("Searching Transactions in DB between %s & %s", startDate.Format("2006-01-02"), endDate.Format("2006-01-02"))
+	log.Debugf("Searching Transactions in DB between %s & %s", startDate.Format("2006-01-02"), endDate.Format("2006-01-02"))
 
 	// Find the transaction bodys
 	rows, err := db.DB.Query(`

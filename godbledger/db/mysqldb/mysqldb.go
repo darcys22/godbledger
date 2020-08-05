@@ -77,7 +77,7 @@ func NewDB(connection_string string) (*Database, error) {
 }
 
 func (db *Database) InitDB() error {
-	log.Info("Initialising DB Table")
+	log.Debug("Initialising DB Table")
 
 	//USERS
 	createDB := `
