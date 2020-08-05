@@ -65,7 +65,6 @@ var (
 
 func MakeConfig(cli *cli.Context) (error, *LedgerConfig) {
 
-	log.Infof("Setting up configuration")
 	config := defaultLedgerConfig
 	//set logrus verbosity
 	level, err := logrus.ParseLevel(config.LogVerbosity)
@@ -77,8 +76,6 @@ func MakeConfig(cli *cli.Context) (error, *LedgerConfig) {
 	if len(cli.String("config")) > 0 {
 		config.ConfigFile = cli.String("config")
 	}
-
-	log.Debugf("Filepath to config file: %s", config.ConfigFile)
 	err = InitConfig(config)
 	if err != nil {
 		log.Debugf("Error initialising config: %s", err)
@@ -100,6 +97,7 @@ func MakeConfig(cli *cli.Context) (error, *LedgerConfig) {
 		return err, nil
 	}
 	logrus.SetLevel(level)
+	log.WithField("Config File", config.ConfigFile).Debug("Configuration Successfully loaded")
 
 	return nil, config
 }
@@ -107,7 +105,7 @@ func MakeConfig(cli *cli.Context) (error, *LedgerConfig) {
 func InitConfig(config *LedgerConfig) error {
 	_, err := os.Stat(config.ConfigFile)
 	if os.IsNotExist(err) {
-		log.Infof("Config File doesn't exist creating at %s", config.ConfigFile)
+		log.Debugf("Config File doesn't exist creating at %s", config.ConfigFile)
 		os.MkdirAll(filepath.Dir(config.ConfigFile), os.ModePerm)
 		buf := new(bytes.Buffer)
 		if err := toml.NewEncoder(buf).Encode(config); err != nil {

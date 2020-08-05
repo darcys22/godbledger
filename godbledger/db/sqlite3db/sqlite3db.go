@@ -24,7 +24,7 @@ func (db *Database) Close() error {
 
 // NewDB initializes a new DB.
 func NewDB(dirPath string) (*Database, error) {
-	log.Info("Creating DB")
+	log.Debug("Creating DB")
 	if err := os.MkdirAll(dirPath, 0700); err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func NewDB(dirPath string) (*Database, error) {
 }
 
 func (db *Database) InitDB() error {
-	log.Info("Initialising DB Table")
+	log.Debug("Initialising DB Table")
 
 	//USERS
 	createDB := `

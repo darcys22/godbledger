@@ -52,7 +52,7 @@ func (n *Node) Start() {
 	n.lock.Lock()
 	log.WithFields(logrus.Fields{
 		"version": version.Version,
-	}).Info("Starting ledger node")
+	}).Info("Starting GoDBLedger Server")
 
 	n.services.StartAll()
 	stop := n.stop

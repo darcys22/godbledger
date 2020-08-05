@@ -60,10 +60,10 @@ func New(ctx *cli.Context, cfg *cmd.LedgerConfig) (*Ledger, error) {
 			return nil, err
 		}
 	case "memorydb":
-		log.Info("Using in memory database")
+		log.Debug("Using in memory database")
 		log.Fatal("In memory database not implemented")
 	default:
-		log.Println("No implementation available for that database.")
+		log.Fatal("No implementation available for that database.")
 	}
 
 	log.Debug("Initialised database configuration")
@@ -72,8 +72,7 @@ func New(ctx *cli.Context, cfg *cmd.LedgerConfig) (*Ledger, error) {
 }
 
 func (l *Ledger) Insert(txn *core.Transaction) (string, error) {
-	log.Infof("Created Transaction: %v", txn)
-	log.Debugf("Creating Safely added user: %v", txn.Poster)
+	log.WithField("transaction", txn).Debug("Created Transaction")
 	l.LedgerDb.SafeAddUser(txn.Poster)
 	currencies, _ := l.GetCurrencies(txn)
 	for _, currency := range currencies {
@@ -95,19 +94,16 @@ func (l *Ledger) Insert(txn *core.Transaction) (string, error) {
 }
 
 func (l *Ledger) Delete(txnID string) {
-	log.Infof("Deleting Transaction: %s", txnID)
 	l.LedgerDb.DeleteTransaction(txnID)
 }
 
 func (l *Ledger) Void(txnID string, usr *core.User) error {
-	log.Infof("Voiding Transaction: %s", txnID)
-
 	txn, err := l.LedgerDb.FindTransaction(txnID)
 	if err != nil {
 		return err
 	}
 
-	log.Debugf("Transaction: %+v", txn)
+	log.Debugf("Transaction Found to Void: %+v", txn)
 
 	newTxn, err := core.ReverseTransaction(txn, usr)
 	if err != nil {
@@ -138,12 +134,10 @@ func (l *Ledger) Void(txnID string, usr *core.User) error {
 }
 
 func (l *Ledger) InsertTag(account, tag string) error {
-	log.Infof("Creating Tag %s on %s", tag, account)
 	return l.LedgerDb.SafeAddTagToAccount(account, tag)
 }
 
 func (l *Ledger) DeleteTag(account, tag string) error {
-	log.Infof("Deleting Tag %s from %s", tag, account)
 	return l.LedgerDb.DeleteTagFromAccount(account, tag)
 }
 
@@ -171,12 +165,10 @@ func (l *Ledger) GetCurrencies(txn *core.Transaction) ([]*core.Currency, error) 
 }
 
 func (l *Ledger) InsertCurrency(curr *core.Currency) error {
-	log.Infof("Creating Currency %s with %d decimals", curr.Name, curr.Decimals)
 	return l.LedgerDb.SafeAddCurrency(curr)
 }
 
 func (l *Ledger) DeleteCurrency(currency string) error {
-	log.Infof("Deleting Currency %s", currency)
 	return l.LedgerDb.DeleteCurrency(currency)
 }
 
