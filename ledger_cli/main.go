@@ -22,8 +22,9 @@ import (
 	"fmt"
 	"os"
 
-	//"github.com/urfave/cli"
 	"github.com/urfave/cli/v2"
+
+	"github.com/darcys22/godbledger/godbledger/cmd"
 )
 
 const (
@@ -52,6 +53,14 @@ func init() {
 		commandTagAccount,
 		// addcurrency.go
 		commandAddCurrency,
+	}
+	app.Flags = []cli.Flag{
+		cmd.VerbosityFlag,
+		cmd.ConfigFileFlag,
+		cmd.RPCHost,
+		cmd.RPCPort,
+		cmd.CertFlag,
+		cmd.KeyFlag,
 	}
 	//app.Action = transaction
 }

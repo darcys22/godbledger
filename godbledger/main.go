@@ -65,6 +65,10 @@ func main() {
 		cmd.DataDirFlag,
 		cmd.ClearDB,
 		cmd.ConfigFileFlag,
+		cmd.RPCHost,
+		cmd.RPCPort,
+		cmd.CertFlag,
+		cmd.KeyFlag,
 	}
 
 	if err := app.Run(os.Args); err != nil {
