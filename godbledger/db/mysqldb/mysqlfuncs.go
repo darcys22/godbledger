@@ -15,6 +15,12 @@ import (
 func (db *Database) AddTransaction(txn *core.Transaction) (string, error) {
 	log.Debug("Adding Transaction to DB")
 
+	longDescription := false
+
+	if len(txn.Description) > 255 {
+		longDescription = true
+	}
+
 	posterID := ""
 	err := db.DB.QueryRow(`SELECT user_id FROM users WHERE username = ? LIMIT 1`, txn.Poster.Name).Scan(&posterID)
 	if err != nil {
@@ -28,7 +34,13 @@ func (db *Database) AddTransaction(txn *core.Transaction) (string, error) {
 	tx, _ := db.DB.Begin()
 	stmt, _ := tx.Prepare(insertTransaction)
 	log.Debug("Query: " + insertTransaction)
-	res, err := stmt.Exec(txn.Id, txn.Postdate, string(txn.Description[:]), posterID)
+
+	var res sql.Result
+	if longDescription {
+		res, err = stmt.Exec(txn.Id, txn.Postdate, string(txn.Description[:255]), posterID)
+	} else {
+		res, err = stmt.Exec(txn.Id, txn.Postdate, string(txn.Description[:]), posterID)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -42,8 +54,34 @@ func (db *Database) AddTransaction(txn *core.Transaction) (string, error) {
 		log.Fatal(err)
 	}
 	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
-
 	tx.Commit()
+
+	if longDescription {
+		insertLongDescriptionTransaction := `
+			INSERT INTO transactions_body(transaction_id, body)
+				VALUES(?,?);
+		`
+		tx, _ := db.DB.Begin()
+		stmt, _ := tx.Prepare(insertLongDescriptionTransaction)
+		log.Debug("Query: " + insertLongDescriptionTransaction)
+		log.Debug("Txn Id: " + txn.Id)
+		res, err := stmt.Exec(txn.Id, string(txn.Description[:]))
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		lastId, err := res.LastInsertId()
+		if err != nil {
+			log.Fatal(err)
+		}
+		rowCnt, err := res.RowsAffected()
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
+		log.Debug("Saving Long Description into extended table")
+		tx.Commit()
+	}
 
 	sqlStr := "INSERT INTO splits(transaction_id, split_id, split_date, description, currency, amount) VALUES "
 	vals := []interface{}{}
@@ -52,7 +90,12 @@ func (db *Database) AddTransaction(txn *core.Transaction) (string, error) {
 
 	for _, split := range txn.Splits {
 		sqlStr += "(?, ?, ?, ?, ?, ?),"
-		vals = append(vals, txn.Id, split.Id, split.Date, string(split.Description[:]), split.Currency.Name, split.Amount.Int64())
+		//Todo:(sean) split is truncated at 255 bytes but should be handled better
+		if len(split.Description) > 255 {
+			vals = append(vals, txn.Id, split.Id, split.Date, string(split.Description[:255]), split.Currency.Name, split.Amount.Int64())
+		} else {
+			vals = append(vals, txn.Id, split.Id, split.Date, string(split.Description[:]), split.Currency.Name, split.Amount.Int64())
+		}
 		for _, acc := range split.Accounts {
 			sqlAccStr += "(?, ?),"
 			accVals = append(accVals, split.Id, strings.TrimSpace(acc.Code))
@@ -110,7 +153,7 @@ func (db *Database) AddTransaction(txn *core.Transaction) (string, error) {
 func (db *Database) FindTransaction(txnID string) (*core.Transaction, error) {
 	var resp core.Transaction
 	var poster core.User
-	log.Debugf("Searching Transaction in DB: %s", txnID)
+	log.Debug("Searching Transaction in DB: ", txnID)
 
 	// Find the transaction body
 	err := db.DB.QueryRow(`
@@ -398,7 +441,7 @@ func (db *Database) DeleteTagFromTransaction(txnID, tag string) error {
 
 func (db *Database) FindCurrency(cur string) (*core.Currency, error) {
 	var resp core.Currency
-	log.Debugf("Searching Currency in DB: %s", cur)
+	log.Debug("Searching Currency in DB: ", cur)
 	err := db.DB.QueryRow(`SELECT * FROM currencies WHERE name = ? LIMIT 1`, strings.TrimSpace(cur)).Scan(&resp.Name, &resp.Decimals)
 	if err != nil {
 		return nil, err
