@@ -4,13 +4,11 @@ GoDBLedger is an Open Source Accounting System that aims to provide the user wit
 
 [Watch the demo video](https://youtu.be/svyw9EOZuuc)
 
-To get started begin here:
-
-[Quickstart](https://github.com/darcys22/godbledger/wiki/Quickstart)
+To get started begin view the quickstart on the wiki:
+https://github.com/darcys22/godbledger/wiki/Quickstart
 
 Documentation is found on the Github Wiki:
-
-[Wiki](https://github.com/darcys22/godbledger/wiki)
+https://github.com/darcys22/godbledger/wiki
 
 Discussion on discord:
 https://discord.gg/xHFufYC
