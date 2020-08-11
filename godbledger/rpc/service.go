@@ -2,7 +2,10 @@ package rpc
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
+	"io/ioutil"
 	"net"
 
 	"github.com/sirupsen/logrus"
@@ -29,28 +32,31 @@ type Service struct {
 	listener        net.Listener
 	port            string
 	host            string
+	withCACert      string
 	withCert        string
 	withKey         string
 	credentialError error
 }
 
 type Config struct {
-	Port     string
-	Host     string
-	CertFlag string
-	KeyFlag  string
+	Port       string
+	Host       string
+	CACertFlag string
+	CertFlag   string
+	KeyFlag    string
 }
 
 func NewRPCService(ctx context.Context, cfg *Config, l *ledger.Ledger) *Service {
 	ctx, cancel := context.WithCancel(ctx)
 	return &Service{
-		ld:       l,
-		ctx:      ctx,
-		cancel:   cancel,
-		port:     cfg.Port,
-		host:     cfg.Host,
-		withCert: cfg.CertFlag,
-		withKey:  cfg.KeyFlag,
+		ld:         l,
+		ctx:        ctx,
+		cancel:     cancel,
+		port:       cfg.Port,
+		host:       cfg.Host,
+		withCACert: cfg.CACertFlag,
+		withCert:   cfg.CertFlag,
+		withKey:    cfg.KeyFlag,
 	}
 }
 
@@ -70,8 +76,8 @@ func (s *Service) Start() {
 		grpc.StreamInterceptor(s.streamConnectionInterceptor),
 	}
 
-	if s.withCert != "" && s.withKey != "" {
-		creds, err := credentials.NewServerTLSFromFile(s.withCert, s.withKey)
+	if s.withCACert != "" && s.withCert != "" && s.withKey != "" {
+		creds, err := s.loadTLSCredentials()
 		if err != nil {
 			log.Errorf("Could not load TLS keys: %s", err)
 			s.credentialError = err
@@ -80,8 +86,6 @@ func (s *Service) Start() {
 	} else {
 		log.Warn("You are using an insecure gRPC server. If you are running your GoDBLedger Server and " +
 			"client on the same machine, you can ignore this message.")
-		//"client on the same machine, you can ignore this message. If you want to know " +
-		//"how to enable secure connections, see: https://docs.prylabs.network/docs/prysm-usage/secure-grpc")
 	}
 
 	s.grpcServer = grpc.NewServer(opts...)
@@ -149,4 +153,31 @@ func (s *Service) logNewClientConnection(ctx context.Context) {
 			"addr": clientInfo.Addr.String(),
 		}).Infof("New gRPC client connected to GoDBLedger")
 	}
+}
+
+func (s *Service) loadTLSCredentials() (credentials.TransportCredentials, error) {
+	// Load certificate of the CA who signed client's certificate
+	pemClientCA, err := ioutil.ReadFile(s.withCACert)
+	if err != nil {
+		return nil, err
+	}
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(pemClientCA) {
+		return nil, fmt.Errorf("failed to add client CA's certificate")
+	}
+
+	// Load server's certificate and private key
+	serverCert, err := tls.LoadX509KeyPair(s.withCert, s.withKey)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create the credentials and return it
+	config := &tls.Config{
+		Certificates: []tls.Certificate{serverCert},
+		ClientAuth:   tls.RequireAndVerifyClientCert,
+		ClientCAs:    certPool,
+	}
+
+	return credentials.NewTLS(config), nil
 }

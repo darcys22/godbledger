@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"time"
 
+	"github.com/darcys22/godbledger/godbledger/cmd"
 	pb "github.com/darcys22/godbledger/proto"
+
 	"google.golang.org/grpc"
 
-	//"github.com/urfave/cli"
 	"github.com/urfave/cli/v2"
 )
 
@@ -26,27 +27,46 @@ var commandTagAccount = &cli.Command{
 			Usage:   "deletes tag rather than creates",
 		},
 	},
-	Action: func(c *cli.Context) error {
+	Action: func(ctx *cli.Context) error {
+		err, cfg := cmd.MakeConfig(ctx)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		address := fmt.Sprintf("%s:%s", cfg.Host, cfg.RPCPort)
+		log.WithField("address", address).Info("GRPC Dialing on port")
+		opts := []grpc.DialOption{}
+
+		if cfg.CACert != "" && cfg.Cert != "" && cfg.Key != "" {
+			tlsCredentials, err := loadTLSCredentials(cfg)
+			if err != nil {
+				log.Fatal("cannot load TLS credentials: ", err)
+			}
+			opts = append(opts, grpc.WithTransportCredentials(tlsCredentials))
+		} else {
+			opts = append(opts, grpc.WithInsecure())
+		}
 
 		// Set up a connection to the server.
-		conn, err := grpc.Dial(address, grpc.WithInsecure())
+		//conn, err := grpc.Dial(address, grpc.WithInsecure())
+		conn, err := grpc.Dial(address, opts...)
 		if err != nil {
 			log.Fatalf("did not connect: %v", err)
 		}
 		defer conn.Close()
 		client := pb.NewTransactorClient(conn)
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		ctxtimeout, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
 
-		if c.Bool("delete") {
+		if ctx.Bool("delete") {
 			req := &pb.DeleteTagRequest{
-				Account:   c.Args().Get(0),
-				Tag:       c.Args().Get(1),
+				Account:   ctx.Args().Get(0),
+				Tag:       ctx.Args().Get(1),
 				Signature: "blah",
 			}
 
-			r, err := client.DeleteTag(ctx, req)
+			r, err := client.DeleteTag(ctxtimeout, req)
 			if err != nil {
 				log.Fatalf("could not greet: %v", err)
 			}
@@ -54,12 +74,12 @@ var commandTagAccount = &cli.Command{
 			log.Printf("Delete Tag Response: %s", r.GetMessage())
 		} else {
 			req := &pb.TagRequest{
-				Account:   c.Args().Get(0),
-				Tag:       c.Args().Get(1),
+				Account:   ctx.Args().Get(0),
+				Tag:       ctx.Args().Get(1),
 				Signature: "blah",
 			}
 
-			r, err := client.AddTag(ctx, req)
+			r, err := client.AddTag(ctxtimeout, req)
 			if err != nil {
 				log.Fatalf("could not greet: %v", err)
 			}

@@ -3,8 +3,7 @@ VERSION ?= latest
 PLATFORMS := linux
 os = $(word 1, $@)
 
-GOBIN = ./build/bin
-GO ?= latest
+GOBIN = ./build/bin GO ?= latest
 GORUN = env GO111MODULE=on go run
 
 .PHONY: $(PLATFORMS)
@@ -18,6 +17,7 @@ release: linux
 PHONY: clean
 clean:
 	rm -rf release/
+	rm -rf cert/
 
 travis:
 	GO111MODULE=on go run utils/ci.go install
@@ -54,3 +54,8 @@ godbledger-linux-arm64:
 	$(GORUN) utils/ci.go xgo -- --go=$(GO) --targets=linux/arm64 -v ./godbledger
 	@echo "Linux ARM64 cross compilation done:"
 	@ls -ld $(GOBIN)/godbledger-linux-* | grep arm64
+
+.PHONY: cert
+cert:
+	mkdir -p cert/
+	cd cert; ../utils/gen.sh; cd ..

@@ -18,6 +18,7 @@ var log = logrus.WithField("prefix", "Config")
 type LedgerConfig struct {
 	Host             string // Host defines the address that the RPC will be opened on. Combined with RPC Port
 	RPCPort          string // RPCPort defines the port that the server will listen for transactions on
+	CACert           string // CACertFlag defines a flag for the server's Certificate Authority certificate.
 	Cert             string // CertFlag defines a flag for the server's TLS certificate.
 	Key              string // KeyFlag defines a flag for the server's TLS key.
 	DataDirectory    string // DataDirectory defines the host systems folder directory holding the database and config files
