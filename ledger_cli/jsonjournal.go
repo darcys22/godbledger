@@ -3,9 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 
-	//"github.com/urfave/cli"
+	"github.com/darcys22/godbledger/godbledger/cmd"
+
 	"github.com/urfave/cli/v2"
 )
 
@@ -22,18 +22,22 @@ var commandJSONJournal = &cli.Command{
 
 `,
 	Flags: []cli.Flag{},
-	Action: func(c *cli.Context) error {
+	Action: func(ctx *cli.Context) error {
+		err, cfg := cmd.MakeConfig(ctx)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		// we initialize our request struct
 		var req Transaction
 
 		// we unmarshal our byteArray which contains our
 		// jsonFile's content into 'users' which we defined above
-		json.Unmarshal([]byte(c.Args().Get(0)), &req)
+		json.Unmarshal([]byte(ctx.Args().Get(0)), &req)
 
 		fmt.Printf("%v\n", req)
 
-		err := Send(&req)
+		err = Send(cfg, &req)
 		if err != nil {
 			log.Fatalf("could not send: %v", err)
 		}

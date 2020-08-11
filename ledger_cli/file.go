@@ -17,11 +17,11 @@ package main
 import (
 	//"flag"
 	"fmt"
-	"log"
 	"strings"
 	"unicode/utf8"
 
-	//"github.com/urfave/cli"
+	"github.com/darcys22/godbledger/godbledger/cmd"
+
 	"github.com/urfave/cli/v2"
 )
 
@@ -39,6 +39,10 @@ var commandFile = &cli.Command{
 `,
 	Flags: []cli.Flag{},
 	Action: func(ctx *cli.Context) error {
+		err, cfg := cmd.MakeConfig(ctx)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		var ledgerFileName string
 
@@ -63,7 +67,7 @@ var commandFile = &cli.Command{
 			}
 
 			PrintLedger(generalLedger, columnWidth)
-			SendLedger(generalLedger)
+			SendLedger(cfg, generalLedger)
 		} else {
 			log.Printf("This command requires an argument.")
 		}
@@ -90,8 +94,8 @@ func PrintLedger(generalLedger []*Transaction, columns int) {
 	}
 }
 
-func SendLedger(generalLedger []*Transaction) {
+func SendLedger(cfg *cmd.LedgerConfig, generalLedger []*Transaction) {
 	for _, trans := range generalLedger {
-		Send(trans)
+		Send(cfg, trans)
 	}
 }

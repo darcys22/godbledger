@@ -4,11 +4,12 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"log"
 	"math/big"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/darcys22/godbledger/godbledger/cmd"
 
 	//"github.com/urfave/cli"
 	"github.com/urfave/cli/v2"
@@ -21,7 +22,11 @@ var commandWizardJournal = &cli.Command{
 	Description: `
 `,
 	Flags: []cli.Flag{},
-	Action: func(c *cli.Context) error {
+	Action: func(ctx *cli.Context) error {
+		err, cfg := cmd.MakeConfig(ctx)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		reader := bufio.NewReader(os.Stdin)
 
@@ -89,7 +94,7 @@ var commandWizardJournal = &cli.Command{
 		}
 		fmt.Printf("%v => %v, '%v'\n", req, bytes, string(bytes))
 
-		err = Send(req)
+		err = Send(cfg, req)
 		if err != nil {
 			log.Fatalf("could not send: %v", err)
 		}

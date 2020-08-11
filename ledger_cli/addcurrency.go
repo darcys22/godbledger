@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"strconv"
 	"time"
+
+	"github.com/darcys22/godbledger/godbledger/cmd"
 
 	pb "github.com/darcys22/godbledger/proto"
 	"google.golang.org/grpc"
@@ -31,11 +33,17 @@ var commandAddCurrency = &cli.Command{
 			Usage:   "deletes currency rather than creates",
 		},
 	},
-	Action: func(c *cli.Context) error {
+	Action: func(ctx *cli.Context) error {
+		err, cfg := cmd.MakeConfig(ctx)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-		if c.NArg() > 0 {
+		if ctx.NArg() > 0 {
 
 			// Set up a connection to the server.
+			address := fmt.Sprintf("%s:%s", cfg.Host, cfg.RPCPort)
+			log.WithField("address", address).Info("GRPC Dialing on port")
 			conn, err := grpc.Dial(address, grpc.WithInsecure())
 			if err != nil {
 				log.Fatalf("did not connect: %v", err)
@@ -43,16 +51,16 @@ var commandAddCurrency = &cli.Command{
 			defer conn.Close()
 			client := pb.NewTransactorClient(conn)
 
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			ctxtimeout, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
 
-			if c.Bool("delete") {
+			if ctx.Bool("delete") {
 				req := &pb.DeleteCurrencyRequest{
-					Currency:  c.Args().Get(0),
+					Currency:  ctx.Args().Get(0),
 					Signature: "blah",
 				}
 
-				r, err := client.DeleteCurrency(ctx, req)
+				r, err := client.DeleteCurrency(ctxtimeout, req)
 				if err != nil {
 					log.Fatalf("could not greet: %v", err)
 				}
@@ -60,19 +68,19 @@ var commandAddCurrency = &cli.Command{
 				log.Printf("Delete Currency Response: %s", r.GetMessage())
 			} else {
 
-				if c.NArg() > 1 {
+				if ctx.NArg() > 1 {
 
-					decimals, err := strconv.ParseInt(c.Args().Get(1), 0, 64)
+					decimals, err := strconv.ParseInt(ctx.Args().Get(1), 0, 64)
 					if err != nil {
 						log.Fatalf("could not parse the decimals provided: %v", err)
 					}
 					req := &pb.CurrencyRequest{
-						Currency:  c.Args().Get(0),
+						Currency:  ctx.Args().Get(0),
 						Decimals:  decimals,
 						Signature: "blah",
 					}
 
-					r, err := client.AddCurrency(ctx, req)
+					r, err := client.AddCurrency(ctxtimeout, req)
 					if err != nil {
 						log.Fatalf("could not create currency: %v", err)
 					}

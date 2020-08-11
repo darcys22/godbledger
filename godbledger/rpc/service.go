@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"net"
 
@@ -71,7 +72,7 @@ func (s *Service) Start() {
 	}
 
 	if s.withCert != "" && s.withKey != "" {
-		creds, err := credentials.NewServerTLSFromFile(s.withCert, s.withKey)
+		creds, err := s.loadTLSCredentials()
 		if err != nil {
 			log.Errorf("Could not load TLS keys: %s", err)
 			s.credentialError = err
@@ -80,8 +81,6 @@ func (s *Service) Start() {
 	} else {
 		log.Warn("You are using an insecure gRPC server. If you are running your GoDBLedger Server and " +
 			"client on the same machine, you can ignore this message.")
-		//"client on the same machine, you can ignore this message. If you want to know " +
-		//"how to enable secure connections, see: https://docs.prylabs.network/docs/prysm-usage/secure-grpc")
 	}
 
 	s.grpcServer = grpc.NewServer(opts...)
@@ -149,4 +148,20 @@ func (s *Service) logNewClientConnection(ctx context.Context) {
 			"addr": clientInfo.Addr.String(),
 		}).Infof("New gRPC client connected to GoDBLedger")
 	}
+}
+
+func (s *Service) loadTLSCredentials() (credentials.TransportCredentials, error) {
+	// Load server's certificate and private key
+	serverCert, err := tls.LoadX509KeyPair(s.withCert, s.withKey)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create the credentials and return it
+	config := &tls.Config{
+		Certificates: []tls.Certificate{serverCert},
+		ClientAuth:   tls.NoClientCert,
+	}
+
+	return credentials.NewTLS(config), nil
 }
