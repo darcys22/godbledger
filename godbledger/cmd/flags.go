@@ -68,6 +68,11 @@ var (
 		Name:  "rpc-port",
 		Usage: "RPC port exposed by GoDBLedger",
 	}
+	// CertFlag defines a flag for the node's TLS CA certificate.
+	CACertFlag = &cli.StringFlag{
+		Name:  "ca-cert",
+		Usage: "Certificate Authority certificate for secure gRPC. Pass this and the tls-key flag in order to use gRPC securely.",
+	}
 	// CertFlag defines a flag for the node's TLS certificate.
 	CertFlag = &cli.StringFlag{
 		Name:  "tls-cert",
@@ -96,6 +101,9 @@ func setConfig(ctx *cli.Context, cfg *LedgerConfig) {
 	}
 	if ctx.IsSet(RPCPort.Name) {
 		cfg.RPCPort = ctx.String(RPCPort.Name)
+	}
+	if ctx.IsSet(CACertFlag.Name) {
+		cfg.CACert = ctx.String(CACertFlag.Name)
 	}
 	if ctx.IsSet(CertFlag.Name) {
 		cfg.Cert = ctx.String(CertFlag.Name)

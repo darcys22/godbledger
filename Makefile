@@ -17,6 +17,7 @@ release: linux
 PHONY: clean
 clean:
 	rm -rf release/
+	rm -rf cert/
 
 travis:
 	GO111MODULE=on go run utils/ci.go install

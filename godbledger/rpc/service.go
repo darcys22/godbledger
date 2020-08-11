@@ -3,7 +3,9 @@ package rpc
 import (
 	"context"
 	"crypto/tls"
+	"crypto/x509"
 	"fmt"
+	"io/ioutil"
 	"net"
 
 	"github.com/sirupsen/logrus"
@@ -30,28 +32,31 @@ type Service struct {
 	listener        net.Listener
 	port            string
 	host            string
+	withCACert      string
 	withCert        string
 	withKey         string
 	credentialError error
 }
 
 type Config struct {
-	Port     string
-	Host     string
-	CertFlag string
-	KeyFlag  string
+	Port       string
+	Host       string
+	CACertFlag string
+	CertFlag   string
+	KeyFlag    string
 }
 
 func NewRPCService(ctx context.Context, cfg *Config, l *ledger.Ledger) *Service {
 	ctx, cancel := context.WithCancel(ctx)
 	return &Service{
-		ld:       l,
-		ctx:      ctx,
-		cancel:   cancel,
-		port:     cfg.Port,
-		host:     cfg.Host,
-		withCert: cfg.CertFlag,
-		withKey:  cfg.KeyFlag,
+		ld:         l,
+		ctx:        ctx,
+		cancel:     cancel,
+		port:       cfg.Port,
+		host:       cfg.Host,
+		withCACert: cfg.CACertFlag,
+		withCert:   cfg.CertFlag,
+		withKey:    cfg.KeyFlag,
 	}
 }
 
@@ -71,7 +76,7 @@ func (s *Service) Start() {
 		grpc.StreamInterceptor(s.streamConnectionInterceptor),
 	}
 
-	if s.withCert != "" && s.withKey != "" {
+	if s.withCACert != "" && s.withCert != "" && s.withKey != "" {
 		creds, err := s.loadTLSCredentials()
 		if err != nil {
 			log.Errorf("Could not load TLS keys: %s", err)
@@ -151,6 +156,16 @@ func (s *Service) logNewClientConnection(ctx context.Context) {
 }
 
 func (s *Service) loadTLSCredentials() (credentials.TransportCredentials, error) {
+	// Load certificate of the CA who signed client's certificate
+	pemClientCA, err := ioutil.ReadFile(s.withCACert)
+	if err != nil {
+		return nil, err
+	}
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(pemClientCA) {
+		return nil, fmt.Errorf("failed to add client CA's certificate")
+	}
+
 	// Load server's certificate and private key
 	serverCert, err := tls.LoadX509KeyPair(s.withCert, s.withKey)
 	if err != nil {
@@ -160,7 +175,8 @@ func (s *Service) loadTLSCredentials() (credentials.TransportCredentials, error)
 	// Create the credentials and return it
 	config := &tls.Config{
 		Certificates: []tls.Certificate{serverCert},
-		ClientAuth:   tls.NoClientCert,
+		ClientAuth:   tls.RequireAndVerifyClientCert,
+		ClientCAs:    certPool,
 	}
 
 	return credentials.NewTLS(config), nil

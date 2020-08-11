@@ -65,6 +65,7 @@ func init() {
 		cmd.ConfigFileFlag,
 		cmd.RPCHost,
 		cmd.RPCPort,
+		cmd.CACertFlag,
 		cmd.CertFlag,
 		cmd.KeyFlag,
 	}

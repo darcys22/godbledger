@@ -33,7 +33,7 @@ var commandDeleteTransaction = &cli.Command{
 			log.WithField("address", address).Info("GRPC Dialing on port")
 			opts := []grpc.DialOption{}
 
-			if cfg.Cert != "" && cfg.Key != "" {
+			if cfg.CACert != "" && cfg.Cert != "" && cfg.Key != "" {
 				tlsCredentials, err := loadTLSCredentials(cfg)
 				if err != nil {
 					log.Fatal("cannot load TLS credentials: ", err)
@@ -92,7 +92,7 @@ var commandVoidTransaction = &cli.Command{
 			log.WithField("address", address).Info("GRPC Dialing on port")
 			opts := []grpc.DialOption{}
 
-			if cfg.Cert != "" && cfg.Key != "" {
+			if cfg.CACert != "" && cfg.Cert != "" && cfg.Key != "" {
 				tlsCredentials, err := loadTLSCredentials(cfg)
 				if err != nil {
 					log.Fatal("cannot load TLS credentials: ", err)

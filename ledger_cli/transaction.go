@@ -80,7 +80,7 @@ func Send(cfg *cmd.LedgerConfig, t *Transaction) error {
 	log.WithField("address", address).Info("GRPC Dialing on port")
 	opts := []grpc.DialOption{}
 
-	if cfg.Cert != "" && cfg.Key != "" {
+	if cfg.CACert != "" && cfg.Cert != "" && cfg.Key != "" {
 		tlsCredentials, err := loadTLSCredentials(cfg)
 		if err != nil {
 			log.Fatal("cannot load TLS credentials: ", err)
@@ -128,7 +128,7 @@ func Send(cfg *cmd.LedgerConfig, t *Transaction) error {
 }
 func loadTLSCredentials(cfg *cmd.LedgerConfig) (credentials.TransportCredentials, error) {
 	// Load certificate of the CA who signed server's certificate
-	pemServerCA, err := ioutil.ReadFile(cfg.Cert)
+	pemServerCA, err := ioutil.ReadFile(cfg.CACert)
 	if err != nil {
 		return nil, err
 	}
@@ -138,9 +138,16 @@ func loadTLSCredentials(cfg *cmd.LedgerConfig) (credentials.TransportCredentials
 		return nil, fmt.Errorf("failed to add server CA's certificate")
 	}
 
+	// Load client's certificate and private key
+	clientCert, err := tls.LoadX509KeyPair(cfg.Cert, cfg.Key)
+	if err != nil {
+		return nil, err
+	}
+
 	// Create the credentials and return it
 	config := &tls.Config{
-		RootCAs: certPool,
+		Certificates: []tls.Certificate{clientCert},
+		RootCAs:      certPool,
 	}
 
 	return credentials.NewTLS(config), nil
