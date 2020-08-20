@@ -25,7 +25,7 @@ func StartGoDBLedger(t *testing.T, config *cmd.LedgerConfig) int {
 	}
 
 	cmd := exec.Command("../build/bin/godbledger", args...)
-	t.Logf("Starting GoDBLedger with flags: %s", strings.Join(args[2:], " "))
+	t.Logf("Starting GoDBLedger with flags: %s", strings.Join(args[:], " "))
 	if err := cmd.Start(); err != nil {
 		t.Fatalf("Failed to start GoDBLedger Server: %v", err)
 	}

@@ -60,7 +60,6 @@ func runEndToEndTest(t *testing.T, config *cmd.LedgerConfig) {
 	}
 
 	client := pb.NewTransactorClient(conns[0])
-	//TODO(sean) add the NodeVersion Parameter rather than empty
 	req := &pb.VersionRequest{
 		Message: "Test",
 	}
