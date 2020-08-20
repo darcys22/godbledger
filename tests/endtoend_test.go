@@ -27,22 +27,22 @@ func runEndToEndTest(t *testing.T, config *cmd.LedgerConfig) {
 	defer helpers.KillProcesses(t, processIDs)
 
 	// Sleep depending on the count of validators, as generating the genesis state could take some time.
-	//time.Sleep(time.Duration(params.BeaconConfig().GenesisDelay) * time.Second)
-	//beaconLogFile, err := os.Open(path.Join(e2e.TestParams.LogPath, fmt.Sprintf(e2e.BeaconNodeLogFileName, 0)))
-	//if err != nil {
-	//t.Fatal(err)
-	//}
+	time.Sleep(time.Duration(5) * time.Second)
+	logFile, err := os.Open(logfile.txt)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	//t.Run("chain started", func(t *testing.T) {
-	//if err := helpers.WaitForTextInFile(beaconLogFile, "Chain started within the last epoch"); err != nil {
-	//t.Fatalf("failed to find chain start in logs, this means the chain did not start: %v", err)
-	//}
-	//})
+	t.Run("chain started", func(t *testing.T) {
+		if err := helpers.WaitForTextInFile(logFile, "Starting GoDBLedger Server"); err != nil {
+			t.Fatalf("failed to find GoDBLedger start in logs, this means the server did not start: %v", err)
+		}
+	})
 
-	// Failing early in case chain doesn't start.
-	//if t.Failed() {
-	//return
-	//}
+	//Failing early in case chain doesn't start.
+	if t.Failed() {
+		return
+	}
 
 	args := []string{
 		"jsonjournal",
@@ -56,11 +56,4 @@ func runEndToEndTest(t *testing.T, config *cmd.LedgerConfig) {
 		t.Fatalf("Failed to start ledger_cli: %v", err)
 	}
 
-	//bt := new(testMatcher)
-
-	//bt.walk(t, basicTestDir, func(t *testing.T, name string, test *BasicTest) {
-	//if err := bt.checkFailure(t, name, test.Run(false)); err != nil {
-	//t.Errorf("test failed: %v", err)
-	//}
-	//})
 }
