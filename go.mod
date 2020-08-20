@@ -7,6 +7,7 @@ require (
 	github.com/cespare/cp v1.1.1 // indirect
 	github.com/ethereum/go-ethereum v1.9.15
 	github.com/go-sql-driver/mysql v1.5.0
+	github.com/gogo/protobuf v1.1.1
 	github.com/golang/protobuf v1.4.2
 	github.com/gophers/xgo v0.0.0-20200104073656-1317f74b9001 // indirect
 	github.com/joyt/godate v0.0.0-20150226210126-7151572574a7

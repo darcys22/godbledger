@@ -1,22 +1,22 @@
-// Package endtoend performs full a end-to-end test for Prysm,
-// including spinning up an ETH1 dev chain, sending deposits to the deposit
-// contract, and making sure the beacon node and validators are running and
-// performing properly for a few epochs.
+// Package endtoend performs full a end-to-end test for GoDBLedger,
+// including spinning up a server and making sure its running
 package tests
 
 import (
-	//"fmt"
+	"context"
 	//"path"
+	"fmt"
+	"os"
+	"os/exec"
 	"testing"
 	"time"
 
-	"os"
-	"os/exec"
-
 	"github.com/darcys22/godbledger/godbledger/cmd"
+	pb "github.com/darcys22/godbledger/proto"
 	"github.com/darcys22/godbledger/tests/components"
 	"github.com/darcys22/godbledger/tests/helpers"
-	//"google.golang.org/grpc"
+	e2e "github.com/darcys22/godbledger/tests/params"
+	"google.golang.org/grpc"
 )
 
 func init() {
@@ -43,6 +43,32 @@ func runEndToEndTest(t *testing.T, config *cmd.LedgerConfig) {
 	//Failing early in case chain doesn't start.
 	if t.Failed() {
 		return
+	}
+
+	t.Fatal("TEST FAILUER")
+
+	conns := make([]*grpc.ClientConn, 1)
+	for i := 0; i < len(conns); i++ {
+		conn, err := grpc.Dial(fmt.Sprintf("127.0.0.1:%d", e2e.TestParams.RPCPort), grpc.WithInsecure())
+		if err != nil {
+			t.Fatalf("Failed to dial: %v", err)
+		}
+		conns[i] = conn
+		defer func() {
+			if err := conn.Close(); err != nil {
+				t.Log(err)
+			}
+		}()
+	}
+
+	client := pb.NewTransactorClient(conns[0])
+	//TODO(sean) add the NodeVersion Parameter rather than empty
+	req := &pb.VersionRequest{
+		Message: "Test",
+	}
+	_, err = client.NodeVersion(context.Background(), req)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	args := []string{
