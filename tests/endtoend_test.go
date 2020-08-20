@@ -45,8 +45,6 @@ func runEndToEndTest(t *testing.T, config *cmd.LedgerConfig) {
 		return
 	}
 
-	t.Fatal("TEST FAILUER")
-
 	conns := make([]*grpc.ClientConn, 1)
 	for i := 0; i < len(conns); i++ {
 		conn, err := grpc.Dial(fmt.Sprintf("127.0.0.1:%d", e2e.TestParams.RPCPort), grpc.WithInsecure())
