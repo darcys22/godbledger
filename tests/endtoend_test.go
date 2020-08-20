@@ -6,11 +6,12 @@ package tests
 
 import (
 	//"fmt"
-	//"os"
-	"os/exec"
 	//"path"
 	"testing"
-	//"time"
+	"time"
+
+	"os"
+	"os/exec"
 
 	"github.com/darcys22/godbledger/godbledger/cmd"
 	"github.com/darcys22/godbledger/tests/components"
@@ -28,7 +29,7 @@ func runEndToEndTest(t *testing.T, config *cmd.LedgerConfig) {
 
 	// Sleep depending on the count of validators, as generating the genesis state could take some time.
 	time.Sleep(time.Duration(5) * time.Second)
-	logFile, err := os.Open(logfile.txt)
+	logFile, err := os.Open("logfile.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
