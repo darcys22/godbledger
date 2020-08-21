@@ -1,5 +1,5 @@
 // Package endtoend performs full a end-to-end test for GoDBLedger,
-// including spinning up a server and making sure its running
+// including spinning up a server and making sure its running, and sending test data to verify
 package tests
 
 import (
@@ -11,16 +11,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/darcys22/godbledger/godbledger/cmd"
 	pb "github.com/darcys22/godbledger/proto"
+
+	"github.com/darcys22/godbledger/godbledger/cmd"
 	"github.com/darcys22/godbledger/tests/components"
+
 	"github.com/darcys22/godbledger/tests/helpers"
 	//e2e "github.com/darcys22/godbledger/tests/params"
+
 	"google.golang.org/grpc"
 )
-
-func init() {
-}
 
 func runEndToEndTest(t *testing.T, config *cmd.LedgerConfig) {
 
