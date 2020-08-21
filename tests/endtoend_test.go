@@ -15,7 +15,7 @@ import (
 	pb "github.com/darcys22/godbledger/proto"
 	"github.com/darcys22/godbledger/tests/components"
 	"github.com/darcys22/godbledger/tests/helpers"
-	e2e "github.com/darcys22/godbledger/tests/params"
+	//e2e "github.com/darcys22/godbledger/tests/params"
 	"google.golang.org/grpc"
 )
 
@@ -35,30 +35,37 @@ func runEndToEndTest(t *testing.T, config *cmd.LedgerConfig) {
 		t.Fatal(err)
 	}
 
+	t.Log("Starting GoDBLedger ")
 	t.Run("chain started", func(t *testing.T) {
 		if err := helpers.WaitForTextInFile(logFile, "Starting GoDBLedger Server"); err != nil {
 			t.Fatalf("failed to find GoDBLedger start in logs, this means the server did not start: %v", err)
 		}
 	})
+	t.Log("Starting GoDBLedger ")
 
 	//Failing early in case chain doesn't start.
 	if t.Failed() {
 		return
 	}
+	t.Log("Starting GoDBLedger before")
 
 	conns := make([]*grpc.ClientConn, 1)
 	for i := 0; i < len(conns); i++ {
-		conn, err := grpc.Dial(fmt.Sprintf("127.0.0.1:%d", e2e.TestParams.RPCPort), grpc.WithInsecure())
+		t.Logf("Starting GoDBLedger %d", i)
+		conn, err := grpc.Dial(fmt.Sprintf("%s:%s", config.Host, config.RPCPort), grpc.WithInsecure())
 		if err != nil {
 			t.Fatalf("Failed to dial: %v", err)
 		}
+		t.Log("here before")
 		conns[i] = conn
+		t.Log("here after")
 		defer func() {
 			if err := conn.Close(); err != nil {
 				t.Log(err)
 			}
 		}()
 	}
+	t.Log("Starting GoDBLedger after")
 
 	client := pb.NewTransactorClient(conns[0])
 	req := &pb.VersionRequest{
