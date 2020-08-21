@@ -7,7 +7,6 @@ import (
 	//"path"
 	"fmt"
 	"os"
-	"os/exec"
 	"testing"
 	"time"
 
@@ -16,7 +15,10 @@ import (
 	"github.com/darcys22/godbledger/godbledger/cmd"
 	"github.com/darcys22/godbledger/tests/components"
 
+	ev "github.com/darcys22/godbledger/tests/evaluators"
 	"github.com/darcys22/godbledger/tests/helpers"
+	"github.com/darcys22/godbledger/tests/types"
+
 	//e2e "github.com/darcys22/godbledger/tests/params"
 
 	"google.golang.org/grpc"
@@ -76,16 +78,25 @@ func runEndToEndTest(t *testing.T, config *cmd.LedgerConfig) {
 		t.Fatal(err)
 	}
 
-	args := []string{
-		"jsonjournal",
-		`{"Payee":"ijfjie","Date":"2019-06-30T00:00:00Z","AccountChanges":[{"Name":"Cash","Description":"jisfeij","Currency":"USD","Balance":"100"},{"Name":"Income","Description":"another","Currency":"USD","Balance":"-100"}],"Signature":"stuff"}`,
-	}
+	//args := []string{
+	//"jsonjournal",
+	//`{"Payee":"ijfjie","Date":"2019-06-30T00:00:00Z","AccountChanges":[{"Name":"Cash","Description":"jisfeij","Currency":"USD","Balance":"100"},{"Name":"Income","Description":"another","Currency":"USD","Balance":"-100"}],"Signature":"stuff"}`,
+	//}
 
-	cmd := exec.Command("../build/bin/ledger_cli", args...)
+	//cmd := exec.Command("../build/bin/ledger_cli", args...)
 
-	//t.Logf("Sending jsonjournal with args %s", strings.Join(args[2:], " "))
-	if err := cmd.Start(); err != nil {
-		t.Fatalf("Failed to start ledger_cli: %v", err)
+	////t.Logf("Sending jsonjournal with args %s", strings.Join(args[2:], " "))
+	//if err := cmd.Start(); err != nil {
+	//t.Fatalf("Failed to start ledger_cli: %v", err)
+	//}
+
+	evaluators := []types.Evaluator{ev.SingleTransaction}
+	for _, evaluator := range evaluators {
+		t.Run(evaluator.Name, func(t *testing.T) {
+			if err := evaluator.Evaluation(conns...); err != nil {
+				t.Errorf("evaluation failed for sync node: %v", err)
+			}
+		})
 	}
 
 }
