@@ -72,7 +72,7 @@ func singleTransaction(conns ...*grpc.ClientConn) error {
 				return errors.New("Trial Balance Groceries Account Incorrect")
 			}
 		default:
-			return errors.New(fmt.Sprintf("Unknown Account %s", res.Lines[i].Accountname))
+			return fmt.Errorf("Unknown Account %s", res.Lines[i].Accountname)
 		}
 	}
 
