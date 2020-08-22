@@ -84,6 +84,8 @@ func main() {
 		cmd.CertFlag,
 		cmd.KeyFlag,
 		cmd.LogFileName,
+		cmd.DatabaseTypeFlag,
+		cmd.DatabaseLocationFlag,
 	}
 
 	if err := app.Run(os.Args); err != nil {

@@ -24,6 +24,8 @@ func StartGoDBLedger(t *testing.T, config *cmd.LedgerConfig) int {
 		"--verbosity=trace",
 		fmt.Sprintf("--rpc-host=%s", config.Host),
 		fmt.Sprintf("--rpc-port=%s", config.RPCPort),
+		fmt.Sprintf("--database=%s", config.DatabaseType),
+		fmt.Sprintf("--database-location=%s", config.DatabaseLocation),
 	}
 
 	cmd := exec.Command("../build/bin/godbledger", args...)

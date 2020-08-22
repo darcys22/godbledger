@@ -21,8 +21,7 @@ func TestEndToEnd_MinimalConfig(t *testing.T) {
 		t.Fatalf("New Config Failed: %v", err)
 	}
 
-	cfg.DatabaseType = "sqlite3"
-	cfg.DatabaseLocation = ":memory:"
+	cfg.DatabaseType = "memorydb"
 
 	runEndToEndTest(t, cfg)
 }

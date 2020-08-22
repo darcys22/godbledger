@@ -31,9 +31,14 @@ func New(ctx *cli.Context, cfg *cmd.LedgerConfig) (*Ledger, error) {
 	}
 
 	switch strings.ToLower(cfg.DatabaseType) {
-	case "sqlite3":
+	case "sqlite3", "memorydb":
 
 		log.Debug("Using Sqlite3")
+		mode := "rwc"
+		if strings.ToLower(cfg.DatabaseType) == "memorydb" {
+			log.Debug("In Memory only Mode")
+			mode = "memory"
+		}
 		dbPath := path.Join(cfg.DataDirectory, ledgerDBName)
 		log.WithField("path", dbPath).Debug("Checking db path")
 		if ctx.Bool(cmd.ClearDB.Name) {
@@ -41,7 +46,7 @@ func New(ctx *cli.Context, cfg *cmd.LedgerConfig) (*Ledger, error) {
 				return nil, err
 			}
 		}
-		ledgerdb, err := sqlite3db.NewDB(dbPath)
+		ledgerdb, err := sqlite3db.NewDB(dbPath, mode)
 		ledger.LedgerDb = ledgerdb
 		if err != nil {
 			return nil, err
@@ -59,9 +64,6 @@ func New(ctx *cli.Context, cfg *cmd.LedgerConfig) (*Ledger, error) {
 		if err != nil {
 			return nil, err
 		}
-	case "memorydb":
-		log.Debug("Using in memory database")
-		log.Fatal("In memory database not implemented")
 	default:
 		log.Fatal("No implementation available for that database.")
 	}

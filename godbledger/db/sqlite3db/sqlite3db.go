@@ -2,6 +2,7 @@ package sqlite3db
 
 import (
 	"database/sql"
+	"fmt"
 	"os"
 	"path"
 
@@ -10,11 +11,14 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+const ledgerDBName = "ledger.db"
+
 var log = logrus.WithField("prefix", "SQLLite")
 
 type Database struct {
 	DB           *sql.DB
 	DatabasePath string
+	Mode         string
 }
 
 // Close closes the underlying database.
@@ -23,18 +27,19 @@ func (db *Database) Close() error {
 }
 
 // NewDB initializes a new DB.
-func NewDB(dirPath string) (*Database, error) {
+func NewDB(dirPath, mode string) (*Database, error) {
 	log.Debug("Creating DB")
 	if err := os.MkdirAll(dirPath, 0700); err != nil {
 		return nil, err
 	}
-	datafile := path.Join(dirPath, "ledger.db?_foreign_keys=true&parseTime=true")
+	datafile := path.Join(dirPath, fmt.Sprintf("%s?_foreign_keys=true&parseTime=true&mode=%s", ledgerDBName, mode))
+	log.WithField("datafile", datafile).Debug("Opening SQLite3 Datafile")
 	SqliteDB, err := sql.Open("sqlite3", datafile)
 	if err != nil {
 		return nil, err
 	}
 
-	db := &Database{DB: SqliteDB, DatabasePath: dirPath}
+	db := &Database{DB: SqliteDB, DatabasePath: dirPath, Mode: mode}
 
 	return db, err
 
