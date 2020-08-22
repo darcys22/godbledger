@@ -11,10 +11,12 @@ import (
 
 	"github.com/darcys22/godbledger/godbledger/cmd"
 	"github.com/darcys22/godbledger/tests/helpers"
+	e2e "github.com/darcys22/godbledger/tests/params"
 )
 
 func StartGoDBLedger(t *testing.T, config *cmd.LedgerConfig) int {
-	stdOutFile, err := helpers.DeleteAndCreateFile("", "logfile.txt")
+	stdOutFile, err := helpers.DeleteAndCreateFile(e2e.TestParams.LogPath, e2e.LogFileName)
+
 	if err != nil {
 		t.Fatal(err)
 	}

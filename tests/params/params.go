@@ -7,21 +7,19 @@ package params
 // Params struct defines the parameters needed for running E2E tests to properly handle test sharding.
 type Params struct {
 	LogPath string
-	RPCPort int
 }
 
 // TestParams is the globally accessible var for getting config elements.
 var TestParams *Params
 
 // LogFileName is the file name used for the GoDBLedger logs.
-var LogFileName = "godbledger.log"
+var LogFileName = "godbledgerE2Etest.log"
 
 // Init initializes the E2E config, properly handling test sharding.
-func Init(beaconNodeCount int) error {
+func Init() error {
 
 	TestParams = &Params{
-		LogPath: "outputlogs",
-		RPCPort: 50051,
+		LogPath: "../build/cache",
 	}
 	return nil
 }
