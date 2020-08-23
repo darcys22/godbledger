@@ -83,6 +83,21 @@ var (
 		Name:  "tls-key",
 		Usage: "Key for secure gRPC. Pass this and the tls-cert flag in order to use gRPC securely.",
 	}
+	// LogFileName specifies the log output file name.
+	LogFileName = &cli.StringFlag{
+		Name:  "log-file",
+		Usage: "Specify log file name, relative or absolute",
+	}
+	// DatabaseType specifies the backend for GoDBLedger
+	DatabaseTypeFlag = &cli.StringFlag{
+		Name:  "database",
+		Usage: "Specify database type, sqlite3 or mysql",
+	}
+	// DatabaseLocation specifies file location for Sqlite or connection string for MySQL
+	DatabaseLocationFlag = &cli.StringFlag{
+		Name:  "database-location",
+		Usage: "location of database file or connection string",
+	}
 )
 
 func setConfig(ctx *cli.Context, cfg *LedgerConfig) {
@@ -110,5 +125,11 @@ func setConfig(ctx *cli.Context, cfg *LedgerConfig) {
 	}
 	if ctx.IsSet(KeyFlag.Name) {
 		cfg.Key = ctx.String(KeyFlag.Name)
+	}
+	if ctx.IsSet(DatabaseTypeFlag.Name) {
+		cfg.DatabaseType = ctx.String(DatabaseTypeFlag.Name)
+	}
+	if ctx.IsSet(DatabaseLocationFlag.Name) {
+		cfg.DatabaseLocation = ctx.String(DatabaseLocationFlag.Name)
 	}
 }
