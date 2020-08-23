@@ -13,13 +13,13 @@ type Params struct {
 var TestParams *Params
 
 // LogFileName is the file name used for the GoDBLedger logs.
-var LogFileName = "godbledgerE2Etest.log"
+var LogFileName = "debug.test"
 
 // Init initializes the E2E config, properly handling test sharding.
 func Init() error {
 
 	TestParams = &Params{
-		LogPath: "../build/cache",
+		LogPath: "/build/cache",
 	}
 	return nil
 }

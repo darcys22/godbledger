@@ -6,7 +6,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"path"
 	"testing"
 	"time"
 
@@ -30,7 +29,7 @@ func runEndToEndTest(t *testing.T, config *cmd.LedgerConfig) {
 	defer helpers.KillProcesses(t, processIDs)
 
 	time.Sleep(time.Duration(1) * time.Second)
-	logFile, err := os.Open(path.Join(e2e.TestParams.LogPath, e2e.LogFileName))
+	logFile, err := os.Open(e2e.LogFileName)
 	if err != nil {
 		t.Fatal(err)
 	}

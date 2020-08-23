@@ -15,7 +15,7 @@ import (
 )
 
 func StartGoDBLedger(t *testing.T, config *cmd.LedgerConfig) int {
-	stdOutFile, err := helpers.DeleteAndCreateFile(e2e.TestParams.LogPath, e2e.LogFileName)
+	stdOutFile, err := helpers.DeleteAndCreateFile("", e2e.LogFileName)
 
 	if err != nil {
 		t.Fatal(err)

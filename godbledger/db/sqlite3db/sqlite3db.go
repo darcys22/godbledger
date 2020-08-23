@@ -33,6 +33,9 @@ func NewDB(dirPath, mode string) (*Database, error) {
 		return nil, err
 	}
 	datafile := path.Join(dirPath, fmt.Sprintf("%s?_foreign_keys=true&parseTime=true&mode=%s", ledgerDBName, mode))
+	if mode == "memory" {
+		datafile = fmt.Sprintf("%s?_foreign_keys=true&parseTime=true&mode=%s", ":memory:", mode)
+	}
 	log.WithField("datafile", datafile).Debug("Opening SQLite3 Datafile")
 	SqliteDB, err := sql.Open("sqlite3", datafile)
 	if err != nil {

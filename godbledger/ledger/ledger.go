@@ -35,11 +35,11 @@ func New(ctx *cli.Context, cfg *cmd.LedgerConfig) (*Ledger, error) {
 
 		log.Debug("Using Sqlite3")
 		mode := "rwc"
+		dbPath := path.Join(cfg.DataDirectory, ledgerDBName)
 		if strings.ToLower(cfg.DatabaseType) == "memorydb" {
 			log.Debug("In Memory only Mode")
 			mode = "memory"
 		}
-		dbPath := path.Join(cfg.DataDirectory, ledgerDBName)
 		log.WithField("path", dbPath).Debug("Checking db path")
 		if ctx.Bool(cmd.ClearDB.Name) {
 			if err := sqlite3db.ClearDB(dbPath); err != nil {
