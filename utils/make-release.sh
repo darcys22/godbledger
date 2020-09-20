@@ -1,8 +1,8 @@
 #!/bin/bash
 
 version=$1
-#build=linux
-build=arm
+build=linux
+#build=arm
 
 if [ -z "$version" ]
 then
@@ -11,6 +11,8 @@ then
 fi
 
 make VERSION=$version release
+make VERSION=$version linux-arm-7
+make VERSION=$version linux-arm-64
 
 WORKING_DIR=release/
 
