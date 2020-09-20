@@ -30,7 +30,13 @@ func startNode(ctx *cli.Context) error {
 		return err
 	}
 	fullnode.Register(ledger)
-	rpc := rpc.NewRPCService(context.Background(), &rpc.Config{Port: cfg.RPCPort}, ledger)
+	rpc := rpc.NewRPCService(context.Background(), &rpc.Config{
+		Host:       cfg.Host,
+		Port:       cfg.RPCPort,
+		CACertFlag: cfg.CACert,
+		CertFlag:   cfg.Cert,
+		KeyFlag:    cfg.Key,
+	}, ledger)
 	fullnode.Register(rpc)
 	fullnode.Start()
 
@@ -48,6 +54,18 @@ func main() {
 	app.Usage = "Accounting Ledger Database Server"
 	app.EnableBashCompletion = true
 	app.Action = startNode
+	app.Before = func(ctx *cli.Context) error {
+		// If persistent log files are written - we disable the log messages coloring because
+		// the colors are ANSI codes and seen as Gibberish in the log files.
+		logFileName := ctx.String(cmd.LogFileName.Name)
+		if logFileName != "" {
+			customFormatter.DisableColors = true
+			if err := cmd.ConfigurePersistentLogging(logFileName); err != nil {
+				log.WithError(err).Error("Failed to configuring logging to disk.")
+			}
+		}
+		return nil
+	}
 	app.Version = version.Version
 	app.Commands = []*cli.Command{
 		// See config.go
@@ -60,6 +78,14 @@ func main() {
 		cmd.DataDirFlag,
 		cmd.ClearDB,
 		cmd.ConfigFileFlag,
+		cmd.RPCHost,
+		cmd.RPCPort,
+		cmd.CACertFlag,
+		cmd.CertFlag,
+		cmd.KeyFlag,
+		cmd.LogFileName,
+		cmd.DatabaseTypeFlag,
+		cmd.DatabaseLocationFlag,
 	}
 
 	if err := app.Run(os.Args); err != nil {

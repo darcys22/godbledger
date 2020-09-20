@@ -31,17 +31,22 @@ func New(ctx *cli.Context, cfg *cmd.LedgerConfig) (*Ledger, error) {
 	}
 
 	switch strings.ToLower(cfg.DatabaseType) {
-	case "sqlite3":
+	case "sqlite3", "memorydb":
 
 		log.Debug("Using Sqlite3")
+		mode := "rwc"
 		dbPath := path.Join(cfg.DataDirectory, ledgerDBName)
+		if strings.ToLower(cfg.DatabaseType) == "memorydb" {
+			log.Debug("In Memory only Mode")
+			mode = "memory"
+		}
 		log.WithField("path", dbPath).Debug("Checking db path")
 		if ctx.Bool(cmd.ClearDB.Name) {
 			if err := sqlite3db.ClearDB(dbPath); err != nil {
 				return nil, err
 			}
 		}
-		ledgerdb, err := sqlite3db.NewDB(dbPath)
+		ledgerdb, err := sqlite3db.NewDB(dbPath, mode)
 		ledger.LedgerDb = ledgerdb
 		if err != nil {
 			return nil, err
@@ -59,11 +64,8 @@ func New(ctx *cli.Context, cfg *cmd.LedgerConfig) (*Ledger, error) {
 		if err != nil {
 			return nil, err
 		}
-	case "memorydb":
-		log.Info("Using in memory database")
-		log.Fatal("In memory database not implemented")
 	default:
-		log.Println("No implementation available for that database.")
+		log.Fatal("No implementation available for that database.")
 	}
 
 	log.Debug("Initialised database configuration")
@@ -72,8 +74,7 @@ func New(ctx *cli.Context, cfg *cmd.LedgerConfig) (*Ledger, error) {
 }
 
 func (l *Ledger) Insert(txn *core.Transaction) (string, error) {
-	log.Infof("Created Transaction: %v", txn)
-	log.Debugf("Creating Safely added user: %v", txn.Poster)
+	log.WithField("transaction", txn).Debug("Created Transaction")
 	l.LedgerDb.SafeAddUser(txn.Poster)
 	currencies, _ := l.GetCurrencies(txn)
 	for _, currency := range currencies {
@@ -95,19 +96,16 @@ func (l *Ledger) Insert(txn *core.Transaction) (string, error) {
 }
 
 func (l *Ledger) Delete(txnID string) {
-	log.Infof("Deleting Transaction: %s", txnID)
 	l.LedgerDb.DeleteTransaction(txnID)
 }
 
 func (l *Ledger) Void(txnID string, usr *core.User) error {
-	log.Infof("Voiding Transaction: %s", txnID)
-
 	txn, err := l.LedgerDb.FindTransaction(txnID)
 	if err != nil {
 		return err
 	}
 
-	log.Debugf("Transaction: %+v", txn)
+	log.Debugf("Transaction Found to Void: %+v", txn)
 
 	newTxn, err := core.ReverseTransaction(txn, usr)
 	if err != nil {
@@ -138,12 +136,10 @@ func (l *Ledger) Void(txnID string, usr *core.User) error {
 }
 
 func (l *Ledger) InsertTag(account, tag string) error {
-	log.Infof("Creating Tag %s on %s", tag, account)
 	return l.LedgerDb.SafeAddTagToAccount(account, tag)
 }
 
 func (l *Ledger) DeleteTag(account, tag string) error {
-	log.Infof("Deleting Tag %s from %s", tag, account)
 	return l.LedgerDb.DeleteTagFromAccount(account, tag)
 }
 
@@ -171,12 +167,10 @@ func (l *Ledger) GetCurrencies(txn *core.Transaction) ([]*core.Currency, error) 
 }
 
 func (l *Ledger) InsertCurrency(curr *core.Currency) error {
-	log.Infof("Creating Currency %s with %d decimals", curr.Name, curr.Decimals)
 	return l.LedgerDb.SafeAddCurrency(curr)
 }
 
 func (l *Ledger) DeleteCurrency(currency string) error {
-	log.Infof("Deleting Currency %s", currency)
 	return l.LedgerDb.DeleteCurrency(currency)
 }
 
@@ -205,6 +199,10 @@ func (l *Ledger) GetAccounts(txn *core.Transaction) ([]*core.Account, error) {
 
 func (l *Ledger) GetTB(date time.Time) (*[]core.TBAccount, error) {
 	return l.LedgerDb.GetTB(date)
+}
+
+func (l *Ledger) GetListing(enddate, startdate time.Time) (*[]core.Transaction, error) {
+	return l.LedgerDb.GetListing(enddate, startdate)
 }
 
 func (l *Ledger) Start() {

@@ -44,3 +44,4 @@ release
 /build/cache/
 /build/bin/
 build/_vendor/pkg
+cert

@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 
 	"github.com/BurntSushi/toml"
-	//"github.com/urfave/cli"
 	"github.com/urfave/cli/v2"
 
 	"github.com/sirupsen/logrus"
@@ -16,7 +15,11 @@ import (
 var log = logrus.WithField("prefix", "Config")
 
 type LedgerConfig struct {
+	Host             string // Host defines the address that the RPC will be opened on. Combined with RPC Port
 	RPCPort          string // RPCPort defines the port that the server will listen for transactions on
+	CACert           string // CACertFlag defines a flag for the server's Certificate Authority certificate.
+	Cert             string // CertFlag defines a flag for the server's TLS certificate.
+	Key              string // KeyFlag defines a flag for the server's TLS key.
 	DataDirectory    string // DataDirectory defines the host systems folder directory holding the database and config files
 	LogVerbosity     string // LogVerbosity defines the logging level {debug, info, warn, error, fatal, panic}
 	ConfigFile       string // Location of the TOML config file, including directory path
@@ -50,6 +53,7 @@ var (
 	}
 
 	defaultLedgerConfig = &LedgerConfig{
+		Host:             "127.0.0.1",
 		RPCPort:          "50051",
 		DataDirectory:    DefaultDataDir(),
 		LogVerbosity:     "debug",
@@ -61,7 +65,6 @@ var (
 
 func MakeConfig(cli *cli.Context) (error, *LedgerConfig) {
 
-	log.Infof("Setting up configuration")
 	config := defaultLedgerConfig
 	//set logrus verbosity
 	level, err := logrus.ParseLevel(config.LogVerbosity)
@@ -73,8 +76,6 @@ func MakeConfig(cli *cli.Context) (error, *LedgerConfig) {
 	if len(cli.String("config")) > 0 {
 		config.ConfigFile = cli.String("config")
 	}
-
-	log.Debugf("Filepath to config file: %s", config.ConfigFile)
 	err = InitConfig(config)
 	if err != nil {
 		log.Debugf("Error initialising config: %s", err)
@@ -96,6 +97,7 @@ func MakeConfig(cli *cli.Context) (error, *LedgerConfig) {
 		return err, nil
 	}
 	logrus.SetLevel(level)
+	log.WithField("Config File", config.ConfigFile).Debug("Configuration Successfully loaded")
 
 	return nil, config
 }
@@ -103,7 +105,7 @@ func MakeConfig(cli *cli.Context) (error, *LedgerConfig) {
 func InitConfig(config *LedgerConfig) error {
 	_, err := os.Stat(config.ConfigFile)
 	if os.IsNotExist(err) {
-		log.Infof("Config File doesn't exist creating at %s", config.ConfigFile)
+		log.Debugf("Config File doesn't exist creating at %s", config.ConfigFile)
 		os.MkdirAll(filepath.Dir(config.ConfigFile), os.ModePerm)
 		buf := new(bytes.Buffer)
 		if err := toml.NewEncoder(buf).Encode(config); err != nil {

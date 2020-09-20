@@ -11,6 +11,7 @@ service Transactor {
   rpc DeleteTag(DeleteTagRequest) returns (TransactionResponse) {}
   rpc AddCurrency(CurrencyRequest) returns (TransactionResponse) {}
   rpc DeleteCurrency(DeleteCurrencyRequest) returns (TransactionResponse) {}
+  rpc GetListing(ReportRequest) returns (ListingResponse) {}
   rpc GetTB(TBRequest) returns (TBResponse) {}
 }
 
@@ -19,6 +20,12 @@ message LineItem {
   string description = 2;
   string currency = 3;
   int64 amount = 4;
+}
+
+message Transaction {
+    string date = 1;
+    string description = 2;
+    repeated LineItem lines = 3;
 }
 
 message TransactionRequest {
@@ -72,9 +79,17 @@ message TBLine {
 message TBRequest {
     string date = 1;
 }
+message ReportRequest {
+    string date = 1;
+    string startdate = 2;
+}
 
 message TBResponse {
     repeated TBLine lines = 1;
+}
+
+message ListingResponse {
+    repeated Transaction transactions = 1;
 }
 
 message VersionRequest {

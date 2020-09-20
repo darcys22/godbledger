@@ -86,4 +86,4 @@ SELECT * FROM accounts where account_id in (select account_id from account_tag w
 
 ### TODO
 - Create Yurnell - programmable journal entries
-- run GoDBLedger on a separate server and access the open port through the network
+- Create GUI - https://github.com/darcys22/GoDBLedger-Journal-Viewer-MacOS

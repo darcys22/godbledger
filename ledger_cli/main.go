@@ -22,17 +22,24 @@ import (
 	"fmt"
 	"os"
 
-	//"github.com/urfave/cli"
 	"github.com/urfave/cli/v2"
+
+	"github.com/sirupsen/logrus"
+	prefixed "github.com/x-cray/logrus-prefixed-formatter"
+
+	"github.com/darcys22/godbledger/godbledger/cmd"
 )
 
-const (
-	address = "localhost:50051"
-)
+var log logrus.FieldLogger
 
 var app *cli.App
 
 func init() {
+	customFormatter := new(prefixed.TextFormatter)
+	customFormatter.TimestampFormat = "2006-01-02 15:04:05"
+	customFormatter.FullTimestamp = true
+	logrus.SetFormatter(customFormatter)
+	log = logrus.WithField("prefix", "ledger_cli")
 	app = cli.NewApp()
 	app.Name = "Ledger CLI"
 	app.Usage = "Command Line for GoDBLedger gRPC"
@@ -52,6 +59,15 @@ func init() {
 		commandTagAccount,
 		// addcurrency.go
 		commandAddCurrency,
+	}
+	app.Flags = []cli.Flag{
+		cmd.VerbosityFlag,
+		cmd.ConfigFileFlag,
+		cmd.RPCHost,
+		cmd.RPCPort,
+		cmd.CACertFlag,
+		cmd.CertFlag,
+		cmd.KeyFlag,
 	}
 	//app.Action = transaction
 }

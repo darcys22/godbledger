@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"time"
+
+	"github.com/darcys22/godbledger/godbledger/cmd"
 
 	pb "github.com/darcys22/godbledger/proto"
 	"google.golang.org/grpc"
@@ -20,26 +22,44 @@ var commandDeleteTransaction = &cli.Command{
 	Deletes a transaction from the database
 `,
 	Flags: []cli.Flag{},
-	Action: func(c *cli.Context) error {
+	Action: func(ctx *cli.Context) error {
+		err, cfg := cmd.MakeConfig(ctx)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-		if c.NArg() > 0 {
+		if ctx.NArg() > 0 {
+			address := fmt.Sprintf("%s:%s", cfg.Host, cfg.RPCPort)
+			log.WithField("address", address).Info("GRPC Dialing on port")
+			opts := []grpc.DialOption{}
+
+			if cfg.CACert != "" && cfg.Cert != "" && cfg.Key != "" {
+				tlsCredentials, err := loadTLSCredentials(cfg)
+				if err != nil {
+					log.Fatal("cannot load TLS credentials: ", err)
+				}
+				opts = append(opts, grpc.WithTransportCredentials(tlsCredentials))
+			} else {
+				opts = append(opts, grpc.WithInsecure())
+			}
+
 			// Set up a connection to the server.
-			conn, err := grpc.Dial(address, grpc.WithInsecure())
+			conn, err := grpc.Dial(address, opts...)
 			if err != nil {
 				log.Fatalf("did not connect: %v", err)
 			}
 			defer conn.Close()
 			client := pb.NewTransactorClient(conn)
 
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			ctxtimeout, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
 
 			signature := "test"
 			req := &pb.DeleteRequest{
-				Identifier: c.Args().Get(0),
+				Identifier: ctx.Args().Get(0),
 				Signature:  signature,
 			}
-			r, err := client.DeleteTransaction(ctx, req)
+			r, err := client.DeleteTransaction(ctxtimeout, req)
 			if err != nil {
 				log.Fatalf("could not delete: %v", err)
 			}
@@ -61,26 +81,44 @@ var commandVoidTransaction = &cli.Command{
 	Reverses a transaction by creating an identical inverse and tags both transactions as void 
 `,
 	Flags: []cli.Flag{},
-	Action: func(c *cli.Context) error {
+	Action: func(ctx *cli.Context) error {
+		err, cfg := cmd.MakeConfig(ctx)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-		if c.NArg() > 0 {
+		if ctx.NArg() > 0 {
+			address := fmt.Sprintf("%s:%s", cfg.Host, cfg.RPCPort)
+			log.WithField("address", address).Info("GRPC Dialing on port")
+			opts := []grpc.DialOption{}
+
+			if cfg.CACert != "" && cfg.Cert != "" && cfg.Key != "" {
+				tlsCredentials, err := loadTLSCredentials(cfg)
+				if err != nil {
+					log.Fatal("cannot load TLS credentials: ", err)
+				}
+				opts = append(opts, grpc.WithTransportCredentials(tlsCredentials))
+			} else {
+				opts = append(opts, grpc.WithInsecure())
+			}
+
 			// Set up a connection to the server.
-			conn, err := grpc.Dial(address, grpc.WithInsecure())
+			conn, err := grpc.Dial(address, opts...)
 			if err != nil {
 				log.Fatalf("did not connect: %v", err)
 			}
 			defer conn.Close()
 			client := pb.NewTransactorClient(conn)
 
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			ctxtimeout, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
 
 			signature := "test"
 			req := &pb.DeleteRequest{
-				Identifier: c.Args().Get(0),
+				Identifier: ctx.Args().Get(0),
 				Signature:  signature,
 			}
-			r, err := client.VoidTransaction(ctx, req)
+			r, err := client.VoidTransaction(ctxtimeout, req)
 			if err != nil {
 				log.Fatalf("could not void: %v", err)
 			}

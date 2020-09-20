@@ -1,66 +1,81 @@
-// Package endtoend performs full a end-to-end test for Prysm,
-// including spinning up an ETH1 dev chain, sending deposits to the deposit
-// contract, and making sure the beacon node and validators are running and
-// performing properly for a few epochs.
+// Package endtoend performs full a end-to-end test for GoDBLedger,
+// including spinning up a server and making sure its running, and sending test data to verify
 package tests
 
 import (
-	//"fmt"
-	//"os"
-	"os/exec"
-	//"path"
+	"context"
+	"fmt"
+	"os"
 	"testing"
-	//"time"
+	"time"
+
+	pb "github.com/darcys22/godbledger/proto"
 
 	"github.com/darcys22/godbledger/godbledger/cmd"
 	"github.com/darcys22/godbledger/tests/components"
+
+	ev "github.com/darcys22/godbledger/tests/evaluators"
 	"github.com/darcys22/godbledger/tests/helpers"
-	//"google.golang.org/grpc"
+	e2e "github.com/darcys22/godbledger/tests/params"
+	"github.com/darcys22/godbledger/tests/types"
+
+	"google.golang.org/grpc"
 )
 
-func init() {
-}
 func runEndToEndTest(t *testing.T, config *cmd.LedgerConfig) {
 
 	goDBLedgerPID := components.StartGoDBLedger(t, config)
 	processIDs := []int{goDBLedgerPID}
 	defer helpers.KillProcesses(t, processIDs)
 
-	// Sleep depending on the count of validators, as generating the genesis state could take some time.
-	//time.Sleep(time.Duration(params.BeaconConfig().GenesisDelay) * time.Second)
-	//beaconLogFile, err := os.Open(path.Join(e2e.TestParams.LogPath, fmt.Sprintf(e2e.BeaconNodeLogFileName, 0)))
-	//if err != nil {
-	//t.Fatal(err)
-	//}
-
-	//t.Run("chain started", func(t *testing.T) {
-	//if err := helpers.WaitForTextInFile(beaconLogFile, "Chain started within the last epoch"); err != nil {
-	//t.Fatalf("failed to find chain start in logs, this means the chain did not start: %v", err)
-	//}
-	//})
-
-	// Failing early in case chain doesn't start.
-	//if t.Failed() {
-	//return
-	//}
-
-	args := []string{
-		"jsonjournal",
-		`{"Payee":"ijfjie","Date":"2019-06-30T00:00:00Z","AccountChanges":[{"Name":"Cash","Description":"jisfeij","Currency":"USD","Balance":"100"},{"Name":"Income","Description":"another","Currency":"USD","Balance":"-100"}],"Signature":"stuff"}`,
+	time.Sleep(time.Duration(1) * time.Second)
+	logFile, err := os.Open(e2e.LogFileName)
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	cmd := exec.Command("../build/bin/ledger_cli", args...)
+	t.Run("Server Started", func(t *testing.T) {
+		if err := helpers.WaitForTextInFile(logFile, "Starting GoDBLedger Server"); err != nil {
+			t.Fatalf("failed to find GoDBLedger start in logs, this means the server did not start: %v", err)
+		}
+	})
 
-	//t.Logf("Sending jsonjournal with args %s", strings.Join(args[2:], " "))
-	if err := cmd.Start(); err != nil {
-		t.Fatalf("Failed to start ledger_cli: %v", err)
+	//Failing early in case chain doesn't start.
+	if t.Failed() {
+		return
 	}
 
-	//bt := new(testMatcher)
+	conns := make([]*grpc.ClientConn, 1)
+	for i := 0; i < len(conns); i++ {
+		t.Logf("Starting GoDBLedger %d", i)
+		conn, err := grpc.Dial(fmt.Sprintf("%s:%s", config.Host, config.RPCPort), grpc.WithInsecure())
+		if err != nil {
+			t.Fatalf("Failed to dial: %v", err)
+		}
+		conns[i] = conn
+		defer func() {
+			if err := conn.Close(); err != nil {
+				t.Log(err)
+			}
+		}()
+	}
 
-	//bt.walk(t, basicTestDir, func(t *testing.T, name string, test *BasicTest) {
-	//if err := bt.checkFailure(t, name, test.Run(false)); err != nil {
-	//t.Errorf("test failed: %v", err)
-	//}
-	//})
+	client := pb.NewTransactorClient(conns[0])
+	req := &pb.VersionRequest{
+		Message: "Test",
+	}
+	_, err = client.NodeVersion(context.Background(), req)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	evaluators := []types.Evaluator{ev.SingleTransaction}
+	for _, evaluator := range evaluators {
+		t.Run(evaluator.Name, func(t *testing.T) {
+			if err := evaluator.Evaluation(conns...); err != nil {
+				t.Errorf("evaluation failed for sync node: %v", err)
+			}
+		})
+	}
+
 }
