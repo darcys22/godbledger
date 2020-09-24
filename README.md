@@ -2,6 +2,8 @@
 
 GoDBLedger is an Open Source Accounting System that aims to provide the user with normal programming goodies that finance systems tend to lack. It includes GRPC endpoints so you can communicate to it from your scripts (Automation!). It also includes a MySQL database backend so you can actually analyse your financial data using third party analysis software.
 
+#### How it works:
+You are a business kr individual wanting a system to track your financials. You dont want to pay a cloud provider and you want to keep your financial data under your own control. You spin up a linux server (or raspberry pi) choose a database (Currently SQLite3 and MySQL are available) and you set up GoDBLedger as a systemd service that continuously runs. You now have a place to send your double entry bookkeeping transaction which get saved into your own database! GoDBLedger gives you an api where you can communicate your double entry transactions from within scripts, apps and other frontends! There is also some command line binaries included to get you started.
 [Watch the demo video](https://youtu.be/svyw9EOZuuc)
 
 To get started view the quickstart on the wiki:
