@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
+	"strconv"
 	"time"
 
 	"encoding/csv"
@@ -12,7 +14,6 @@ import (
 	"github.com/darcys22/godbledger/godbledger/ledger"
 
 	"github.com/olekukonko/tablewriter"
-	//"github.com/urfave/cli"
 	"github.com/urfave/cli/v2"
 )
 
@@ -65,12 +66,14 @@ If you want to see all the transactions in the database, or export to CSV/JSON
 				splits.split_date,
 				splits.description,
 				splits.currency,
+				currency.decimals,
 				splits.amount,
 				split_accounts.account_id
 			FROM
 				splits
 				JOIN split_accounts ON splits.split_id = split_accounts.split_id
 				JOIN transactions on splits.transaction_id = transactions.transaction_id
+				JOIN currencies AS currency ON splits.currency = currency.NAME
 			WHERE
 				splits.split_date >= ?
 				AND splits.split_date <= ?
@@ -96,9 +99,15 @@ If you want to see all the transactions in the database, or export to CSV/JSON
 		for rows.Next() {
 			// Scan one customer record
 			var t Transaction
-			if err := rows.Scan(&t.ID, &t.Date, &t.Description, &t.Currency, &t.Amount, &t.Account); err != nil {
+			var decimals float64
+			if err := rows.Scan(&t.ID, &t.Date, &t.Description, &t.Currency, &decimals, &t.Amount, &t.Account); err != nil {
 				return err
 			}
+			centsAmount, err := strconv.ParseFloat(t.Amount, 64)
+			if err != nil {
+				return fmt.Errorf("Could not process the amount as a float (%v)", err)
+			}
+			t.Amount = fmt.Sprintf("%.2f", centsAmount/math.Pow(10, decimals))
 			output.Data = append(output.Data, t)
 			table.Append([]string{t.Date, t.ID, t.Account, t.Description, t.Currency, t.Amount})
 		}

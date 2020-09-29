@@ -105,10 +105,11 @@ func Send(cfg *cmd.LedgerConfig, t *Transaction) error {
 	transactionLines := make([]*pb.LineItem, 2)
 
 	for i, accChange := range t.AccountChanges {
+		amountInt64 := accChange.Balance.Num().Int64() * int64(100) / accChange.Balance.Denom().Int64()
 		transactionLines[i] = &pb.LineItem{
 			Accountname: accChange.Name,
 			Description: accChange.Description,
-			Amount:      accChange.Balance.Num().Int64(),
+			Amount:      amountInt64,
 			Currency:    accChange.Currency,
 		}
 	}
