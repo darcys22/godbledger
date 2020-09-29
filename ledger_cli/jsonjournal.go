@@ -25,7 +25,7 @@ var commandJSONJournal = &cli.Command{
 	Action: func(ctx *cli.Context) error {
 		err, cfg := cmd.MakeConfig(ctx)
 		if err != nil {
-			log.Fatal(err)
+			return fmt.Errorf("Could not make config (%v)", err)
 		}
 
 		// we initialize our request struct
@@ -35,11 +35,11 @@ var commandJSONJournal = &cli.Command{
 		// jsonFile's content into 'users' which we defined above
 		json.Unmarshal([]byte(ctx.Args().Get(0)), &req)
 
-		fmt.Printf("%v\n", req)
+		log.Debugf("Transaction: %v\n", req)
 
 		err = Send(cfg, &req)
 		if err != nil {
-			log.Fatalf("could not send: %v", err)
+			return fmt.Errorf("Could not send transaction (%v)", err)
 		}
 
 		return nil
