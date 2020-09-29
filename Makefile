@@ -19,6 +19,9 @@ clean:
 	rm -rf release/
 	rm -rf cert/
 
+lint:
+	GO111MODULE=on go run utils/ci.go lint
+
 travis:
 	GO111MODULE=on go run utils/ci.go install
 	GO111MODULE=on go run utils/ci.go test -coverage $$TEST_PACKAGES

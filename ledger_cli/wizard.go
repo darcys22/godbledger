@@ -11,7 +11,7 @@ import (
 
 	"github.com/darcys22/godbledger/godbledger/cmd"
 
-	//"github.com/urfave/cli"
+	"github.com/marcmak/calc/calc"
 	"github.com/urfave/cli/v2"
 )
 
@@ -58,12 +58,10 @@ var commandWizardJournal = &cli.Command{
 			lineAccount, _ := reader.ReadString('\n')
 
 			fmt.Print("Enter the Amount: ")
-			var i int64
-			_, err := fmt.Scanf("%d", &i)
-			if err != nil {
-				panic(err)
-			}
-			lineAmount := big.NewRat(i, 1)
+			lineAmountStr, _ := reader.ReadString('\n')
+
+			lineAmount := new(big.Rat)
+			lineAmount.SetFloat64(calc.Solve(lineAmountStr))
 
 			transactionLines = append(transactionLines, Account{
 				Name:        lineAccount,
@@ -90,13 +88,13 @@ var commandWizardJournal = &cli.Command{
 
 		bytes, err := json.Marshal(req)
 		if err != nil {
-			fmt.Println("Can't serialize", req)
+			return fmt.Errorf("Can't Serialize (%v)", err)
 		}
 		fmt.Printf("%v => %v, '%v'\n", req, bytes, string(bytes))
 
 		err = Send(cfg, req)
 		if err != nil {
-			log.Fatalf("could not send: %v", err)
+			return fmt.Errorf("could not send: %v", err)
 		}
 
 		return nil
