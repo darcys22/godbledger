@@ -16,6 +16,7 @@ package main
 
 import (
 	//"flag"
+	"errors"
 	"fmt"
 	"strings"
 	"unicode/utf8"
@@ -41,7 +42,7 @@ var commandFile = &cli.Command{
 	Action: func(ctx *cli.Context) error {
 		err, cfg := cmd.MakeConfig(ctx)
 		if err != nil {
-			log.Fatal(err)
+			return fmt.Errorf("Could not make config (%v)", err)
 		}
 
 		var ledgerFileName string
@@ -56,20 +57,18 @@ var commandFile = &cli.Command{
 
 			ledgerFileReader, err := NewLedgerReader(ledgerFileName)
 			if err != nil {
-				log.Printf("error reading file, %v\n", err)
-				return err
+				return fmt.Errorf("Could not read file %s (%v)", ledgerFileName, err)
 			}
 
 			generalLedger, parseError := ParseLedger(ledgerFileReader)
 			if parseError != nil {
-				log.Printf("error parsing file, %s\n", parseError.Error())
-				return parseError
+				return fmt.Errorf("Could not parse file (%v)", parseError)
 			}
 
 			PrintLedger(generalLedger, columnWidth)
 			SendLedger(cfg, generalLedger)
 		} else {
-			log.Printf("This command requires an argument.")
+			return errors.New("This command requires an argument")
 		}
 		return nil
 	},

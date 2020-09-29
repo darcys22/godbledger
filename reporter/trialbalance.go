@@ -42,12 +42,12 @@ If you want to see all the transactions in the database, or export to CSV
 		//Check if keyfile path given and make sure it doesn't already exist.
 		err, cfg := cmd.MakeConfig(ctx)
 		if err != nil {
-			log.Fatal(err)
+			return fmt.Errorf("Could not make config (%v)", err)
 		}
 
 		ledger, err := ledger.New(ctx, cfg)
 		if err != nil {
-			log.Fatal(err)
+			return fmt.Errorf("Could not make new ledger (%v)", err)
 		}
 		queryDate := time.Now()
 
@@ -74,7 +74,7 @@ If you want to see all the transactions in the database, or export to CSV
 		log.Debug("Querying Database")
 		rows, err := ledger.LedgerDb.Query(queryDB, queryDate)
 		if err != nil {
-			log.Fatal(err)
+			return fmt.Errorf("Could not query database (%v)", err)
 		}
 		defer rows.Close()
 
@@ -83,7 +83,7 @@ If you want to see all the transactions in the database, or export to CSV
 			var t Account
 			var decimals float64
 			if err := rows.Scan(&t.Account, &t.Amount, &decimals); err != nil {
-				return fmt.Errorf("Error Scanning row (%v)", err)
+				return fmt.Errorf("Could not scan rows of query (%v)", err)
 			}
 			centsAmount, err := strconv.ParseFloat(t.Amount, 64)
 			if err != nil {
@@ -94,7 +94,7 @@ If you want to see all the transactions in the database, or export to CSV
 			table.Append([]string{t.Account, t.Amount})
 		}
 		if rows.Err() != nil {
-			return fmt.Errorf("Error finding next row (%v)", rows.Err())
+			return fmt.Errorf("rows errored with (%v)", rows.Err())
 		}
 
 		//Output some information.
@@ -102,7 +102,7 @@ If you want to see all the transactions in the database, or export to CSV
 			log.Infof("Exporting CSV to %s", ctx.String(csvFlag.Name))
 			file, err := os.OpenFile(ctx.String(csvFlag.Name), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 			if err != nil {
-				log.Fatalf("Cannot open to file: %s", err)
+				return fmt.Errorf("opening csv file errored with (%v)", err)
 			}
 			defer file.Close()
 
@@ -113,7 +113,7 @@ If you want to see all the transactions in the database, or export to CSV
 			for _, element := range tboutput.Data {
 				err := csvWriter.Write([]string{element.Account, element.Amount})
 				if err != nil {
-					log.Fatal("Cannot write to file", err)
+					return fmt.Errorf("could not write to csv file (%v)", err)
 				}
 			}
 
@@ -122,17 +122,17 @@ If you want to see all the transactions in the database, or export to CSV
 			file, err := os.OpenFile(ctx.String(jsonFlag.Name), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 
 			if err != nil {
-				log.Fatalf("Cannot open to file: %s", err)
+				return fmt.Errorf("could not open json file (%v)", err)
 			}
 			defer file.Close()
 
 			bytes, err := json.Marshal(tboutput.Data)
 			if err != nil {
-				log.Fatal("Cannot serialize")
+				return fmt.Errorf("could not serialise json (%v)", err)
 			}
 			_, err = file.Write(bytes)
 			if err != nil {
-				log.Fatal("Cannot write to file", err)
+				return fmt.Errorf("could not write to json file (%v)", err)
 			}
 		} else {
 			fmt.Println()

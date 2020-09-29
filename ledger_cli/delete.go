@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -10,7 +11,6 @@ import (
 	pb "github.com/darcys22/godbledger/proto"
 	"google.golang.org/grpc"
 
-	//"github.com/urfave/cli"
 	"github.com/urfave/cli/v2"
 )
 
@@ -25,7 +25,7 @@ var commandDeleteTransaction = &cli.Command{
 	Action: func(ctx *cli.Context) error {
 		err, cfg := cmd.MakeConfig(ctx)
 		if err != nil {
-			log.Fatal(err)
+			return fmt.Errorf("Could not make config (%v)", err)
 		}
 
 		if ctx.NArg() > 0 {
@@ -36,7 +36,7 @@ var commandDeleteTransaction = &cli.Command{
 			if cfg.CACert != "" && cfg.Cert != "" && cfg.Key != "" {
 				tlsCredentials, err := loadTLSCredentials(cfg)
 				if err != nil {
-					log.Fatal("cannot load TLS credentials: ", err)
+					return fmt.Errorf("Could not load TLS credentials (%v)", err)
 				}
 				opts = append(opts, grpc.WithTransportCredentials(tlsCredentials))
 			} else {
@@ -46,7 +46,7 @@ var commandDeleteTransaction = &cli.Command{
 			// Set up a connection to the server.
 			conn, err := grpc.Dial(address, opts...)
 			if err != nil {
-				log.Fatalf("did not connect: %v", err)
+				return fmt.Errorf("Could not connect to GRPC (%v)", err)
 			}
 			defer conn.Close()
 			client := pb.NewTransactorClient(conn)
@@ -61,12 +61,11 @@ var commandDeleteTransaction = &cli.Command{
 			}
 			r, err := client.DeleteTransaction(ctxtimeout, req)
 			if err != nil {
-				log.Fatalf("could not delete: %v", err)
+				return fmt.Errorf("Could not call Delete Transaction Method (%v)", err)
 			}
-			log.Printf("Response: %s", r.GetMessage())
-			return nil
+			log.Infof("Delete Transaction Response: %s", r.GetMessage())
 		} else {
-			log.Fatalf("This command requires an argument.")
+			return errors.New("This command requires an argument")
 		}
 
 		return nil
@@ -84,7 +83,7 @@ var commandVoidTransaction = &cli.Command{
 	Action: func(ctx *cli.Context) error {
 		err, cfg := cmd.MakeConfig(ctx)
 		if err != nil {
-			log.Fatal(err)
+			return fmt.Errorf("Could not make config (%v)", err)
 		}
 
 		if ctx.NArg() > 0 {
@@ -95,7 +94,7 @@ var commandVoidTransaction = &cli.Command{
 			if cfg.CACert != "" && cfg.Cert != "" && cfg.Key != "" {
 				tlsCredentials, err := loadTLSCredentials(cfg)
 				if err != nil {
-					log.Fatal("cannot load TLS credentials: ", err)
+					return fmt.Errorf("Could not load TLS credentials (%v)", err)
 				}
 				opts = append(opts, grpc.WithTransportCredentials(tlsCredentials))
 			} else {
@@ -105,7 +104,7 @@ var commandVoidTransaction = &cli.Command{
 			// Set up a connection to the server.
 			conn, err := grpc.Dial(address, opts...)
 			if err != nil {
-				log.Fatalf("did not connect: %v", err)
+				return fmt.Errorf("Could not connect to GRPC (%v)", err)
 			}
 			defer conn.Close()
 			client := pb.NewTransactorClient(conn)
@@ -120,12 +119,11 @@ var commandVoidTransaction = &cli.Command{
 			}
 			r, err := client.VoidTransaction(ctxtimeout, req)
 			if err != nil {
-				log.Fatalf("could not void: %v", err)
+				return fmt.Errorf("Could not call Void Transaction Method (%v)", err)
 			}
-			log.Printf("Response: %s", r.GetMessage())
-			return nil
+			log.Infof("Void Transaction Response: %s", r.GetMessage())
 		} else {
-			log.Fatalf("This command requires an argument.")
+			return errors.New("This command requires an argument")
 		}
 
 		return nil

@@ -25,7 +25,7 @@ var commandWizardJournal = &cli.Command{
 	Action: func(ctx *cli.Context) error {
 		err, cfg := cmd.MakeConfig(ctx)
 		if err != nil {
-			log.Fatal(err)
+			return fmt.Errorf("Could not make config (%v)", err)
 		}
 
 		reader := bufio.NewReader(os.Stdin)
@@ -37,7 +37,7 @@ var commandWizardJournal = &cli.Command{
 		datetext, _ := reader.ReadString('\n')
 		date, err := time.Parse("2006-01-02", strings.TrimSpace(datetext))
 		if err != nil {
-			panic(err)
+			return fmt.Errorf("Could not make parse date string %s with error (%v)", datetext, err)
 		}
 
 		fmt.Print("Enter the Journal Descripion: ")
@@ -88,13 +88,13 @@ var commandWizardJournal = &cli.Command{
 
 		bytes, err := json.Marshal(req)
 		if err != nil {
-			return fmt.Errorf("Can't Serialize (%v)", err)
+			return fmt.Errorf("Can't Serialize Transaction (%v)", err)
 		}
-		fmt.Printf("%v => %v, '%v'\n", req, bytes, string(bytes))
+		log.Debugf("Transaction: %v => %v, '%v'\n", req, bytes, string(bytes))
 
 		err = Send(cfg, req)
 		if err != nil {
-			return fmt.Errorf("could not send: %v", err)
+			return fmt.Errorf("Could not send transaction (%v)", err)
 		}
 
 		return nil
