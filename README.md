@@ -1,9 +1,11 @@
 ## Go DB Ledger
 
-GoDBLedger is an Open Source Accounting System that aims to provide the user with normal programming goodies that finance systems tend to lack. It includes GRPC endpoints so you can communicate to it from your scripts (Automation!). It also includes a MySQL database backend so you can actually analyse your financial data using third party analysis software.
+GoDBLedger is an open source accounting system that aims to make the recording of double entry bookkeeping transactions programmable. It provide users with normal features that most finance systems tend to lack such as api endpoints for your scripts and a database backend with a clear schema so you can analyse your financial data using your software of choice. The ultimate goal is for your whole financial process to be automated from data entry to compilation of financials/tax returns.
 
 #### How it works:
-You are a business or individual wanting a system to track your financials. You dont want to pay a cloud provider and you want to keep your financial data under your own control. You spin up a linux server (or raspberry pi) choose a database (Currently SQLite3 and MySQL are available) and you set up GoDBLedger as a systemd service that continuously runs. You now have a place to send your double entry bookkeeping transactions which get saved into your own database! GoDBLedger gives you an api where you can communicate your double entry transactions from within scripts, apps and other frontends! There are also some command line binaries included to get you started.
+You are a business or individual wanting a system to record your profits and produce financial reports. You dont want to pay a cloud provider and you want to keep your financial data under your own control. You spin up a linux server (or raspberry pi) choose a database (Currently SQLite3 and MySQL are available) and you set up GoDBLedger to run on that server. You now have a place to send your double entry bookkeeping transactions which get saved into your own database! 
+
+GoDBLedger gives you an api for the recording of transactions and there are  some command line binaries included to get you started.
 
 [Watch the demo video](https://youtu.be/svyw9EOZuuc)
 
