@@ -89,6 +89,13 @@ SELECT * FROM accounts where account_id in (select account_id from account_tag w
 
 ```
 
-### TODO
+### TODO/Milestones
+- ~~GoDBLedger server runs and accepts transactions~~
+- ~~trial balance and transaction reports of journals~~
+- ~~analyse database using metabase to create financial dashboard~~
+- ~~authenticated api using mutual TLS~~
+- web interface (GoDBLedger-Web)
+- triple entry bookkeeping using signed transactions
+- reconciliations and "bank feed"
+- profit and loss and balance sheet reports
 - Create Yurnell - programmable journal entries
-- Create GUI - https://github.com/darcys22/GoDBLedger-Journal-Viewer-MacOS
