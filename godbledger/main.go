@@ -68,12 +68,13 @@ func main() {
 	}
 	app.Version = version.Version
 	app.Commands = []*cli.Command{
-		// See config.go
+		// See cmd/config.go
 		cmd.DumpConfigCommand,
 		cmd.InitConfigCommand,
 	}
 
 	app.Flags = []cli.Flag{
+		// See cmd/flags.go
 		cmd.VerbosityFlag,
 		cmd.DataDirFlag,
 		cmd.ClearDB,
