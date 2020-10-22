@@ -81,14 +81,9 @@ func TestClearDB(t *testing.T) {
 	d := time.Now().Add(maxPollingWaitTime)
 	contextWithDeadline, cancel := context.WithDeadline(context.Background(), d)
 	defer cancel()
-out:
-	for {
-		select {
-		case <-contextWithDeadline.Done():
-			shared.LogsContain(t.Fatalf, hook, "Clearing SQLite3 DB", true)
-			break out
-		}
-	}
+	<-contextWithDeadline.Done()
+	shared.LogsContain(t.Fatalf, hook, "Clearing SQLite3 DB", true)
+	//case <-contextWithDeadline.Done():
 
 	node.Close()
 	assert.NoError(t, os.RemoveAll(tmp))
