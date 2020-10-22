@@ -73,8 +73,10 @@ func MakeConfig(cli *cli.Context) (error, *LedgerConfig) {
 		return err, nil
 	}
 	logrus.SetLevel(level)
-	if len(cli.String("config")) > 0 {
-		config.ConfigFile = cli.String("config")
+	setConfig(cli, config)
+	if config.DataDirectory != DefaultDataDir() {
+		config.ConfigFile = config.DataDirectory + "/config.toml"
+		config.DatabaseLocation = config.DataDirectory + "/ledgerdata/ledger.db"
 	}
 	err = InitConfig(config)
 	if err != nil {
