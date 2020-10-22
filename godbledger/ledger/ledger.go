@@ -42,6 +42,7 @@ func New(ctx *cli.Context, cfg *cmd.LedgerConfig) (*Ledger, error) {
 		}
 		log.WithField("path", dbPath).Debug("Checking db path")
 		if ctx.Bool(cmd.ClearDB.Name) {
+			log.Info("Clearing SQLite3 DB")
 			if err := sqlite3db.ClearDB(dbPath); err != nil {
 				return nil, err
 			}

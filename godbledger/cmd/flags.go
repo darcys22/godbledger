@@ -109,7 +109,7 @@ func setConfig(ctx *cli.Context, cfg *LedgerConfig) {
 		cfg.ConfigFile = ctx.String(ConfigFileFlag.Name)
 	}
 	if ctx.IsSet(DataDirFlag.Name) {
-		cfg.ConfigFile = ctx.String(DataDirFlag.Name)
+		cfg.DataDirectory = ctx.String(DataDirFlag.Name)
 	}
 	if ctx.IsSet(RPCHost.Name) {
 		cfg.Host = ctx.String(RPCHost.Name)
