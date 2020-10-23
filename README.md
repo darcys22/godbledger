@@ -1,16 +1,22 @@
 ## Go DB Ledger
 
-GoDBLedger is an Open Source Accounting System that aims to provide the user with normal programming goodies that finance systems tend to lack. It includes GRPC endpoints so you can communicate to it from your scripts (Automation!). It also includes a MySQL database backend so you can actually analyse your financial data using third party analysis software.
+GoDBLedger is an open source accounting system that aims to make the recording of double entry bookkeeping transactions programmable. It provide users with normal features that most finance systems tend to lack such as api endpoints for your scripts and a database backend with a clear schema so you can analyse your financial data using your software of choice. The ultimate goal is for your whole financial process to be automated from data entry to compilation of financials/tax returns.
 
-[![Watch the demo video](https://img.youtube.com/vi/svyw9EOZuuc/maxresdefault.jpg)](https://youtu.be/svyw9EOZuuc)
+#### How it works:
+You are a business or individual wanting a system to record your profits and produce financial reports. You dont want to pay a cloud provider and you want to keep your financial data under your own control. You spin up a linux server (or raspberry pi) choose a database (Currently SQLite3 and MySQL are available) and you set up GoDBLedger to run on that server. You now have a place to send your double entry bookkeeping transactions which get saved into your own database! 
 
-To get started begin here:
+GoDBLedger gives you an api for the recording of transactions and there are  some command line binaries included to get you started.
 
-[Quickstart](https://github.com/darcys22/godbledger/wiki/Quickstart)
+[Watch the demo video](https://youtu.be/svyw9EOZuuc)
+
+To get started view the quickstart on the wiki:
+https://github.com/darcys22/godbledger/wiki/Quickstart
 
 Documentation is found on the Github Wiki:
+https://github.com/darcys22/godbledger/wiki
 
-[Wiki](https://github.com/darcys22/godbledger/wiki)
+Discussion on discord:
+https://discord.gg/xHFufYC
 
 ## Executables
 
@@ -83,6 +89,13 @@ SELECT * FROM accounts where account_id in (select account_id from account_tag w
 
 ```
 
-### TODO
+### TODO/Milestones
+- ~~GoDBLedger server runs and accepts transactions~~
+- ~~trial balance and transaction reports of journals~~
+- ~~analyse database using metabase to create financial dashboard~~
+- ~~authenticated api using mutual TLS~~
+- web interface (GoDBLedger-Web)
+- triple entry bookkeeping using signed transactions
+- reconciliations and "bank feed"
+- profit and loss and balance sheet reports
 - Create Yurnell - programmable journal entries
-- Create GUI - https://github.com/darcys22/GoDBLedger-Journal-Viewer-MacOS

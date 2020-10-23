@@ -22,6 +22,8 @@ mkdir -p $WORKING_DIR
 cd $WORKING_DIR
 
 tar -czvf godbledger-$build-x64-v$version.tar.gz godbledger-$build-x64-v$version
+tar -czvf godbledger-arm7-v$version.tar.gz godbledger-arm7-v$version
+tar -czvf godbledger-arm64-v$version.tar.gz godbledger-arm64-v$version
 
 echo '#### sha256sum'
-sha256sum godbledger-*-x64-v$version.tar.gz
+sha256sum godbledger-*-v$version.tar.gz

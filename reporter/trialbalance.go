@@ -69,6 +69,7 @@ If you want to see all the transactions in the database, or export to CSV
 																				 ON tt.tag_id = t.tag_id
 																WHERE  tt.transaction_id = splits.transaction_id)
 			GROUP  BY split_accounts.account_id, splits.currency
+
 			;`
 
 		log.Debug("Querying Database")
