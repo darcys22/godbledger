@@ -56,8 +56,7 @@ var commandAddCurrency = &cli.Command{
 
 			if ctx.Bool("delete") {
 				req := &pb.DeleteCurrencyRequest{
-					Currency:  ctx.Args().Get(0),
-					Signature: "blah",
+					Currency: ctx.Args().Get(0),
 				}
 
 				r, err := client.DeleteCurrency(ctxtimeout, req)
@@ -75,9 +74,8 @@ var commandAddCurrency = &cli.Command{
 						return fmt.Errorf("Could not parse the decimals provided (%v)", err)
 					}
 					req := &pb.CurrencyRequest{
-						Currency:  ctx.Args().Get(0),
-						Decimals:  decimals,
-						Signature: "blah",
+						Currency: ctx.Args().Get(0),
+						Decimals: decimals,
 					}
 
 					r, err := client.AddCurrency(ctxtimeout, req)

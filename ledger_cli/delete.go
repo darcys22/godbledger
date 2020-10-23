@@ -54,10 +54,8 @@ var commandDeleteTransaction = &cli.Command{
 			ctxtimeout, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
 
-			signature := "test"
 			req := &pb.DeleteRequest{
 				Identifier: ctx.Args().Get(0),
-				Signature:  signature,
 			}
 			r, err := client.DeleteTransaction(ctxtimeout, req)
 			if err != nil {
@@ -112,10 +110,8 @@ var commandVoidTransaction = &cli.Command{
 			ctxtimeout, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
 
-			signature := "test"
 			req := &pb.DeleteRequest{
 				Identifier: ctx.Args().Get(0),
-				Signature:  signature,
 			}
 			r, err := client.VoidTransaction(ctxtimeout, req)
 			if err != nil {
