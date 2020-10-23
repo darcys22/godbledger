@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -11,7 +12,6 @@ import (
 	pb "github.com/darcys22/godbledger/proto"
 	"google.golang.org/grpc"
 
-	//"github.com/urfave/cli"
 	"github.com/urfave/cli/v2"
 )
 
@@ -36,7 +36,7 @@ var commandAddCurrency = &cli.Command{
 	Action: func(ctx *cli.Context) error {
 		err, cfg := cmd.MakeConfig(ctx)
 		if err != nil {
-			log.Fatal(err)
+			return fmt.Errorf("Could not make config (%v)", err)
 		}
 
 		if ctx.NArg() > 0 {
@@ -46,7 +46,7 @@ var commandAddCurrency = &cli.Command{
 			log.WithField("address", address).Info("GRPC Dialing on port")
 			conn, err := grpc.Dial(address, grpc.WithInsecure())
 			if err != nil {
-				log.Fatalf("did not connect: %v", err)
+				return fmt.Errorf("Could not connect to GRPC (%v)", err)
 			}
 			defer conn.Close()
 			client := pb.NewTransactorClient(conn)
@@ -56,48 +56,46 @@ var commandAddCurrency = &cli.Command{
 
 			if ctx.Bool("delete") {
 				req := &pb.DeleteCurrencyRequest{
-					Currency:  ctx.Args().Get(0),
-					Signature: "blah",
+					Currency: ctx.Args().Get(0),
 				}
 
 				r, err := client.DeleteCurrency(ctxtimeout, req)
 				if err != nil {
-					log.Fatalf("could not greet: %v", err)
+					return fmt.Errorf("Could not call Delete Currency Method (%v)", err)
 				}
 
-				log.Printf("Delete Currency Response: %s", r.GetMessage())
+				log.Infof("Delete Currency Response: %s", r.GetMessage())
 			} else {
 
 				if ctx.NArg() > 1 {
 
 					decimals, err := strconv.ParseInt(ctx.Args().Get(1), 0, 64)
 					if err != nil {
-						log.Fatalf("could not parse the decimals provided: %v", err)
+						return fmt.Errorf("Could not parse the decimals provided (%v)", err)
 					}
 					req := &pb.CurrencyRequest{
-						Currency:  ctx.Args().Get(0),
-						Decimals:  decimals,
-						Signature: "blah",
+						Currency: ctx.Args().Get(0),
+						Decimals: decimals,
 					}
 
 					r, err := client.AddCurrency(ctxtimeout, req)
 					if err != nil {
-						log.Fatalf("could not create currency: %v", err)
+						return fmt.Errorf("Could not call Add Currency Method (%v)", err)
 					}
 
-					log.Printf("Create Currency Response: %s", r.GetMessage())
+					log.Infof("Create Currency Response: %s", r.GetMessage())
 
 				} else {
-					log.Printf("This command two arguments.")
+					return errors.New("This command requires two arguments")
 				}
 			}
 
 			if err != nil {
-				log.Fatalf("Failed with Error: %v", err)
+				return fmt.Errorf("Failed with Error (%v)", err)
 			}
 
 		} else {
-			log.Printf("This command requires an argument.")
+			return errors.New("This command requires an argument")
 		}
 
 		return nil

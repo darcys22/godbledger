@@ -45,7 +45,6 @@ func singleTransaction(conns ...*grpc.ClientConn) error {
 		Date:        date.Format("2006-01-02"),
 		Description: desc,
 		Lines:       transactionLines,
-		Signature:   "test",
 	}
 	_, err := client.AddTransaction(context.Background(), req)
 	if err != nil {

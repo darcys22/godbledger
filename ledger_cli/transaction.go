@@ -28,7 +28,7 @@ var commandSingleTestTransaction = &cli.Command{
 	Action: func(ctx *cli.Context) error {
 		err, cfg := cmd.MakeConfig(ctx)
 		if err != nil {
-			log.Fatal(err)
+			return fmt.Errorf("Could not make config (%v)", err)
 		}
 
 		date, _ := time.Parse("2006-01-02", "2011-03-15")
@@ -62,12 +62,11 @@ var commandSingleTestTransaction = &cli.Command{
 			Date:           date,
 			Payee:          desc,
 			AccountChanges: transactionLines,
-			Signature:      "stuff",
 		}
 
 		err = Send(cfg, req)
 		if err != nil {
-			log.Fatalf("could not send: %v", err)
+			return fmt.Errorf("Could not send transaction (%v)", err)
 		}
 
 		return nil
@@ -83,7 +82,7 @@ func Send(cfg *cmd.LedgerConfig, t *Transaction) error {
 	if cfg.CACert != "" && cfg.Cert != "" && cfg.Key != "" {
 		tlsCredentials, err := loadTLSCredentials(cfg)
 		if err != nil {
-			log.Fatal("cannot load TLS credentials: ", err)
+			return fmt.Errorf("Could not load TLS credentials (%v)", err)
 		}
 		opts = append(opts, grpc.WithTransportCredentials(tlsCredentials))
 	} else {
@@ -94,7 +93,7 @@ func Send(cfg *cmd.LedgerConfig, t *Transaction) error {
 	//conn, err := grpc.Dial(address, grpc.WithInsecure())
 	conn, err := grpc.Dial(address, opts...)
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		return fmt.Errorf("Could not connect to GRPC (%v)", err)
 	}
 	defer conn.Close()
 	client := pb.NewTransactorClient(conn)
@@ -105,10 +104,11 @@ func Send(cfg *cmd.LedgerConfig, t *Transaction) error {
 	transactionLines := make([]*pb.LineItem, 2)
 
 	for i, accChange := range t.AccountChanges {
+		amountInt64 := accChange.Balance.Num().Int64() * int64(100) / accChange.Balance.Denom().Int64()
 		transactionLines[i] = &pb.LineItem{
 			Accountname: accChange.Name,
 			Description: accChange.Description,
-			Amount:      accChange.Balance.Num().Int64(),
+			Amount:      amountInt64,
 			Currency:    accChange.Currency,
 		}
 	}
@@ -117,13 +117,12 @@ func Send(cfg *cmd.LedgerConfig, t *Transaction) error {
 		Date:        t.Date.Format("2006-01-02"),
 		Description: t.Payee,
 		Lines:       transactionLines,
-		Signature:   t.Signature,
 	}
 	r, err := client.AddTransaction(ctx, req)
 	if err != nil {
-		log.Fatalf("Could not send transaction: %v", err)
+		return fmt.Errorf("Could not call Add Transaction Method (%v)", err)
 	}
-	log.Printf("Response: %s", r.GetMessage())
+	log.Infof("Add Transaction Response: %s", r.GetMessage())
 	return nil
 }
 func loadTLSCredentials(cfg *cmd.LedgerConfig) (credentials.TransportCredentials, error) {

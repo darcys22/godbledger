@@ -111,7 +111,6 @@ func doInstall(jsonfile string) {
 			Date:           date,
 			Payee:          obj[i].Description[:20],
 			AccountChanges: transactionLines,
-			Signature:      "stuff",
 		}
 
 		err = Send(req)
@@ -149,7 +148,6 @@ type Transaction struct {
 	Payee          string
 	Date           time.Time
 	AccountChanges []Account
-	Signature      string
 }
 
 type sortTransactions []*Transaction
@@ -191,7 +189,6 @@ func Send(t *Transaction) error {
 		Date:        t.Date.Format("2006-01-02"),
 		Description: t.Payee,
 		Lines:       transactionLines,
-		Signature:   t.Signature,
 	}
 	r, err := client.AddTransaction(ctx, req)
 	if err != nil {

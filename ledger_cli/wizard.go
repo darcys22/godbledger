@@ -11,7 +11,7 @@ import (
 
 	"github.com/darcys22/godbledger/godbledger/cmd"
 
-	//"github.com/urfave/cli"
+	"github.com/marcmak/calc/calc"
 	"github.com/urfave/cli/v2"
 )
 
@@ -25,7 +25,7 @@ var commandWizardJournal = &cli.Command{
 	Action: func(ctx *cli.Context) error {
 		err, cfg := cmd.MakeConfig(ctx)
 		if err != nil {
-			log.Fatal(err)
+			return fmt.Errorf("Could not make config (%v)", err)
 		}
 
 		reader := bufio.NewReader(os.Stdin)
@@ -37,7 +37,7 @@ var commandWizardJournal = &cli.Command{
 		datetext, _ := reader.ReadString('\n')
 		date, err := time.Parse("2006-01-02", strings.TrimSpace(datetext))
 		if err != nil {
-			panic(err)
+			return fmt.Errorf("Could not make parse date string %s with error (%v)", datetext, err)
 		}
 
 		fmt.Print("Enter the Journal Descripion: ")
@@ -58,12 +58,10 @@ var commandWizardJournal = &cli.Command{
 			lineAccount, _ := reader.ReadString('\n')
 
 			fmt.Print("Enter the Amount: ")
-			var i int64
-			_, err := fmt.Scanf("%d", &i)
-			if err != nil {
-				panic(err)
-			}
-			lineAmount := big.NewRat(i, 1)
+			lineAmountStr, _ := reader.ReadString('\n')
+
+			lineAmount := new(big.Rat)
+			lineAmount.SetFloat64(calc.Solve(lineAmountStr))
 
 			transactionLines = append(transactionLines, Account{
 				Name:        lineAccount,
@@ -85,18 +83,17 @@ var commandWizardJournal = &cli.Command{
 			Date:           date,
 			Payee:          desc,
 			AccountChanges: transactionLines,
-			Signature:      "stuff",
 		}
 
 		bytes, err := json.Marshal(req)
 		if err != nil {
-			fmt.Println("Can't serialize", req)
+			return fmt.Errorf("Can't Serialize Transaction (%v)", err)
 		}
-		fmt.Printf("%v => %v, '%v'\n", req, bytes, string(bytes))
+		log.Debugf("Transaction: %v => %v, '%v'\n", req, bytes, string(bytes))
 
 		err = Send(cfg, req)
 		if err != nil {
-			log.Fatalf("could not send: %v", err)
+			return fmt.Errorf("Could not send transaction (%v)", err)
 		}
 
 		return nil

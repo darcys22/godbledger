@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
+	"strconv"
 	"time"
 
 	"encoding/csv"
@@ -12,7 +14,6 @@ import (
 	"github.com/darcys22/godbledger/godbledger/ledger"
 
 	"github.com/olekukonko/tablewriter"
-	//"github.com/urfave/cli"
 	"github.com/urfave/cli/v2"
 )
 
@@ -46,11 +47,11 @@ If you want to see all the transactions in the database, or export to CSV/JSON
 
 		err, cfg := cmd.MakeConfig(ctx)
 		if err != nil {
-			log.Fatal(err)
+			return fmt.Errorf("Could not make config (%v)", err)
 		}
 		ledger, err := ledger.New(ctx, cfg)
 		if err != nil {
-			log.Fatal(err)
+			return fmt.Errorf("Could not make new ledger (%v)", err)
 		}
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"Date", "ID", "Account", "Description", "Currency", "Amount"})
@@ -65,12 +66,14 @@ If you want to see all the transactions in the database, or export to CSV/JSON
 				splits.split_date,
 				splits.description,
 				splits.currency,
+				currency.decimals,
 				splits.amount,
 				split_accounts.account_id
 			FROM
 				splits
 				JOIN split_accounts ON splits.split_id = split_accounts.split_id
 				JOIN transactions on splits.transaction_id = transactions.transaction_id
+				JOIN currencies AS currency ON splits.currency = currency.NAME
 			WHERE
 				splits.split_date >= ?
 				AND splits.split_date <= ?
@@ -89,21 +92,27 @@ If you want to see all the transactions in the database, or export to CSV/JSON
 		rows, err := ledger.LedgerDb.Query(queryDB, queryDateStart, queryDateEnd)
 
 		if err != nil {
-			log.Fatal(err)
+			return fmt.Errorf("Could not query database (%v)", err)
 		}
 		defer rows.Close()
 
 		for rows.Next() {
 			// Scan one customer record
 			var t Transaction
-			if err := rows.Scan(&t.ID, &t.Date, &t.Description, &t.Currency, &t.Amount, &t.Account); err != nil {
-				return err
+			var decimals float64
+			if err := rows.Scan(&t.ID, &t.Date, &t.Description, &t.Currency, &decimals, &t.Amount, &t.Account); err != nil {
+				return fmt.Errorf("Could not scan rows of query (%v)", err)
 			}
+			centsAmount, err := strconv.ParseFloat(t.Amount, 64)
+			if err != nil {
+				return fmt.Errorf("Could not process the amount as a float (%v)", err)
+			}
+			t.Amount = fmt.Sprintf("%.2f", centsAmount/math.Pow(10, decimals))
 			output.Data = append(output.Data, t)
 			table.Append([]string{t.Date, t.ID, t.Account, t.Description, t.Currency, t.Amount})
 		}
 		if rows.Err() != nil {
-			return err
+			return fmt.Errorf("rows errored with (%v)", rows.Err())
 		}
 
 		//Output some information.
@@ -114,7 +123,7 @@ If you want to see all the transactions in the database, or export to CSV/JSON
 			defer file.Close()
 
 			if err != nil {
-				os.Exit(1)
+				return fmt.Errorf("opening csv file errored with (%v)", err)
 			}
 
 			csvWriter := csv.NewWriter(file)
@@ -124,7 +133,7 @@ If you want to see all the transactions in the database, or export to CSV/JSON
 			for _, element := range output.Data {
 				err := csvWriter.Write([]string{element.Date, element.ID, element.Account, element.Description, element.Currency, element.Amount})
 				if err != nil {
-					log.Fatal("Cannot write to file", err)
+					return fmt.Errorf("could not write to csv file (%v)", err)
 				}
 			}
 
@@ -133,17 +142,17 @@ If you want to see all the transactions in the database, or export to CSV/JSON
 			file, err := os.OpenFile(ctx.String(jsonFlag.Name), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 
 			if err != nil {
-				log.Fatalf("Cannot open to file: %s", err)
+				return fmt.Errorf("could not open json file (%v)", err)
 			}
 			defer file.Close()
 
 			bytes, err := json.Marshal(output.Data)
 			if err != nil {
-				log.Fatal("Cannot serialize")
+				return fmt.Errorf("could not serialise json (%v)", err)
 			}
 			_, err = file.Write(bytes)
 			if err != nil {
-				log.Fatal("Cannot write to file", err)
+				return fmt.Errorf("could not write to json file (%v)", err)
 			}
 
 		} else {

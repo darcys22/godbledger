@@ -30,7 +30,7 @@ var commandTagAccount = &cli.Command{
 	Action: func(ctx *cli.Context) error {
 		err, cfg := cmd.MakeConfig(ctx)
 		if err != nil {
-			log.Fatal(err)
+			return fmt.Errorf("Could not make config (%v)", err)
 		}
 
 		address := fmt.Sprintf("%s:%s", cfg.Host, cfg.RPCPort)
@@ -40,7 +40,7 @@ var commandTagAccount = &cli.Command{
 		if cfg.CACert != "" && cfg.Cert != "" && cfg.Key != "" {
 			tlsCredentials, err := loadTLSCredentials(cfg)
 			if err != nil {
-				log.Fatal("cannot load TLS credentials: ", err)
+				return fmt.Errorf("Could not load TLS credentials (%v)", err)
 			}
 			opts = append(opts, grpc.WithTransportCredentials(tlsCredentials))
 		} else {
@@ -48,10 +48,9 @@ var commandTagAccount = &cli.Command{
 		}
 
 		// Set up a connection to the server.
-		//conn, err := grpc.Dial(address, grpc.WithInsecure())
 		conn, err := grpc.Dial(address, opts...)
 		if err != nil {
-			log.Fatalf("did not connect: %v", err)
+			return fmt.Errorf("Could not connect to GRPC (%v)", err)
 		}
 		defer conn.Close()
 		client := pb.NewTransactorClient(conn)
@@ -61,34 +60,28 @@ var commandTagAccount = &cli.Command{
 
 		if ctx.Bool("delete") {
 			req := &pb.DeleteTagRequest{
-				Account:   ctx.Args().Get(0),
-				Tag:       ctx.Args().Get(1),
-				Signature: "blah",
+				Account: ctx.Args().Get(0),
+				Tag:     ctx.Args().Get(1),
 			}
 
 			r, err := client.DeleteTag(ctxtimeout, req)
 			if err != nil {
-				log.Fatalf("could not greet: %v", err)
+				return fmt.Errorf("Could not call Delete Tag Method (%v)", err)
 			}
 
-			log.Printf("Delete Tag Response: %s", r.GetMessage())
+			log.Infof("Delete Tag Response: %s", r.GetMessage())
 		} else {
 			req := &pb.TagRequest{
-				Account:   ctx.Args().Get(0),
-				Tag:       ctx.Args().Get(1),
-				Signature: "blah",
+				Account: ctx.Args().Get(0),
+				Tag:     ctx.Args().Get(1),
 			}
 
 			r, err := client.AddTag(ctxtimeout, req)
 			if err != nil {
-				log.Fatalf("could not greet: %v", err)
+				return fmt.Errorf("Could not call Add Tag Method (%v)", err)
 			}
 
-			log.Printf("Create Tag Response: %s", r.GetMessage())
-		}
-
-		if err != nil {
-			log.Fatalf("could not greet: %v", err)
+			log.Infof("Create Tag Response: %s", r.GetMessage())
 		}
 
 		return nil
