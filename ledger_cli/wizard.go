@@ -83,7 +83,6 @@ var commandWizardJournal = &cli.Command{
 			Date:           date,
 			Payee:          desc,
 			AccountChanges: transactionLines,
-			Signature:      "stuff",
 		}
 
 		bytes, err := json.Marshal(req)
