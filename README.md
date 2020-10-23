@@ -5,13 +5,11 @@ GoDBLedger is an open source accounting system that aims to make the recording o
 [![Build Status]][Build Link] [![Book Status]][Book Link] [![Chat Badge]][Chat Link]
 
 [Build Status]: https://travis-ci.com/darcys22/godbledger.svg?branch=dev
-[Build Link]: https://github.com/sigp/lighthouse/actions
+[Build Link]: https://github.com/darcys22/godbledger/actions
 [Chat Badge]: https://img.shields.io/badge/chat-discord-%237289da
 [Chat Link]: https://discord.gg/xHFufYC
 [Book Status]:https://img.shields.io/badge/user--docs-master-informational
 [Book Link]: https://github.com/darcys22/godbledger/wiki
-
-[Documentation](https://github.com/darcys22/godbledger/wiki)
 
 #### How it works:
 You are a business or individual wanting a system to record your profits and produce financial reports. You dont want to pay a cloud provider and you want to keep your financial data under your own control. You spin up a linux server (or raspberry pi) choose a database (Currently SQLite3 and MySQL are available) and you set up GoDBLedger to run on that server. You now have a place to send your double entry bookkeeping transactions which get saved into your own database! 
