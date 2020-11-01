@@ -1,11 +1,15 @@
 BINARY := godbledger
 VERSION ?= latest
-PLATFORMS := linux
+PLATFORMS := linux darwin
 os = $(word 1, $@)
 
 GOBIN = ./build/bin GO ?= latest
 GORUN = env GO111MODULE=on go run
 
+# build all platforms by default
+build: $(PLATFORMS)
+
+# generate a build target for each platform
 .PHONY: $(PLATFORMS)
 $(PLATFORMS):
 		mkdir -p release/$(BINARY)-$(os)-x64-v$(VERSION)/
