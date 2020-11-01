@@ -7,7 +7,7 @@ GOBIN = ./build/bin GO ?= latest
 GORUN = env GO111MODULE=on go run
 
 # build all platforms by default
-build: $(PLATFORMS)
+build: test $(PLATFORMS)
 
 # generate a build target for each platform
 .PHONY: $(PLATFORMS)
