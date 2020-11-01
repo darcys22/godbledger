@@ -4,6 +4,8 @@ package components
 
 import (
 	"os/exec"
+	"runtime"
+
 	//"strings"
 	"fmt"
 	"strings"
@@ -30,8 +32,9 @@ func StartGoDBLedger(t *testing.T, config *cmd.LedgerConfig) int {
 		fmt.Sprintf("--database-location=%s", config.DatabaseLocation),
 	}
 
-	cmd := exec.Command("../build/bin/godbledger", args...)
-	t.Logf("Starting GoDBLedger with flags: %s", strings.Join(args[:], " "))
+	binPath := fmt.Sprintf("../release/godbledger-%s-x64-vlatest/godbledger", runtime.GOOS)
+	cmd := exec.Command(binPath, args...)
+	t.Logf("Starting GoDBLedger (%s) with flags: %s", binPath, strings.Join(args[:], " "))
 	if err := cmd.Start(); err != nil {
 		t.Fatalf("Failed to start GoDBLedger Server: %v", err)
 	}
