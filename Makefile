@@ -23,6 +23,9 @@ clean:
 	rm -rf release/
 	rm -rf cert/
 
+test:
+	GO111MODULE=on go test ./...
+
 lint:
 	GO111MODULE=on go run utils/ci.go lint
 
