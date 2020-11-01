@@ -7,7 +7,7 @@ GOBIN = ./build/bin GO ?= latest
 GORUN = env GO111MODULE=on go run
 
 # build all platforms by default
-build: test $(PLATFORMS)
+build: $(PLATFORMS)
 
 # generate a build target for each platform
 .PHONY: $(PLATFORMS)
@@ -16,14 +16,14 @@ $(PLATFORMS):
 		GOOS=$(os) GOARCH=amd64 GO111MODULE=on go build -o release/$(BINARY)-$(os)-x64-v$(VERSION)/ ./...
 
 .PHONY: release
-release: linux
+release: linux test
 
 PHONY: clean
 clean:
 	rm -rf release/
 	rm -rf cert/
 
-test:
+test: build
 	GO111MODULE=on go test ./...
 
 lint:
