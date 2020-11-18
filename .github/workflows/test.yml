@@ -37,4 +37,6 @@ jobs:
       if: ${{ github.event_name == 'pull_request' }}
 
     - name: Test
-      run: go run utils/ci.go install
+      run: |
+        go run utils/ci.go install
+        go run utils/ci.go test -coverage $TEST_PACKAGES
