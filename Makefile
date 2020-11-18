@@ -16,6 +16,7 @@ release: linux
 
 PHONY: clean
 clean:
+	rm -rf build/
 	rm -rf release/
 	rm -rf cert/
 
