@@ -1,6 +1,16 @@
 ## Go DB Ledger
 
+[![Build Status]][Build Link] [![Book Status]][Book Link] [![Chat Badge]][Chat Link]
+
+[Build Status]: https://travis-ci.com/darcys22/godbledger.svg?branch=dev
+[Build Link]: https://github.com/darcys22/godbledger/actions
+[Chat Badge]: https://img.shields.io/badge/chat-discord-%237289da
+[Chat Link]: https://discord.gg/xHFufYC
+[Book Status]:https://img.shields.io/badge/user--docs-master-informational
+[Book Link]: https://github.com/darcys22/godbledger/wiki
+
 GoDBLedger is an open source accounting system that aims to make the recording of double entry bookkeeping transactions programmable. It provide users with normal features that most finance systems tend to lack such as api endpoints for your scripts and a database backend with a clear schema so you can analyse your financial data using your software of choice. The ultimate goal is for your whole financial process to be automated from data entry to compilation of financials/tax returns.
+
 
 #### How it works:
 You are a business or individual wanting a system to record your profits and produce financial reports. You dont want to pay a cloud provider and you want to keep your financial data under your own control. You spin up a linux server (or raspberry pi) choose a database (Currently SQLite3 and MySQL are available) and you set up GoDBLedger to run on that server. You now have a place to send your double entry bookkeeping transactions which get saved into your own database! 
@@ -12,11 +22,6 @@ GoDBLedger gives you an api for the recording of transactions and there are  som
 To get started view the quickstart on the wiki:
 https://github.com/darcys22/godbledger/wiki/Quickstart
 
-Documentation is found on the Github Wiki:
-https://github.com/darcys22/godbledger/wiki
-
-Discussion on discord:
-https://discord.gg/xHFufYC
 
 ## Executables
 
