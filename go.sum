@@ -255,3 +255,5 @@ honnef.co/go/tools v0.0.0-20190102054323-c2f93a96b099/go.mod h1:rf3lG4BRIbNafJWh
 honnef.co/go/tools v0.0.0-20190523083050-ea95bdfd59fc/go.mod h1:rf3lG4BRIbNafJWhAfAdb/ePZxsR/4RtNHQocxwk9r4=
 src.techknowlogick.com/xgo v1.0.1-0.20200717030703-5c3bb7fc435e h1:cNlfcCyMwIq/KyKPgpuPohdDr9EjtxX0b44sGYSV2Ic=
 src.techknowlogick.com/xgo v1.0.1-0.20200717030703-5c3bb7fc435e/go.mod h1:31CE1YKtDOrKTk9PSnjTpe6YbO6W/0LTYZ1VskL09oU=
+src.techknowlogick.com/xgo v1.1.1-0.20201113032224-51945c0192ab h1:nt4v+ILEOvuF9p4W6L03GtbfBvzrwRiov5Z8pvLVPrQ=
+src.techknowlogick.com/xgo v1.1.1-0.20201113032224-51945c0192ab/go.mod h1:31CE1YKtDOrKTk9PSnjTpe6YbO6W/0LTYZ1VskL09oU=

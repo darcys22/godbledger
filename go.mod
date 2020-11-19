@@ -23,5 +23,5 @@ require (
 	github.com/urfave/cli/v2 v2.2.0
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2
 	google.golang.org/grpc v1.30.0
-	src.techknowlogick.com/xgo v1.0.1-0.20200717030703-5c3bb7fc435e // indirect
+	src.techknowlogick.com/xgo v1.1.1-0.20201113032224-51945c0192ab // indirect
 )
