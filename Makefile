@@ -3,7 +3,8 @@ VERSION ?= latest
 PLATFORMS := linux
 os = $(word 1, $@)
 
-GOBIN = ./build/bin GO ?= latest
+GOBIN = ./build/bin
+GO ?= latest
 GORUN = env GO111MODULE=on go run
 
 # default target builds all binaries for local development/testing
@@ -68,6 +69,12 @@ godbledger-linux-arm64:
 	$(GORUN) utils/ci.go xgo -- --go=$(GO) --targets=linux/arm64 -v ./godbledger
 	@echo "Linux ARM64 cross compilation done:"
 	@ls -ld $(GOBIN)/godbledger-linux-* | grep arm64
+
+godbledger-darwin:
+	$(GORUN) utils/ci.go xgo -- --go=$(GO) --targets=darwin/* -v ./godbledger
+
+godbledger-windows:
+	$(GORUN) utils/ci.go xgo -- --go=$(GO) --targets=windows/* -v ./godbledger
 
 .PHONY: cert
 cert:
