@@ -16,7 +16,7 @@ $(PLATFORMS):
 		GOOS=$(os) GOARCH=amd64 GO111MODULE=on go build -o release/$(BINARY)-$(os)-x64-v$(VERSION)/ ./...
 
 .PHONY: release
-release: linux
+release: godbledger-linux-arm godbledger-darwin godbledger-windows
 
 PHONY: clean
 clean:
@@ -51,7 +51,7 @@ godbledger-linux-arm: godbledger-linux-arm-5 godbledger-linux-arm-6 godbledger-l
 	@ls -ld $(GOBIN)/godbledger-linux-* | grep arm
 
 godbledger-linux-arm-5:
-	$(GORUN) utils/ci.go xgo -- --go=$(GO) --targets=linux/arm-5 -v ./..
+	$(GORUN) utils/ci.go xgo -- --go=$(GO) --targets=linux/arm-5 -v ./godbledger
 	@echo "Linux ARMv5 cross compilation done:"
 	@ls -ld $(GOBIN)/godbledger-linux-* | grep arm-5
 
