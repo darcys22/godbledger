@@ -6,6 +6,9 @@ os = $(word 1, $@)
 GOBIN = ./build/bin GO ?= latest
 GORUN = env GO111MODULE=on go run
 
+# default target builds all binaries for local development/testing
+default: all
+
 .PHONY: $(PLATFORMS)
 $(PLATFORMS):
 		mkdir -p release/$(BINARY)-$(os)-x64-v$(VERSION)/
@@ -20,11 +23,16 @@ clean:
 	rm -rf release/
 	rm -rf cert/
 
+all:
+	GO111MODULE=on go run utils/ci.go install
+
 lint:
 	GO111MODULE=on go run utils/ci.go lint
 
-travis:
-	GO111MODULE=on go run utils/ci.go install
+test:
+	GO111MODULE=on go run utils/ci.go test
+
+travis: all
 	GO111MODULE=on go run utils/ci.go test -coverage $$TEST_PACKAGES
 
 linux-arm-7:
