@@ -7,24 +7,25 @@ GOBIN = ./build/bin
 GO ?= latest
 GORUN = env GO111MODULE=on go run
 
-# default target builds all binaries for local development/testing
-default: all
+# 'default' target builds all binaries for local development/testing
+default: build-native
 
-.PHONY: $(PLATFORMS)
-$(PLATFORMS):
-		mkdir -p release/$(BINARY)-$(os)-x64-v$(VERSION)/
-		GOOS=$(os) GOARCH=amd64 GO111MODULE=on go build -o release/$(BINARY)-$(os)-x64-v$(VERSION)/ ./...
+# no longer needed once we complete the build-native updates
+# .PHONY: $(PLATFORMS)
+# $(PLATFORMS):
+# 		mkdir -p release/$(BINARY)-$(os)-x64-v$(VERSION)/
+# 		GOOS=$(os) GOARCH=amd64 GO111MODULE=on go build -o release/$(BINARY)-$(os)-x64-v$(VERSION)/ ./...
 
-.PHONY: release
+# 'release' target builds os-specific builds of only godbledger using xgo/docker
 release: godbledger-linux-arm godbledger-darwin godbledger-windows
 
-PHONY: clean
 clean:
+	rm -rf bin/
 	rm -rf build/
 	rm -rf release/
 	rm -rf cert/
 
-all:
+build-native:
 	GO111MODULE=on go run utils/ci.go build
 
 lint:
@@ -32,10 +33,10 @@ lint:
 
 # our tests include an integration test which expects the local
 # GOOS-based build output to be in the ./build/bin folder
-test: all
+test: build-native
 	GO111MODULE=on go run utils/ci.go test
 
-travis: all
+travis: build-native
 	GO111MODULE=on go run utils/ci.go test -coverage $$TEST_PACKAGES
 
 linux-arm-7:

@@ -53,9 +53,11 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+
 	//"regexp"
 	"runtime"
 	"strings"
+
 	//"time"
 	//"github.com/cespare/cp"
 	"github.com/darcys22/godbledger/godbledger/version"
@@ -117,6 +119,13 @@ var (
 
 var GOBIN, _ = filepath.Abs(filepath.Join("build", "bin"))
 
+func archBinPath(goos string, arch string) string {
+	if goos == runtime.GOOS && arch == runtime.GOARCH {
+		return filepath.Join(GOBIN, "native")
+	}
+	return filepath.Join(GOBIN, fmt.Sprintf("%s-%s", goos, arch))
+}
+
 func executablePath(name string) string {
 	if runtime.GOOS == "windows" {
 		name += ".exe"
@@ -157,16 +166,10 @@ func main() {
 
 // Compiling
 
-func doBuild(cmdline []string) {
-	var (
-		arch = flag.String("arch", "", "Architecture to cross build for")
-		cc   = flag.String("cc", "", "C compiler to cross build with")
-	)
-	flag.CommandLine.Parse(cmdline)
-	env := build.Env()
-
-	// Check Go version. People regularly open issues about compilation
-	// failure with outdated Go. This should save them the trouble.
+// ensureMinimumGoVersion ensures that the current go version is compatible with
+// our build requirements. People regularly open issues about compilation failure
+// with outdated Go; this should save them the trouble.
+func ensureMinimumGoVersion() {
 	if !strings.Contains(runtime.Version(), "devel") {
 		// Figure out the minor version number since we can't textually compare (1.10 < 1.9)
 		var minor int
@@ -179,17 +182,35 @@ func doBuild(cmdline []string) {
 			os.Exit(1)
 		}
 	}
+}
+
+func doBuild(cmdline []string) {
+	var (
+		goos = flag.String("os", runtime.GOOS, "OS to (cross) build for")
+		arch = flag.String("arch", runtime.GOARCH, "Architecture to (cross) build for")
+		cc   = flag.String("cc", "", "C compiler to (cross) build with")
+	)
+	flag.CommandLine.Parse(cmdline)
+	env := build.Env()
+
 	// Compile packages given as arguments, or everything if there are no arguments.
 	packages := []string{"./..."}
 	if flag.NArg() > 0 {
 		packages = flag.Args()
 	}
 
-	if *arch == "" || *arch == runtime.GOARCH {
-		goinstall := goTool("install", buildFlags(env)...)
+	ensureMinimumGoVersion()
+
+	// ensure our output path exists so we can use the -o flag to dump build output there
+	os.MkdirAll(archBinPath(*goos, *arch), os.ModePerm)
+
+	// native build can be done with plain go tools
+	if *goos == runtime.GOOS && *arch == runtime.GOARCH {
+		goinstall := goTool("build", buildFlags(env)...)
 		if runtime.GOARCH == "arm64" {
 			goinstall.Args = append(goinstall.Args, "-p", "1")
 		}
+		goinstall.Args = append(goinstall.Args, []string{"-o", archBinPath(*goos, *arch)}...)
 		goinstall.Args = append(goinstall.Args, "-v")
 		goinstall.Args = append(goinstall.Args, packages...)
 		build.MustRun(goinstall)
