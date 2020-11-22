@@ -25,7 +25,7 @@ clean:
 	rm -rf cert/
 
 all:
-	GO111MODULE=on go run utils/ci.go install
+	GO111MODULE=on go run utils/ci.go build
 
 lint:
 	GO111MODULE=on go run utils/ci.go lint

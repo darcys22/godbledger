@@ -134,8 +134,8 @@ func main() {
 		log.Fatal("need subcommand as first argument")
 	}
 	switch os.Args[1] {
-	case "install":
-		doInstall(os.Args[2:])
+	case "build":
+		doBuild(os.Args[2:])
 	case "test":
 		doTest(os.Args[2:])
 	case "lint":
@@ -157,7 +157,7 @@ func main() {
 
 // Compiling
 
-func doInstall(cmdline []string) {
+func doBuild(cmdline []string) {
 	var (
 		arch = flag.String("arch", "", "Architecture to cross build for")
 		cc   = flag.String("cc", "", "C compiler to cross build with")
