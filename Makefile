@@ -1,81 +1,108 @@
-BINARY := godbledger
 VERSION ?= latest
-PLATFORMS := linux
-os = $(word 1, $@)
 
-GOBIN = ./build/bin
+GODIST = ./build/dist
 GO ?= latest
 GORUN = env GO111MODULE=on go run
+
+xtarget = $(strip $(subst build-,,$@)) # e.g. 'build-linux-amd64' -> 'linux-amd64'
+xdest = $(GODIST)/$(xtarget)
 
 # 'default' target builds all binaries for local development/testing
 default: build-native
 
-# no longer needed once we complete the build-native updates
-# .PHONY: $(PLATFORMS)
-# $(PLATFORMS):
-# 		mkdir -p release/$(BINARY)-$(os)-x64-v$(VERSION)/
-# 		GOOS=$(os) GOARCH=amd64 GO111MODULE=on go build -o release/$(BINARY)-$(os)-x64-v$(VERSION)/ ./...
-
 # 'release' target builds os-specific builds of only godbledger using xgo/docker
-release: godbledger-linux-arm godbledger-darwin godbledger-windows
+release: build-cross
 
 clean:
-	rm -rf bin/
-	rm -rf build/
+	rm -rf build/.cache
+	rm -rf build/bin
+	rm -rf build/dist
 	rm -rf release/
 	rm -rf cert/
 
 build-native:
-	GO111MODULE=on go run utils/ci.go build
+	$(GORUN) utils/ci.go build
 
 lint:
-	GO111MODULE=on go run utils/ci.go lint
+	$(GORUN) utils/ci.go lint
 
 # our tests include an integration test which expects the local
 # GOOS-based build output to be in the ./build/bin folder
 test: build-native
-	GO111MODULE=on go run utils/ci.go test
+	$(GORUN) utils/ci.go test
 
 travis: build-native
-	GO111MODULE=on go run utils/ci.go test -coverage $$TEST_PACKAGES
+	$(GORUN) utils/ci.go test -coverage $$TEST_PACKAGES
+
+# -------------------------------------
+# release_pattern=current
+#
+linux:
+		mkdir -p release/godbledger-linux-x64-v$(VERSION)/
+		GOOS=linux GOARCH=amd64 GO111MODULE=on go build -o release/godbledger-linux-x64-v$(VERSION)/ ./...
 
 linux-arm-7:
-		mkdir -p release/$(BINARY)-arm7-v$(VERSION)/
-		env CC=arm-linux-gnueabihf-gcc CXX=arm-linux-gnueabihf-g++ CGO_ENABLED=1 GOOS=linux GOARCH=arm GOARM=7 GO111MODULE=on go build -o release/$(BINARY)-arm7-v$(VERSION)/ ./...
+		mkdir -p release/godbledger-arm7-v$(VERSION)/
+		env CC=arm-linux-gnueabihf-gcc CXX=arm-linux-gnueabihf-g++ CGO_ENABLED=1 GOOS=linux GOARCH=arm GOARM=7 GO111MODULE=on go build -o release/godbledger-arm7-v$(VERSION)/ ./...
 
 linux-arm-64:
-		mkdir -p release/$(BINARY)-arm64-v$(VERSION)/
-		env CC=aarch64-linux-gnu-gcc CXX=aarch-linux-gnu-g++ CGO_ENABLED=1 GOOS=linux GOARCH=arm64 GO111MODULE=on go build -o release/$(BINARY)-arm64-v$(VERSION)/ ./...
+		mkdir -p release/godbledger-arm64-v$(VERSION)/
+		env CC=aarch64-linux-gnu-gcc CXX=aarch-linux-gnu-g++ CGO_ENABLED=1 GOOS=linux GOARCH=arm64 GO111MODULE=on go build -o release/godbledger-arm64-v$(VERSION)/ ./...
+# -------------------------------
 
-godbledger-linux-arm: godbledger-linux-arm-5 godbledger-linux-arm-6 godbledger-linux-arm-7 godbledger-linux-arm64
+build-cross: build-linux build-darwin build-windows
+
+build-linux: build-linux-386 build-linux-amd64 build-linux-arm
+	@echo "Linux cross compilation done:"
+	@ls -ld $(GODIST)/linux-*
+
+build-linux-386:
+	@echo "building $(xtarget)"
+	$(GORUN) utils/ci.go xgo --target linux/386 -- --go=$(GO)
+
+build-linux-amd64:
+	@echo "building $(xtarget)"
+	$(GORUN) utils/ci.go xgo --target linux/amd64 -- --go=$(GO)
+
+build-linux-arm: build-linux-arm-5 build-linux-arm-6 build-linux-arm-7 build-linux-arm64
 	@echo "Linux ARM cross compilation done:"
-	@ls -ld $(GOBIN)/godbledger-linux-* | grep arm
+	@ls -ld $(GODIST)/linux-arm*
 
-godbledger-linux-arm-5:
-	$(GORUN) utils/ci.go xgo -- --go=$(GO) --targets=linux/arm-5 -v ./godbledger
-	@echo "Linux ARMv5 cross compilation done:"
-	@ls -ld $(GOBIN)/godbledger-linux-* | grep arm-5
+build-linux-arm-5:
+	@echo "building $(xtarget)"
+	$(GORUN) utils/ci.go xgo --target linux/arm-5 -- --go=$(GO)
 
-godbledger-linux-arm-6:
-	$(GORUN) utils/ci.go xgo -- --go=$(GO) --targets=linux/arm-6 -v ./godbledger
-	@echo "Linux ARMv6 cross compilation done:"
-	@ls -ld $(GOBIN)/godbledger-linux-* | grep arm-6
+build-linux-arm-6:
+	@echo "building $(xtarget)"
+	$(GORUN) utils/ci.go xgo --target linux/arm-6 -- --go=$(GO)
 
-godbledger-linux-arm-7:
-	$(GORUN) utils/ci.go xgo -- --go=$(GO) --targets=linux/arm-7 -v ./godbledger
-	@echo "Linux ARMv7 cross compilation done:"
-	@ls -ld $(GOBIN)/godbledger-linux-* | grep arm-7
+build-linux-arm-7:
+	@echo "building $(xtarget)"
+	$(GORUN) utils/ci.go xgo --target linux/arm-7 -- --go=$(GO)
 
-godbledger-linux-arm64:
-	$(GORUN) utils/ci.go xgo -- --go=$(GO) --targets=linux/arm64 -v ./godbledger
-	@echo "Linux ARM64 cross compilation done:"
-	@ls -ld $(GOBIN)/godbledger-linux-* | grep arm64
+build-linux-arm64:
+	@echo "building $(xtarget)"
+	$(GORUN) utils/ci.go xgo --target linux/arm64 -- --go=$(GO)
 
-godbledger-darwin:
-	$(GORUN) utils/ci.go xgo -- --go=$(GO) --targets=darwin/* -v ./godbledger
+build-darwin: build-darwin-10.6-amd64
+	@echo "Darwin cross compilation done:"
+	@ls -ld $(GODIST)/darwin-*
 
-godbledger-windows:
-	$(GORUN) utils/ci.go xgo -- --go=$(GO) --targets=windows/* -v ./godbledger
+build-darwin-10.6-amd64:
+	@echo "building $(xtarget)"
+	$(GORUN) utils/ci.go xgo --target darwin-10.6/amd64 -- --go=$(GO)
+
+build-windows: build-windows-4.0-386 build-windows-4.0-amd64
+	@echo "Windows cross compilation done:"
+	@ls -ld $(GODIST)/windows-*
+
+build-windows-4.0-386:
+	@echo "building $(xtarget)"
+	$(GORUN) utils/ci.go xgo --target windows-4.0/386 -- --go=$(GO)
+
+build-windows-4.0-amd64:
+	@echo "building $(xtarget)"
+	$(GORUN) utils/ci.go xgo --target windows-4.0/amd64 -- --go=$(GO)
 
 .PHONY: cert
 cert:

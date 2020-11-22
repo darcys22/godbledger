@@ -65,6 +65,14 @@ import (
 )
 
 var (
+	// NOTE: this could be inferred if these 'main' packages were moved
+	//       into a ./cmd folder (see: https://github.com/golang-standards/project-layout#cmd)
+	packagesToBuild = []string{
+		"godbledger",
+		"ledger_cli",
+		"reporter",
+	}
+
 	// Files that end up in the godbledger*.zip archive.
 	godbledgerArchiveFiles = []string{
 		executablePath("godbledger"),
@@ -118,12 +126,21 @@ var (
 )
 
 var GOBIN, _ = filepath.Abs(filepath.Join("build", "bin"))
+var BUILDDIR, _ = filepath.Abs("build")
 
 func archBinPath(goos string, arch string) string {
 	if goos == runtime.GOOS && arch == runtime.GOARCH {
 		return filepath.Join(GOBIN, "native")
 	}
 	return filepath.Join(GOBIN, fmt.Sprintf("%s-%s", goos, arch))
+}
+
+func cachePath() string {
+	return filepath.Join(BUILDDIR, ".cache")
+}
+
+func distPath() string {
+	return filepath.Join(BUILDDIR, "dist")
 }
 
 func executablePath(name string) string {
@@ -318,7 +335,7 @@ func doTest(cmdline []string) {
 // doLint runs golangci-lint on requested packages.
 func doLint(cmdline []string) {
 	var (
-		cachedir = flag.String("cachedir", "./build/cache", "directory for caching golangci-lint binary.")
+		cachedir = flag.String("cachedir", cachePath(), "directory for caching golangci-lint binary.")
 	)
 	flag.CommandLine.Parse(cmdline)
 	packages := []string{"./..."}
@@ -797,38 +814,54 @@ func (d debExecutable) Package() string {
 
 func doXgo(cmdline []string) {
 	var (
-		alltools = flag.Bool("alltools", false, `Flag whether we're building all known tools, or only on in particular`)
+		xtarget = flag.String("target", "", "cross-compile target")
 	)
 	flag.CommandLine.Parse(cmdline)
 	env := build.Env()
 
+	if *xtarget == "" || strings.Contains(*xtarget, "*") {
+		// TODO: not sure about this, limiting xgo to a single target, but it lets us manage the output to a target-based folder
+		log.Println("must supply a single xgo build target for cross-compliation")
+		os.Exit(1)
+	}
+
+	targetSuffix := strings.ReplaceAll(*xtarget, "/", "-")
+	outDir := filepath.Join(distPath(), targetSuffix)
+	os.MkdirAll(outDir, os.ModePerm)
+
+	log.Printf("xgo target [%s] --> %s\n", *xtarget, outDir)
+
 	// Make sure xgo is available for cross compilation
-	//gogetxgo := goTool("get", "github.com/techknowlogick/xgo")
 	gogetxgo := goTool("get", "src.techknowlogick.com/xgo")
 	build.MustRun(gogetxgo)
 
-	// If all tools building is requested, build everything the builder wants
-	args := append(buildFlags(env), flag.Args()...)
+	for _, cmd := range packagesToBuild {
+		xgoArgs := append(buildFlags(env), flag.Args()...)
+		xgoArgs = append(xgoArgs, []string{"--targets", *xtarget}...)
+		xgoArgs = append(xgoArgs, []string{"--dest", outDir}...)
+		xgoArgs = append(xgoArgs, "-v")
+		xgoArgs = append(xgoArgs, "./"+cmd) // relative package name (assumes we are inside GOPATH)
+		xgo := xgoTool(xgoArgs)
+		build.MustRun(xgo)
 
-	if *alltools {
-		args = append(args, []string{"--dest", GOBIN}...)
-		for _, res := range allToolsArchiveFiles {
-			if strings.HasPrefix(res, GOBIN) {
-				// Binary tool found, cross build it explicitly
-				args = append(args, "./"+filepath.Base(res))
-				xgo := xgoTool(args)
-				build.MustRun(xgo)
-				args = args[:len(args)-1]
+		// strip the suffix out of the binary name
+		// TODO: add this ability into xgo
+		filepath.Walk(outDir, func(path string, info os.FileInfo, err error) error {
+			if info.IsDir() {
+				return nil // skip
 			}
-		}
-		return
-	}
-	// Otherwise xxecute the explicit cross compilation
-	path := args[len(args)-1]
-	args = append(args[:len(args)-1], []string{"--dest", GOBIN, path}...)
 
-	xgo := xgoTool(args)
-	build.MustRun(xgo)
+			suffix := filepath.Base(filepath.Dir(path))
+			if strings.HasPrefix(info.Name(), cmd) && strings.Contains(info.Name(), suffix) {
+				newName := strings.Replace(info.Name(), "-"+suffix, "", 1)
+				newPath := filepath.Join(filepath.Dir(path), newName)
+				log.Println("renaming:", path)
+				log.Println("      to:", newPath)
+				os.Rename(path, newPath)
+			}
+			return nil
+		})
+	}
 }
 
 func xgoTool(args []string) *exec.Cmd {
