@@ -160,6 +160,8 @@ func main() {
 		log.Fatal("need subcommand as first argument")
 	}
 	switch os.Args[1] {
+	case "info":
+		log.Printf("current system: %s/%s", runtime.GOOS, runtime.GOARCH)
 	case "build":
 		doBuild(os.Args[2:])
 	case "test":
@@ -209,6 +211,7 @@ func doBuild(cmdline []string) {
 	)
 	flag.CommandLine.Parse(cmdline)
 	env := build.Env()
+	log.Printf("build targeting: %s/%s", *goos, *arch)
 
 	// Compile packages given as arguments, or everything if there are no arguments.
 	packages := []string{"./..."}
