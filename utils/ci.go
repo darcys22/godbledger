@@ -873,6 +873,23 @@ func xgoTool(args []string) *exec.Cmd {
 	cmd.Env = append(cmd.Env, []string{
 		"GOBIN=" + GOBIN,
 	}...)
+	if os.Getenv("GOPATH") == "" {
+		// xgo requires that $GOPATH be set
+		homeRel := os.Getenv("HOME")
+		if runtime.GOOS == "windows" {
+			homeRel = os.Getenv("USERPROFILE")
+		}
+		if homeRel == "" {
+			log.Println("GOPATH undefined and cannot determine homedir")
+			os.Exit(1)
+		}
+		homeAbs, _ := filepath.Abs(homeRel)
+		goPath := filepath.Join(homeAbs, "go")
+		log.Printf("GOPATH undefined but required by xgo; injecting %s\n", goPath)
+		cmd.Env = append(cmd.Env, []string{
+			"GOPATH="+goPath,
+		}...)
+	}
 	return cmd
 }
 
