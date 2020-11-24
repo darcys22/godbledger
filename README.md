@@ -1,4 +1,4 @@
-## Go DB Ledger
+# Go DB Ledger
 
 [![Build Status]][Build Link] [![Book Status]][Book Link] [![Chat Badge]][Chat Link]
 
@@ -31,7 +31,7 @@ https://github.com/darcys22/godbledger/wiki/Quickstart
 | `Ledger_cli`     | A CLI client that can be used to transmit transactions to the server.                             |
 | `Reporter`      | Builds basic reports from the database on the command line.                                             |
 
-### Communicating with Godbledger and software examples
+## Communicating with Godbledger and software examples
 
 **GRPC and Proto Buffers**
 The primary way to communicate with Godbledger is through the GRPC endpoint, submitting a transaction that contains your journal entry/transaction.
@@ -64,7 +64,7 @@ The PDF files are generated from [handlebars](https://handlebarsjs.com/) iterati
 
 Templates can be viewed [here](https://github.com/darcys22/pdf-generator)
 
-### Database and configuration
+## Database and configuration
 
 Godbledger will set a default configuration if none has been provided using Sqlite3 as the default database.
 
@@ -73,13 +73,13 @@ The config file can be found by default at:
 ~/.ledger/config.toml
 ```
 
-### Building the Proto Buffers
+## Building the Proto Buffers
 Call from the root directory
 ```
 protoc -I proto/ proto/transaction.proto --go_out=plugins=grpc:proto
 ```
 
-### SQL Querys
+## SQL Querys
 default stored location for database is .ledger/ledgerdata `sqlite3 ledger.db`
 
 **Select all transactions**
@@ -93,6 +93,73 @@ SELECT * FROM splits JOIN split_accounts ON splits.split_id = split_accounts.spl
 SELECT * FROM accounts where account_id in (select account_id from account_tag where tag_id = 8);
 
 ```
+
+## Contributing
+
+### Local Development
+
+1. Install golang version 1.13 or higher for your OS and architecture:
+
+    - https://golang.org/doc/install
+
+1. To build the `godbledger` executables natively for your OS and architecture you can simply use Make
+
+    ```
+    make
+    ```
+
+    The default make target is `build-native` which builds binaries native to your environment into the `./build/bin/native/` folder.
+
+    NOTE: on windows you may need to install a C++ tool chain (e.g. [`tdm-gcc`](https://jmeubank.github.io/tdm-gcc/)) in order to cross compile the sqlite dependency.
+
+    After building you can run the version you just built:
+
+    ```
+    ./build/bin/native/godbledger
+    ```
+
+1. Run the linter to discover any style or structural errors:
+
+    ```
+    make lint
+    ```
+
+1. Run the tests
+   
+    ```
+    make test
+    ```
+
+    NOTE: the test suite depends on the `build-native` target as it includes an integration test which spins up an instance of `godbledger`
+
+### Build architecture
+
+The primary entrypoint into the build scripts is the `Makefile` which provides the aforementioned build targets:
+- `build-native` (default)
+- `lint`
+- `test`
+
+All three of which call into the `./utils/ci.go` script to do the actual work of setting up required env vars, building the executiables, and configuring output folders.
+
+An additional `./utils/make-release.sh` script is available to help orchestrate the creation of zip/tarfiles.
+
+### Cross-compiling with xgo/docker
+
+In addition to the default, native build target, the `Makefile` also offers a `build-cross` target which uses a forked version of `xgo` (https://github.com/techknowlogick/xgo) to build for different operating systems and architectures, including linux variants, a MacOS-compatible binary, and windows-compatible exe files.
+
+```
+make build-cross
+```
+
+Go tooling natively offers cross-compiling features when the `CGO_ENABLED=0` flag is set; `godbledger`'s `go-sqlite3` dependency however requires `CGO_ENABLED=1` in order to link in the C-level bindings for SQLite.  Cross-compiling golang when `CGO` is enable is significantly more complicated as each platform and architecture can require a custom C++ toolchain.
+
+`xgo` achieves consistency in cross-compilation using Docker, so running Docker Engine on your dev box is a requirement to running the `build-cross` target.
+
+#### Install Docker Engine
+
+The Docker web site includes detailed instructions on [installing and running Docker Engine](https://docs.docker.com/engine/install/) on a variety of supported platforms.
+
+NOTE: if installing Docker Engine on a linux system make sure to follow the [Post-installation steps for Linux](https://docs.docker.com/engine/install/linux-postinstall/) in order to be able to run `docker` commands from local user accounts.
 
 ### TODO/Milestones
 - ~~GoDBLedger server runs and accepts transactions~~
