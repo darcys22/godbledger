@@ -36,7 +36,6 @@ func ValidateConnectionString(dsn string) (string, error) {
 	log.Debugf("DB_NET := %s", cfg.Net)
 	log.Debugf("DB_DBNAME := %s", cfg.DBName)
 	log.Debugf("DB_USER := %s", cfg.User)
-	log.Debugf("DB_PASSWORD := %s", cfg.Passwd)
 	log.Debugf("PARAMS := %v", cfg.Params)
 	if !cfg.ParseTime {
 		cfg.ParseTime = true
