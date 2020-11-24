@@ -6,6 +6,23 @@ on:
     # The branches below must be a subset of the branches above
     branches: [master, dev]
 jobs:
+  lint:
+    strategy:
+      fail-fast: false # dont' want one scenario failing to deprive us of feedback on the others
+      matrix:
+        go-version: [1.14.x, 1.15.x]
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: ${{ matrix.go-version }}
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Lint
+      run: go run utils/ci.go lint
+      if: matrix.os == 'ubuntu-latest'   
   test:
     strategy:
       fail-fast: false # dont' want one scenario failing to deprive us of feedback on the others
@@ -20,8 +37,6 @@ jobs:
         go-version: ${{ matrix.go-version }}
     - name: Checkout code
       uses: actions/checkout@v2
-    - name: Lint
-      run: go run utils/ci.go lint
     - name: Build
       run: go run utils/ci.go install
     - name: Test
