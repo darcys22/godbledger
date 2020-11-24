@@ -1,0 +1,10 @@
+# comment
+.github/
+.travis.yaml
+.golangeci.yml
+build/.cache
+build/bin
+build/dist
+release/
+cert/
+Dockerfile.*

@@ -52,7 +52,42 @@ linux-arm-7:
 linux-arm-64:
 		mkdir -p release/godbledger-arm64-v$(VERSION)/
 		env CC=aarch64-linux-gnu-gcc CXX=aarch-linux-gnu-g++ CGO_ENABLED=1 GOOS=linux GOARCH=arm64 GO111MODULE=on go build -o release/godbledger-arm64-v$(VERSION)/ ./...
+
 # -------------------------------
+# docker
+
+# convenience target which looks like the other top-level build-* targets
+build-docker: docker-build
+
+docker-build:
+	docker build -t godbledger:$(VERSION) -f ./Dockerfile.build .
+
+docker-start:
+	@docker run -d --name=godbledger-server -p 50051:50051 godbledger:$(VERSION)
+
+docker-stop:
+	@docker stop godbledger-server
+
+docker-inspect:
+	@docker inspect godbledger-server
+
+docker-clean:
+	@$(if $(strip $(shell docker container list -a | grep godbledger-server)), @docker rm -f godbledger-server && echo "godbledger-server has been removed from docker",@echo "no godbledger-server container found")
+
+docker-status:
+	@$(if $(strip $(shell docker ps | grep godbledger-server)), @echo "godbledger-server is running on localhost:50051", @echo "godbledger-server is not running")
+
+docker-logs:
+	@docker logs godbledger-server
+
+docker-logs-follow:
+	@docker logs -f godbledger-server
+
+docker-login:
+	@$(if $(strip $(shell docker ps | grep godbledger-server)), @docker exec -it godbledger-server /bin/ash || 0, @docker run -it --rm --entrypoint /bin/ash godbledger:$(VERSION) )
+
+# -------------------------------
+# cross
 
 build-cross: build-linux build-darwin build-windows
 

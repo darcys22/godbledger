@@ -1,0 +1,23 @@
+FROM golang:1.15.5-alpine AS builder
+# https://megamorf.gitlab.io/2019/09/08/alpine-go-builds-with-cgo-enabled/
+
+RUN apk update
+RUN apk upgrade
+RUN apk add --update gcc g++ make git
+
+ENV GOPATH /go
+WORKDIR /go/src/github.com/darcys22/godbledger
+ADD . .
+
+# TODO: pull app version from VERSION
+RUN make
+
+FROM alpine
+
+WORKDIR /app
+
+ENV GDBL_LOG_LEVEL info
+COPY --from=builder /go/src/github.com/darcys22/godbledger/build/bin/native/* ./
+
+EXPOSE 50051
+ENTRYPOINT ./godbledger --verbosity=${GDBL_LOG_LEVEL} --rpc-port=50051
