@@ -5,16 +5,16 @@ option go_package = "github.com/darcys22/godbledger/transaction";
 package transaction;
 
 service Transactor {
-  rpc NodeVersion(VersionRequest) returns (VersionResponse) {}
   rpc AddTransaction(TransactionRequest) returns (TransactionResponse) {}
   rpc DeleteTransaction(DeleteRequest) returns (TransactionResponse) {}
   rpc VoidTransaction(DeleteRequest) returns (TransactionResponse) {}
+  rpc NodeVersion(VersionRequest) returns (VersionResponse) {}
   rpc AddTag(TagRequest) returns (TransactionResponse) {}
   rpc DeleteTag(DeleteTagRequest) returns (TransactionResponse) {}
   rpc AddCurrency(CurrencyRequest) returns (TransactionResponse) {}
   rpc DeleteCurrency(DeleteCurrencyRequest) returns (TransactionResponse) {}
-  rpc GetListing(ReportRequest) returns (ListingResponse) {}
   rpc GetTB(TBRequest) returns (TBResponse) {}
+  rpc GetListing(ReportRequest) returns (ListingResponse) {}
 }
 
 message LineItem {

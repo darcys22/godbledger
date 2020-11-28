@@ -8,7 +8,7 @@ require (
 	github.com/ethereum/go-ethereum v1.9.15
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gogo/protobuf v1.1.1
-	github.com/golang/protobuf v1.4.2
+	github.com/golang/protobuf v1.4.3
 	github.com/gophers/xgo v0.0.0-20200104073656-1317f74b9001 // indirect
 	github.com/joyt/godate v0.0.0-20150226210126-7151572574a7
 	github.com/karalabe/xgo v0.0.0-20191115072854-c5ccff8648a7 // indirect
@@ -22,6 +22,11 @@ require (
 	github.com/stretchr/testify v1.4.0
 	github.com/urfave/cli/v2 v2.2.0
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2
-	google.golang.org/grpc v1.30.0
+	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b // indirect
+	golang.org/x/sys v0.0.0-20201126233918-771906719818 // indirect
+	golang.org/x/text v0.3.4 // indirect
+	google.golang.org/genproto v0.0.0-20201119123407-9b1e624d6bc4 // indirect
+	google.golang.org/grpc v1.33.2
+	google.golang.org/protobuf v1.25.0
 	src.techknowlogick.com/xgo v1.0.1-0.20200717030703-5c3bb7fc435e // indirect
 )

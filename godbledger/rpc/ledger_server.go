@@ -14,6 +14,7 @@ import (
 )
 
 type LedgerServer struct {
+	pb.UnimplementedTransactorServer
 	ld *ledger.Ledger
 }
 
