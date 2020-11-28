@@ -7,9 +7,10 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/darcys22/godbledger/proto/transaction"
+
 	"github.com/darcys22/godbledger/godbledger/cmd"
 
-	pb "github.com/darcys22/godbledger/proto"
 	"google.golang.org/grpc"
 
 	"github.com/urfave/cli/v2"
@@ -49,13 +50,13 @@ var commandAddCurrency = &cli.Command{
 				return fmt.Errorf("Could not connect to GRPC (%v)", err)
 			}
 			defer conn.Close()
-			client := pb.NewTransactorClient(conn)
+			client := transaction.NewTransactorClient(conn)
 
 			ctxtimeout, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
 
 			if ctx.Bool("delete") {
-				req := &pb.DeleteCurrencyRequest{
+				req := &transaction.DeleteCurrencyRequest{
 					Currency: ctx.Args().Get(0),
 				}
 
@@ -73,7 +74,7 @@ var commandAddCurrency = &cli.Command{
 					if err != nil {
 						return fmt.Errorf("Could not parse the decimals provided (%v)", err)
 					}
-					req := &pb.CurrencyRequest{
+					req := &transaction.CurrencyRequest{
 						Currency: ctx.Args().Get(0),
 						Decimals: decimals,
 					}

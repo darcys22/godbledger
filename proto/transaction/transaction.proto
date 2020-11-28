@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/darcys22/godbledger/transaction";
+option go_package = "github.com/darcys22/godbledger/proto/transaction";
 
 package transaction;
 
