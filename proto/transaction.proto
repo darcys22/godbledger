@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+option go_package = "github.com/darcys22/godbledger/transaction";
+
 package transaction;
 
 service Transactor {
