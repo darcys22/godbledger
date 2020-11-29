@@ -20,4 +20,4 @@ ENV GDBL_LOG_LEVEL info
 COPY --from=builder /go/src/github.com/darcys22/godbledger/build/bin/native/* ./
 
 EXPOSE 50051
-ENTRYPOINT ./godbledger --verbosity=${GDBL_LOG_LEVEL} --rpc-port=50051
+ENTRYPOINT ./godbledger --verbosity=${GDBL_LOG_LEVEL} --rpc-host=0.0.0.0 --rpc-port=50051
