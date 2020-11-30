@@ -9,9 +9,9 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/darcys22/godbledger/godbledger/cmd"
-	pb "github.com/darcys22/godbledger/proto"
+	"github.com/darcys22/godbledger/proto/transaction"
 
+	"github.com/darcys22/godbledger/godbledger/cmd"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
@@ -96,16 +96,16 @@ func Send(cfg *cmd.LedgerConfig, t *Transaction) error {
 		return fmt.Errorf("Could not connect to GRPC (%v)", err)
 	}
 	defer conn.Close()
-	client := pb.NewTransactorClient(conn)
+	client := transaction.NewTransactorClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	transactionLines := make([]*pb.LineItem, 2)
+	transactionLines := make([]*transaction.LineItem, 2)
 
 	for i, accChange := range t.AccountChanges {
 		amountInt64 := accChange.Balance.Num().Int64() * int64(100) / accChange.Balance.Denom().Int64()
-		transactionLines[i] = &pb.LineItem{
+		transactionLines[i] = &transaction.LineItem{
 			Accountname: accChange.Name,
 			Description: accChange.Description,
 			Amount:      amountInt64,
@@ -113,7 +113,7 @@ func Send(cfg *cmd.LedgerConfig, t *Transaction) error {
 		}
 	}
 
-	req := &pb.TransactionRequest{
+	req := &transaction.TransactionRequest{
 		Date:        t.Date.Format("2006-01-02"),
 		Description: t.Payee,
 		Lines:       transactionLines,

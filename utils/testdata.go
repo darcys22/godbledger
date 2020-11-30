@@ -17,6 +17,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/darcys22/godbledger/proto/transaction"
 	"io/ioutil"
 	"log"
 	"math/big"
@@ -24,7 +25,6 @@ import (
 	"path/filepath"
 	"time"
 
-	pb "github.com/darcys22/godbledger/proto"
 	"google.golang.org/grpc"
 )
 
@@ -169,15 +169,15 @@ func Send(t *Transaction) error {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
-	client := pb.NewTransactorClient(conn)
+	client := transaction.NewTransactorClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	transactionLines := make([]*pb.LineItem, 2)
+	transactionLines := make([]*transaction.LineItem, 2)
 
 	for i, accChange := range t.AccountChanges {
-		transactionLines[i] = &pb.LineItem{
+		transactionLines[i] = &transaction.LineItem{
 			Accountname: accChange.Name,
 			Description: accChange.Description,
 			Amount:      accChange.Balance.Num().Int64(),
@@ -185,7 +185,7 @@ func Send(t *Transaction) error {
 		}
 	}
 
-	req := &pb.TransactionRequest{
+	req := &transaction.TransactionRequest{
 		Date:        t.Date.Format("2006-01-02"),
 		Description: t.Payee,
 		Lines:       transactionLines,

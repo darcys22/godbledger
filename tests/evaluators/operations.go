@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	pb "github.com/darcys22/godbledger/proto"
+	"github.com/darcys22/godbledger/proto/transaction"
 
 	"github.com/darcys22/godbledger/tests/types"
 
@@ -20,28 +20,28 @@ var SingleTransaction = types.Evaluator{
 }
 
 func singleTransaction(conns ...*grpc.ClientConn) error {
-	client := pb.NewTransactorClient(conns[0])
+	client := transaction.NewTransactorClient(conns[0])
 
 	date, _ := time.Parse("2006-01-02", "2011-03-15")
 	desc := "Whole Food Market"
 
-	transactionLines := make([]*pb.LineItem, 2)
+	transactionLines := make([]*transaction.LineItem, 2)
 
-	transactionLines[0] = &pb.LineItem{
+	transactionLines[0] = &transaction.LineItem{
 		Accountname: "Expenses:Groceries",
 		Description: "Groceries",
 		Amount:      7500,
 		Currency:    "USD",
 	}
 
-	transactionLines[1] = &pb.LineItem{
+	transactionLines[1] = &transaction.LineItem{
 		Accountname: "Assets:Checking",
 		Description: "Groceries",
 		Amount:      -7500,
 		Currency:    "USD",
 	}
 
-	req := &pb.TransactionRequest{
+	req := &transaction.TransactionRequest{
 		Date:        date.Format("2006-01-02"),
 		Description: desc,
 		Lines:       transactionLines,
@@ -51,7 +51,7 @@ func singleTransaction(conns ...*grpc.ClientConn) error {
 		return err
 	}
 
-	res, err := client.GetTB(context.Background(), &pb.TBRequest{Date: time.Now().Format("2006-01-02")})
+	res, err := client.GetTB(context.Background(), &transaction.TBRequest{Date: time.Now().Format("2006-01-02")})
 	if err != nil {
 		return err
 	}

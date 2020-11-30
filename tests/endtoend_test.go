@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	pb "github.com/darcys22/godbledger/proto"
+	"github.com/darcys22/godbledger/proto/transaction"
 
 	"github.com/darcys22/godbledger/godbledger/cmd"
 	"github.com/darcys22/godbledger/tests/components"
@@ -60,8 +60,8 @@ func runEndToEndTest(t *testing.T, config *cmd.LedgerConfig) {
 		}()
 	}
 
-	client := pb.NewTransactorClient(conns[0])
-	req := &pb.VersionRequest{
+	client := transaction.NewTransactorClient(conns[0])
+	req := &transaction.VersionRequest{
 		Message: "Test",
 	}
 	_, err = client.NodeVersion(context.Background(), req)

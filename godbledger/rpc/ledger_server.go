@@ -6,18 +6,19 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/darcys22/godbledger/proto/transaction"
+
 	"github.com/darcys22/godbledger/godbledger/core"
 	"github.com/darcys22/godbledger/godbledger/ledger"
 	"github.com/darcys22/godbledger/godbledger/version"
-
-	pb "github.com/darcys22/godbledger/proto"
 )
 
 type LedgerServer struct {
+	transaction.UnimplementedTransactorServer
 	ld *ledger.Ledger
 }
 
-func (s *LedgerServer) AddTransaction(ctx context.Context, in *pb.TransactionRequest) (*pb.TransactionResponse, error) {
+func (s *LedgerServer) AddTransaction(ctx context.Context, in *transaction.TransactionRequest) (*transaction.TransactionResponse, error) {
 	log.WithField("Request", in).Info("Received New Add Transaction Request")
 
 	usr, err := core.NewUser("MainUser")
@@ -69,17 +70,17 @@ func (s *LedgerServer) AddTransaction(ctx context.Context, in *pb.TransactionReq
 		log.Error(err)
 	}
 
-	return &pb.TransactionResponse{Message: response}, nil
+	return &transaction.TransactionResponse{Message: response}, nil
 }
 
-func (s *LedgerServer) DeleteTransaction(ctx context.Context, in *pb.DeleteRequest) (*pb.TransactionResponse, error) {
+func (s *LedgerServer) DeleteTransaction(ctx context.Context, in *transaction.DeleteRequest) (*transaction.TransactionResponse, error) {
 	log.WithField("Request", in).Info("Received New Delete Request")
 	s.ld.Delete(in.GetIdentifier())
 
-	return &pb.TransactionResponse{Message: "Accepted"}, nil
+	return &transaction.TransactionResponse{Message: "Accepted"}, nil
 }
 
-func (s *LedgerServer) VoidTransaction(ctx context.Context, in *pb.DeleteRequest) (*pb.TransactionResponse, error) {
+func (s *LedgerServer) VoidTransaction(ctx context.Context, in *transaction.DeleteRequest) (*transaction.TransactionResponse, error) {
 	log.WithField("Request", in).Info("Received New Void Request")
 
 	usr, err := core.NewUser("MainUser")
@@ -93,30 +94,30 @@ func (s *LedgerServer) VoidTransaction(ctx context.Context, in *pb.DeleteRequest
 		message = err.Error()
 	}
 
-	return &pb.TransactionResponse{Message: message}, nil
+	return &transaction.TransactionResponse{Message: message}, nil
 }
 
-func (s *LedgerServer) NodeVersion(ctx context.Context, in *pb.VersionRequest) (*pb.VersionResponse, error) {
+func (s *LedgerServer) NodeVersion(ctx context.Context, in *transaction.VersionRequest) (*transaction.VersionResponse, error) {
 	log.WithField("Request", in).Info("Received New Version Request")
-	return &pb.VersionResponse{Message: version.Version}, nil
+	return &transaction.VersionResponse{Message: version.Version}, nil
 }
 
-func (s *LedgerServer) AddTag(ctx context.Context, in *pb.TagRequest) (*pb.TransactionResponse, error) {
+func (s *LedgerServer) AddTag(ctx context.Context, in *transaction.TagRequest) (*transaction.TransactionResponse, error) {
 	log.WithField("Request", in).Info("Received New Add Tag Request")
 
 	s.ld.InsertTag(in.GetAccount(), in.GetTag())
 
-	return &pb.TransactionResponse{Message: "Accepted"}, nil
+	return &transaction.TransactionResponse{Message: "Accepted"}, nil
 }
 
-func (s *LedgerServer) DeleteTag(ctx context.Context, in *pb.DeleteTagRequest) (*pb.TransactionResponse, error) {
+func (s *LedgerServer) DeleteTag(ctx context.Context, in *transaction.DeleteTagRequest) (*transaction.TransactionResponse, error) {
 	log.WithField("Request", in).Info("Received New Delete Tag Request")
 	s.ld.DeleteTag(in.GetAccount(), in.GetTag())
 
-	return &pb.TransactionResponse{Message: "Accepted"}, nil
+	return &transaction.TransactionResponse{Message: "Accepted"}, nil
 }
 
-func (s *LedgerServer) AddCurrency(ctx context.Context, in *pb.CurrencyRequest) (*pb.TransactionResponse, error) {
+func (s *LedgerServer) AddCurrency(ctx context.Context, in *transaction.CurrencyRequest) (*transaction.TransactionResponse, error) {
 	log.WithField("Request", in).Info("Received New Add Currency Request")
 
 	curr, err := core.NewCurrency(in.GetCurrency(), int(in.GetDecimals()))
@@ -129,19 +130,19 @@ func (s *LedgerServer) AddCurrency(ctx context.Context, in *pb.CurrencyRequest) 
 		log.Error(err)
 	}
 
-	return &pb.TransactionResponse{Message: "Accepted"}, nil
+	return &transaction.TransactionResponse{Message: "Accepted"}, nil
 }
 
-func (s *LedgerServer) DeleteCurrency(ctx context.Context, in *pb.DeleteCurrencyRequest) (*pb.TransactionResponse, error) {
+func (s *LedgerServer) DeleteCurrency(ctx context.Context, in *transaction.DeleteCurrencyRequest) (*transaction.TransactionResponse, error) {
 	log.WithField("Request", in).Info("Received New Delete Currency Request")
 	s.ld.DeleteCurrency(in.GetCurrency())
 
-	return &pb.TransactionResponse{Message: "Accepted"}, nil
+	return &transaction.TransactionResponse{Message: "Accepted"}, nil
 }
 
-func (s *LedgerServer) GetTB(ctx context.Context, in *pb.TBRequest) (*pb.TBResponse, error) {
+func (s *LedgerServer) GetTB(ctx context.Context, in *transaction.TBRequest) (*transaction.TBResponse, error) {
 	log.WithField("Request", in).Info("Received New Get Trial Balance Request")
-	response := pb.TBResponse{}
+	response := transaction.TBResponse{}
 
 	querydate, err := time.Parse("2006-01-02", in.Date)
 	if err != nil {
@@ -166,7 +167,7 @@ func (s *LedgerServer) GetTB(ctx context.Context, in *pb.TBRequest) (*pb.TBRespo
 			amt = prefix + amt
 		}
 		response.Lines = append(response.Lines,
-			&pb.TBLine{
+			&transaction.TBLine{
 				Accountname: account.Account,
 				Amount:      int64(account.Amount),
 				Tags:        account.Tags,
@@ -179,9 +180,9 @@ func (s *LedgerServer) GetTB(ctx context.Context, in *pb.TBRequest) (*pb.TBRespo
 	return &response, nil
 }
 
-func (s *LedgerServer) GetListing(ctx context.Context, in *pb.ReportRequest) (*pb.ListingResponse, error) {
+func (s *LedgerServer) GetListing(ctx context.Context, in *transaction.ReportRequest) (*transaction.ListingResponse, error) {
 	log.WithField("Request", in).Info("Received New Get Listing Request")
-	response := pb.ListingResponse{}
+	response := transaction.ListingResponse{}
 
 	startdate, err := time.Parse("2006-01-02", in.Startdate)
 	if err != nil {
@@ -199,14 +200,14 @@ func (s *LedgerServer) GetListing(ctx context.Context, in *pb.ReportRequest) (*p
 	log.Debug("Building Listing Response")
 
 	for _, txn := range *txns {
-		splits := []*pb.LineItem{}
+		splits := []*transaction.LineItem{}
 		date := ""
 
 		if len(txn.Splits) > 0 {
 			date = txn.Splits[0].Date.Format("2006-01-02 15:04:05")
 			for _, split := range txn.Splits {
 				splits = append(splits,
-					&pb.LineItem{
+					&transaction.LineItem{
 						Accountname: split.Accounts[0].Name,
 						Description: string(split.Description),
 						Currency:    split.Currency.Name,
@@ -217,7 +218,7 @@ func (s *LedgerServer) GetListing(ctx context.Context, in *pb.ReportRequest) (*p
 			date = txn.Postdate.Format("2006-01-02 15:04:05")
 		}
 		response.Transactions = append(response.Transactions,
-			&pb.Transaction{
+			&transaction.Transaction{
 				Date:        date,
 				Description: string(txn.Description),
 				Lines:       splits,
