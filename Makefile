@@ -1,5 +1,17 @@
 VERSION ?= latest
-GDBL_DATA_DIR ?= $(HOME)/.ledger
+
+# set default data directory by OS
+ifeq ($(OS),Windows_NT)
+  DEFAULT_DATA_DIR=$(HOME)/.ledger
+else
+  ifeq ($(shell uname -s),Darwin)
+    DEFAULT_DATA_DIR=$(HOME)/Library/ledger
+  else
+    DEFAULT_DATA_DIR=$(HOME)/.ledger
+  endif
+endif
+
+GDBL_DATA_DIR ?= $(DEFAULT_DATA_DIR)
 
 GODIST = ./build/dist
 GO ?= latest
