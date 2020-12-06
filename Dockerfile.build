@@ -15,9 +15,12 @@ RUN make
 FROM alpine
 
 WORKDIR /app
+ENV PATH=/app:${PATH}
 
 ENV GDBL_LOG_LEVEL info
+ENV GDBL_DATA_DIR ~/.ledger
+ENV GDBL_CONFIG_FILE ~/.ledger/config.docker.toml
 COPY --from=builder /go/src/github.com/darcys22/godbledger/build/bin/native/* ./
 
 EXPOSE 50051
-ENTRYPOINT ./godbledger --verbosity=${GDBL_LOG_LEVEL} --rpc-host=0.0.0.0 --rpc-port=50051
+ENTRYPOINT ./godbledger --verbosity=${GDBL_LOG_LEVEL} --rpc-host=0.0.0.0 --rpc-port=50051 --datadir=${GDBL_DATA_DIR} --config=${GDBL_CONFIG_FILE}

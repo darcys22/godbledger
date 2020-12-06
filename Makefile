@@ -1,4 +1,5 @@
 VERSION ?= latest
+GDBL_DATA_DIR ?= $(HOME)/.ledger
 
 GODIST = ./build/dist
 GO ?= latest
@@ -63,13 +64,13 @@ docker-build:
 	docker build -t godbledger:$(VERSION) -f ./Dockerfile.build .
 
 docker-start:
-	@docker run -d --name=godbledger-server -p 50051:50051 godbledger:$(VERSION)
+	docker run -d --name=godbledger-server -p 50051:50051 --mount type=bind,source="$(GDBL_DATA_DIR)",target="/mnt/host/.ledger" --env GDBL_LOG_LEVEL=debug --env GDBL_DATA_DIR=/mnt/host/.ledger --env GDBL_CONFIG_FILE=/mnt/host/.ledger/config.docker.toml godbledger:$(VERSION) && docker logs godbledger-server
 
 docker-stop:
-	@docker stop godbledger-server
+	docker stop godbledger-server
 
 docker-inspect:
-	@docker inspect godbledger-server
+	docker inspect godbledger-server
 
 docker-clean:
 	@$(if $(strip $(shell docker container list -a | grep godbledger-server)), @docker rm -f godbledger-server && echo "godbledger-server has been removed from docker",@echo "no godbledger-server container found")
