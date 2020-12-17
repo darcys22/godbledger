@@ -41,7 +41,8 @@ password.txt
 # Ignore Build
 release
 /build/_workspace/
-/build/cache/
+/build/.cache/
 /build/bin/
+/build/dist/
 build/_vendor/pkg
 cert

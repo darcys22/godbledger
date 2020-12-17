@@ -53,9 +53,11 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+
 	//"regexp"
 	"runtime"
 	"strings"
+
 	//"time"
 	//"github.com/cespare/cp"
 	"github.com/darcys22/godbledger/godbledger/version"
@@ -63,6 +65,14 @@ import (
 )
 
 var (
+	// NOTE: this could be inferred if these 'main' packages were moved
+	//       into a ./cmd folder (see: https://github.com/golang-standards/project-layout#cmd)
+	packagesToBuild = []string{
+		"godbledger",
+		"ledger_cli",
+		"reporter",
+	}
+
 	// Files that end up in the godbledger*.zip archive.
 	godbledgerArchiveFiles = []string{
 		executablePath("godbledger"),
@@ -116,6 +126,22 @@ var (
 )
 
 var GOBIN, _ = filepath.Abs(filepath.Join("build", "bin"))
+var BUILDDIR, _ = filepath.Abs("build")
+
+func archBinPath(goos string, arch string) string {
+	if goos == runtime.GOOS && arch == runtime.GOARCH {
+		return filepath.Join(GOBIN, "native")
+	}
+	return filepath.Join(GOBIN, fmt.Sprintf("%s-%s", goos, arch))
+}
+
+func cachePath() string {
+	return filepath.Join(BUILDDIR, ".cache")
+}
+
+func distPath() string {
+	return filepath.Join(BUILDDIR, "dist")
+}
 
 func executablePath(name string) string {
 	if runtime.GOOS == "windows" {
@@ -134,8 +160,10 @@ func main() {
 		log.Fatal("need subcommand as first argument")
 	}
 	switch os.Args[1] {
-	case "install":
-		doInstall(os.Args[2:])
+	case "info":
+		log.Printf("current system: %s/%s", runtime.GOOS, runtime.GOARCH)
+	case "build":
+		doBuild(os.Args[2:])
 	case "test":
 		doTest(os.Args[2:])
 	case "lint":
@@ -157,16 +185,10 @@ func main() {
 
 // Compiling
 
-func doInstall(cmdline []string) {
-	var (
-		arch = flag.String("arch", "", "Architecture to cross build for")
-		cc   = flag.String("cc", "", "C compiler to cross build with")
-	)
-	flag.CommandLine.Parse(cmdline)
-	env := build.Env()
-
-	// Check Go version. People regularly open issues about compilation
-	// failure with outdated Go. This should save them the trouble.
+// ensureMinimumGoVersion ensures that the current go version is compatible with
+// our build requirements. People regularly open issues about compilation failure
+// with outdated Go; this should save them the trouble.
+func ensureMinimumGoVersion() {
 	if !strings.Contains(runtime.Version(), "devel") {
 		// Figure out the minor version number since we can't textually compare (1.10 < 1.9)
 		var minor int
@@ -179,17 +201,36 @@ func doInstall(cmdline []string) {
 			os.Exit(1)
 		}
 	}
+}
+
+func doBuild(cmdline []string) {
+	var (
+		goos = flag.String("os", runtime.GOOS, "OS to (cross) build for")
+		arch = flag.String("arch", runtime.GOARCH, "Architecture to (cross) build for")
+		cc   = flag.String("cc", "", "C compiler to (cross) build with")
+	)
+	flag.CommandLine.Parse(cmdline)
+	env := build.Env()
+	log.Printf("build targeting: %s/%s", *goos, *arch)
+
 	// Compile packages given as arguments, or everything if there are no arguments.
 	packages := []string{"./..."}
 	if flag.NArg() > 0 {
 		packages = flag.Args()
 	}
 
-	if *arch == "" || *arch == runtime.GOARCH {
-		goinstall := goTool("install", buildFlags(env)...)
+	ensureMinimumGoVersion()
+
+	// ensure our output path exists so we can use the -o flag to dump build output there
+	os.MkdirAll(archBinPath(*goos, *arch), os.ModePerm)
+
+	// native build can be done with plain go tools
+	if *goos == runtime.GOOS && *arch == runtime.GOARCH {
+		goinstall := goTool("build", buildFlags(env)...)
 		if runtime.GOARCH == "arm64" {
 			goinstall.Args = append(goinstall.Args, "-p", "1")
 		}
+		goinstall.Args = append(goinstall.Args, []string{"-o", archBinPath(*goos, *arch)}...)
 		goinstall.Args = append(goinstall.Args, "-v")
 		goinstall.Args = append(goinstall.Args, packages...)
 		build.MustRun(goinstall)
@@ -297,7 +338,7 @@ func doTest(cmdline []string) {
 // doLint runs golangci-lint on requested packages.
 func doLint(cmdline []string) {
 	var (
-		cachedir = flag.String("cachedir", "./build/cache", "directory for caching golangci-lint binary.")
+		cachedir = flag.String("cachedir", cachePath(), "directory for caching golangci-lint binary.")
 	)
 	flag.CommandLine.Parse(cmdline)
 	packages := []string{"./..."}
@@ -776,38 +817,54 @@ func (d debExecutable) Package() string {
 
 func doXgo(cmdline []string) {
 	var (
-		alltools = flag.Bool("alltools", false, `Flag whether we're building all known tools, or only on in particular`)
+		xtarget = flag.String("target", "", "cross-compile target")
 	)
 	flag.CommandLine.Parse(cmdline)
 	env := build.Env()
 
+	if *xtarget == "" || strings.Contains(*xtarget, "*") {
+		// TODO: not sure about this, limiting xgo to a single target, but it lets us manage the output to a target-based folder
+		log.Println("must supply a single xgo build target for cross-compliation")
+		os.Exit(1)
+	}
+
+	targetSuffix := strings.ReplaceAll(*xtarget, "/", "-")
+	outDir := filepath.Join(distPath(), targetSuffix)
+	os.MkdirAll(outDir, os.ModePerm)
+
+	log.Printf("xgo target [%s] --> %s\n", *xtarget, outDir)
+
 	// Make sure xgo is available for cross compilation
-	//gogetxgo := goTool("get", "github.com/techknowlogick/xgo")
 	gogetxgo := goTool("get", "src.techknowlogick.com/xgo")
 	build.MustRun(gogetxgo)
 
-	// If all tools building is requested, build everything the builder wants
-	args := append(buildFlags(env), flag.Args()...)
+	for _, cmd := range packagesToBuild {
+		xgoArgs := append(buildFlags(env), flag.Args()...)
+		xgoArgs = append(xgoArgs, []string{"--targets", *xtarget}...)
+		xgoArgs = append(xgoArgs, []string{"--dest", outDir}...)
+		xgoArgs = append(xgoArgs, "-v")
+		xgoArgs = append(xgoArgs, "./"+cmd) // relative package name (assumes we are inside GOPATH)
+		xgo := xgoTool(xgoArgs)
+		build.MustRun(xgo)
 
-	if *alltools {
-		args = append(args, []string{"--dest", GOBIN}...)
-		for _, res := range allToolsArchiveFiles {
-			if strings.HasPrefix(res, GOBIN) {
-				// Binary tool found, cross build it explicitly
-				args = append(args, "./"+filepath.Base(res))
-				xgo := xgoTool(args)
-				build.MustRun(xgo)
-				args = args[:len(args)-1]
+		// strip the suffix out of the binary name
+		// TODO: add this ability into xgo
+		filepath.Walk(outDir, func(path string, info os.FileInfo, err error) error {
+			if info.IsDir() {
+				return nil // skip
 			}
-		}
-		return
-	}
-	// Otherwise xxecute the explicit cross compilation
-	path := args[len(args)-1]
-	args = append(args[:len(args)-1], []string{"--dest", GOBIN, path}...)
 
-	xgo := xgoTool(args)
-	build.MustRun(xgo)
+			suffix := filepath.Base(filepath.Dir(path))
+			if strings.HasPrefix(info.Name(), cmd) && strings.Contains(info.Name(), suffix) {
+				newName := strings.Replace(info.Name(), "-"+suffix, "", 1)
+				newPath := filepath.Join(filepath.Dir(path), newName)
+				log.Println("renaming:", path)
+				log.Println("      to:", newPath)
+				os.Rename(path, newPath)
+			}
+			return nil
+		})
+	}
 }
 
 func xgoTool(args []string) *exec.Cmd {
@@ -816,6 +873,23 @@ func xgoTool(args []string) *exec.Cmd {
 	cmd.Env = append(cmd.Env, []string{
 		"GOBIN=" + GOBIN,
 	}...)
+	if os.Getenv("GOPATH") == "" {
+		// xgo requires that $GOPATH be set
+		homeRel := os.Getenv("HOME")
+		if runtime.GOOS == "windows" {
+			homeRel = os.Getenv("USERPROFILE")
+		}
+		if homeRel == "" {
+			log.Println("GOPATH undefined and cannot determine homedir")
+			os.Exit(1)
+		}
+		homeAbs, _ := filepath.Abs(homeRel)
+		goPath := filepath.Join(homeAbs, "go")
+		log.Printf("GOPATH undefined but required by xgo; injecting %s\n", goPath)
+		cmd.Env = append(cmd.Env, []string{
+			"GOPATH="+goPath,
+		}...)
+	}
 	return cmd
 }
 
