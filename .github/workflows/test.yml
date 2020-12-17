@@ -38,5 +38,5 @@ jobs:
 
     - name: Test
       run: |
-        go run utils/ci.go install
+        go run utils/ci.go build
         go run utils/ci.go test -coverage $TEST_PACKAGES
