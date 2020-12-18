@@ -547,6 +547,21 @@ func (db *Database) SafeAddAccount(acc *core.Account) error {
 
 }
 
+func (db *Database) DeleteAccount(account string) error {
+
+	sqlStatement := `
+	DELETE FROM accounts
+	WHERE 
+		name = ?
+	;`
+	_, err := db.DB.Exec(sqlStatement, account)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (db *Database) FindUser(pubKey string) (*core.User, error) {
 	var resp core.User
 	log.Debug("Searching User in DB")

@@ -102,17 +102,59 @@ func (s *LedgerServer) NodeVersion(ctx context.Context, in *transaction.VersionR
 	return &transaction.VersionResponse{Message: version.Version}, nil
 }
 
-func (s *LedgerServer) AddTag(ctx context.Context, in *transaction.TagRequest) (*transaction.TransactionResponse, error) {
+func (s *LedgerServer) AddTag(ctx context.Context, in *transaction.AccountTagRequest) (*transaction.TransactionResponse, error) {
 	log.WithField("Request", in).Info("Received New Add Tag Request")
 
-	s.ld.InsertTag(in.GetAccount(), in.GetTag())
+	tags := in.GetTag()
+	for i := 0; i < len(tags); i++ {
+		s.ld.InsertTag(in.GetAccount(), tags[i])
+	}
 
 	return &transaction.TransactionResponse{Message: "Accepted"}, nil
 }
 
-func (s *LedgerServer) DeleteTag(ctx context.Context, in *transaction.DeleteTagRequest) (*transaction.TransactionResponse, error) {
+func (s *LedgerServer) DeleteTag(ctx context.Context, in *transaction.DeleteAccountTagRequest) (*transaction.TransactionResponse, error) {
 	log.WithField("Request", in).Info("Received New Delete Tag Request")
-	s.ld.DeleteTag(in.GetAccount(), in.GetTag())
+
+	tags := in.GetTag()
+	for i := 0; i < len(tags); i++ {
+		s.ld.DeleteTag(in.GetAccount(), tags[i])
+	}
+
+	return &transaction.TransactionResponse{Message: "Accepted"}, nil
+}
+
+func (s *LedgerServer) AddAccount(ctx context.Context, in *transaction.AccountTagRequest) (*transaction.TransactionResponse, error) {
+	log.WithField("Request", in).Info("Received New Add Account Request")
+
+	accountRequested := in.GetAccount()
+	err := s.ld.InsertAccount(accountRequested)
+	if err != nil {
+		return nil, err
+	}
+
+	tags := in.GetTag()
+	for i := 0; i < len(tags); i++ {
+		s.ld.InsertTag(accountRequested, tags[i])
+	}
+
+	return &transaction.TransactionResponse{Message: "Accepted"}, nil
+}
+
+func (s *LedgerServer) DeleteAccount(ctx context.Context, in *transaction.DeleteAccountTagRequest) (*transaction.TransactionResponse, error) {
+	log.WithField("Request", in).Info("Received New Delete Account Request")
+
+	accountRequested := in.GetAccount()
+
+	tags := in.GetTag()
+	for i := 0; i < len(tags); i++ {
+		s.ld.DeleteTag(accountRequested, tags[i])
+	}
+
+	err := s.ld.DeleteAccount(accountRequested)
+	if err != nil {
+		return nil, err
+	}
 
 	return &transaction.TransactionResponse{Message: "Accepted"}, nil
 }

@@ -144,6 +144,18 @@ func (l *Ledger) DeleteTag(account, tag string) error {
 	return l.LedgerDb.DeleteTagFromAccount(account, tag)
 }
 
+func (l *Ledger) InsertAccount(accountStr string) error {
+	acc, err := core.NewAccount(accountStr, accountStr)
+	if err != nil {
+		log.Error(err)
+	}
+	return l.LedgerDb.SafeAddAccount(acc)
+}
+
+func (l *Ledger) DeleteAccount(accountStr string) error {
+	return l.LedgerDb.DeleteAccount(accountStr)
+}
+
 func (l *Ledger) GetCurrencies(txn *core.Transaction) ([]*core.Currency, error) {
 
 	currencies := []*core.Currency{}
