@@ -188,7 +188,7 @@ type UnsafeTransactorServer interface {
 }
 
 func RegisterTransactorServer(s grpc.ServiceRegistrar, srv TransactorServer) {
-	s.RegisterService(&Transactor_ServiceDesc, srv)
+	s.RegisterService(&_Transactor_serviceDesc, srv)
 }
 
 func _Transactor_AddTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -371,10 +371,7 @@ func _Transactor_GetListing_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-// Transactor_ServiceDesc is the grpc.ServiceDesc for Transactor service.
-// It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
-var Transactor_ServiceDesc = grpc.ServiceDesc{
+var _Transactor_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "transaction.Transactor",
 	HandlerType: (*TransactorServer)(nil),
 	Methods: []grpc.MethodDesc{
