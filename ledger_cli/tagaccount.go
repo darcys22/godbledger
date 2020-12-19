@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/darcys22/godbledger/godbledger/cmd"
-	pb "github.com/darcys22/godbledger/proto"
+	"github.com/darcys22/godbledger/proto/transaction"
 
+	"github.com/darcys22/godbledger/godbledger/cmd"
 	"google.golang.org/grpc"
 
 	"github.com/urfave/cli/v2"
@@ -53,15 +53,15 @@ var commandTagAccount = &cli.Command{
 			return fmt.Errorf("Could not connect to GRPC (%v)", err)
 		}
 		defer conn.Close()
-		client := pb.NewTransactorClient(conn)
+		client := transaction.NewTransactorClient(conn)
 
 		ctxtimeout, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
 
 		if ctx.Bool("delete") {
-			req := &pb.DeleteTagRequest{
+			req := &transaction.DeleteAccountTagRequest{
 				Account: ctx.Args().Get(0),
-				Tag:     ctx.Args().Get(1),
+				Tag:     []string{ctx.Args().Get(1)},
 			}
 
 			r, err := client.DeleteTag(ctxtimeout, req)
@@ -71,9 +71,9 @@ var commandTagAccount = &cli.Command{
 
 			log.Infof("Delete Tag Response: %s", r.GetMessage())
 		} else {
-			req := &pb.TagRequest{
+			req := &transaction.AccountTagRequest{
 				Account: ctx.Args().Get(0),
-				Tag:     ctx.Args().Get(1),
+				Tag:     []string{ctx.Args().Get(1)},
 			}
 
 			r, err := client.AddTag(ctxtimeout, req)

@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 	"net"
 
+	"github.com/darcys22/godbledger/proto/transaction"
+
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -15,7 +17,6 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	"github.com/darcys22/godbledger/godbledger/ledger"
-	pb "github.com/darcys22/godbledger/proto"
 )
 
 var log logrus.FieldLogger
@@ -92,7 +93,7 @@ func (s *Service) Start() {
 
 	ledgerServer := &LedgerServer{ld: s.ld}
 
-	pb.RegisterTransactorServer(s.grpcServer, ledgerServer)
+	transaction.RegisterTransactorServer(s.grpcServer, ledgerServer)
 
 	// Register reflection service on gRPC server.
 	reflection.Register(s.grpcServer)

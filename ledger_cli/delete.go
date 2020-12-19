@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/darcys22/godbledger/proto/transaction"
+
 	"github.com/darcys22/godbledger/godbledger/cmd"
 
-	pb "github.com/darcys22/godbledger/proto"
 	"google.golang.org/grpc"
 
 	"github.com/urfave/cli/v2"
@@ -49,12 +50,12 @@ var commandDeleteTransaction = &cli.Command{
 				return fmt.Errorf("Could not connect to GRPC (%v)", err)
 			}
 			defer conn.Close()
-			client := pb.NewTransactorClient(conn)
+			client := transaction.NewTransactorClient(conn)
 
 			ctxtimeout, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
 
-			req := &pb.DeleteRequest{
+			req := &transaction.DeleteRequest{
 				Identifier: ctx.Args().Get(0),
 			}
 			r, err := client.DeleteTransaction(ctxtimeout, req)
@@ -105,12 +106,12 @@ var commandVoidTransaction = &cli.Command{
 				return fmt.Errorf("Could not connect to GRPC (%v)", err)
 			}
 			defer conn.Close()
-			client := pb.NewTransactorClient(conn)
+			client := transaction.NewTransactorClient(conn)
 
 			ctxtimeout, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
 
-			req := &pb.DeleteRequest{
+			req := &transaction.DeleteRequest{
 				Identifier: ctx.Args().Get(0),
 			}
 			r, err := client.VoidTransaction(ctxtimeout, req)

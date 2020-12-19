@@ -74,9 +74,13 @@ The config file can be found by default at:
 ```
 
 ## Building the Proto Buffers
+Ensure that you have the latest version of the `protobuf` toolchain (currently at `3.14.0`):
+
+- See: [Protocol Buffer Compiler Installation](https://grpc.io/docs/protoc-installation/)
+
 Call from the root directory
 ```
-protoc -I proto/ proto/transaction.proto --go_out=plugins=grpc:proto
+make proto
 ```
 
 ## SQL Querys

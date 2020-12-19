@@ -1,18 +1,22 @@
 syntax = "proto3";
 
+option go_package = "github.com/darcys22/godbledger/proto/transaction";
+
 package transaction;
 
 service Transactor {
-  rpc NodeVersion(VersionRequest) returns (VersionResponse) {}
   rpc AddTransaction(TransactionRequest) returns (TransactionResponse) {}
   rpc DeleteTransaction(DeleteRequest) returns (TransactionResponse) {}
   rpc VoidTransaction(DeleteRequest) returns (TransactionResponse) {}
-  rpc AddTag(TagRequest) returns (TransactionResponse) {}
-  rpc DeleteTag(DeleteTagRequest) returns (TransactionResponse) {}
+  rpc NodeVersion(VersionRequest) returns (VersionResponse) {}
+  rpc AddTag(AccountTagRequest) returns (TransactionResponse) {}
+  rpc DeleteTag(DeleteAccountTagRequest) returns (TransactionResponse) {}
   rpc AddCurrency(CurrencyRequest) returns (TransactionResponse) {}
   rpc DeleteCurrency(DeleteCurrencyRequest) returns (TransactionResponse) {}
-  rpc GetListing(ReportRequest) returns (ListingResponse) {}
   rpc GetTB(TBRequest) returns (TBResponse) {}
+  rpc GetListing(ReportRequest) returns (ListingResponse) {}
+  rpc AddAccount(AccountTagRequest) returns (TransactionResponse) {}
+  rpc DeleteAccount(DeleteAccountTagRequest) returns (TransactionResponse) {}
 }
 
 message LineItem {
@@ -42,14 +46,14 @@ message TransactionResponse {
     string message = 1;
 }
 
-message TagRequest {
+message AccountTagRequest {
     string account = 1;
-    string tag = 2;
+    repeated string tag = 2;
 }
 
-message DeleteTagRequest {
+message DeleteAccountTagRequest {
     string account = 1;
-    string tag = 2;
+    repeated string tag = 2;
 }
 
 message CurrencyRequest {
