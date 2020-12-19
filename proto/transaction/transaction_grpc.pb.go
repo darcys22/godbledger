@@ -21,12 +21,14 @@ type TransactorClient interface {
 	DeleteTransaction(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*TransactionResponse, error)
 	VoidTransaction(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*TransactionResponse, error)
 	NodeVersion(ctx context.Context, in *VersionRequest, opts ...grpc.CallOption) (*VersionResponse, error)
-	AddTag(ctx context.Context, in *TagRequest, opts ...grpc.CallOption) (*TransactionResponse, error)
-	DeleteTag(ctx context.Context, in *DeleteTagRequest, opts ...grpc.CallOption) (*TransactionResponse, error)
+	AddTag(ctx context.Context, in *AccountTagRequest, opts ...grpc.CallOption) (*TransactionResponse, error)
+	DeleteTag(ctx context.Context, in *DeleteAccountTagRequest, opts ...grpc.CallOption) (*TransactionResponse, error)
 	AddCurrency(ctx context.Context, in *CurrencyRequest, opts ...grpc.CallOption) (*TransactionResponse, error)
 	DeleteCurrency(ctx context.Context, in *DeleteCurrencyRequest, opts ...grpc.CallOption) (*TransactionResponse, error)
 	GetTB(ctx context.Context, in *TBRequest, opts ...grpc.CallOption) (*TBResponse, error)
 	GetListing(ctx context.Context, in *ReportRequest, opts ...grpc.CallOption) (*ListingResponse, error)
+	AddAccount(ctx context.Context, in *AccountTagRequest, opts ...grpc.CallOption) (*TransactionResponse, error)
+	DeleteAccount(ctx context.Context, in *DeleteAccountTagRequest, opts ...grpc.CallOption) (*TransactionResponse, error)
 }
 
 type transactorClient struct {
@@ -73,7 +75,7 @@ func (c *transactorClient) NodeVersion(ctx context.Context, in *VersionRequest, 
 	return out, nil
 }
 
-func (c *transactorClient) AddTag(ctx context.Context, in *TagRequest, opts ...grpc.CallOption) (*TransactionResponse, error) {
+func (c *transactorClient) AddTag(ctx context.Context, in *AccountTagRequest, opts ...grpc.CallOption) (*TransactionResponse, error) {
 	out := new(TransactionResponse)
 	err := c.cc.Invoke(ctx, "/transaction.Transactor/AddTag", in, out, opts...)
 	if err != nil {
@@ -82,7 +84,7 @@ func (c *transactorClient) AddTag(ctx context.Context, in *TagRequest, opts ...g
 	return out, nil
 }
 
-func (c *transactorClient) DeleteTag(ctx context.Context, in *DeleteTagRequest, opts ...grpc.CallOption) (*TransactionResponse, error) {
+func (c *transactorClient) DeleteTag(ctx context.Context, in *DeleteAccountTagRequest, opts ...grpc.CallOption) (*TransactionResponse, error) {
 	out := new(TransactionResponse)
 	err := c.cc.Invoke(ctx, "/transaction.Transactor/DeleteTag", in, out, opts...)
 	if err != nil {
@@ -127,6 +129,24 @@ func (c *transactorClient) GetListing(ctx context.Context, in *ReportRequest, op
 	return out, nil
 }
 
+func (c *transactorClient) AddAccount(ctx context.Context, in *AccountTagRequest, opts ...grpc.CallOption) (*TransactionResponse, error) {
+	out := new(TransactionResponse)
+	err := c.cc.Invoke(ctx, "/transaction.Transactor/AddAccount", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *transactorClient) DeleteAccount(ctx context.Context, in *DeleteAccountTagRequest, opts ...grpc.CallOption) (*TransactionResponse, error) {
+	out := new(TransactionResponse)
+	err := c.cc.Invoke(ctx, "/transaction.Transactor/DeleteAccount", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TransactorServer is the server API for Transactor service.
 // All implementations must embed UnimplementedTransactorServer
 // for forward compatibility
@@ -135,12 +155,14 @@ type TransactorServer interface {
 	DeleteTransaction(context.Context, *DeleteRequest) (*TransactionResponse, error)
 	VoidTransaction(context.Context, *DeleteRequest) (*TransactionResponse, error)
 	NodeVersion(context.Context, *VersionRequest) (*VersionResponse, error)
-	AddTag(context.Context, *TagRequest) (*TransactionResponse, error)
-	DeleteTag(context.Context, *DeleteTagRequest) (*TransactionResponse, error)
+	AddTag(context.Context, *AccountTagRequest) (*TransactionResponse, error)
+	DeleteTag(context.Context, *DeleteAccountTagRequest) (*TransactionResponse, error)
 	AddCurrency(context.Context, *CurrencyRequest) (*TransactionResponse, error)
 	DeleteCurrency(context.Context, *DeleteCurrencyRequest) (*TransactionResponse, error)
 	GetTB(context.Context, *TBRequest) (*TBResponse, error)
 	GetListing(context.Context, *ReportRequest) (*ListingResponse, error)
+	AddAccount(context.Context, *AccountTagRequest) (*TransactionResponse, error)
+	DeleteAccount(context.Context, *DeleteAccountTagRequest) (*TransactionResponse, error)
 	mustEmbedUnimplementedTransactorServer()
 }
 
@@ -160,10 +182,10 @@ func (UnimplementedTransactorServer) VoidTransaction(context.Context, *DeleteReq
 func (UnimplementedTransactorServer) NodeVersion(context.Context, *VersionRequest) (*VersionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NodeVersion not implemented")
 }
-func (UnimplementedTransactorServer) AddTag(context.Context, *TagRequest) (*TransactionResponse, error) {
+func (UnimplementedTransactorServer) AddTag(context.Context, *AccountTagRequest) (*TransactionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddTag not implemented")
 }
-func (UnimplementedTransactorServer) DeleteTag(context.Context, *DeleteTagRequest) (*TransactionResponse, error) {
+func (UnimplementedTransactorServer) DeleteTag(context.Context, *DeleteAccountTagRequest) (*TransactionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteTag not implemented")
 }
 func (UnimplementedTransactorServer) AddCurrency(context.Context, *CurrencyRequest) (*TransactionResponse, error) {
@@ -178,6 +200,12 @@ func (UnimplementedTransactorServer) GetTB(context.Context, *TBRequest) (*TBResp
 func (UnimplementedTransactorServer) GetListing(context.Context, *ReportRequest) (*ListingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetListing not implemented")
 }
+func (UnimplementedTransactorServer) AddAccount(context.Context, *AccountTagRequest) (*TransactionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddAccount not implemented")
+}
+func (UnimplementedTransactorServer) DeleteAccount(context.Context, *DeleteAccountTagRequest) (*TransactionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteAccount not implemented")
+}
 func (UnimplementedTransactorServer) mustEmbedUnimplementedTransactorServer() {}
 
 // UnsafeTransactorServer may be embedded to opt out of forward compatibility for this service.
@@ -188,7 +216,7 @@ type UnsafeTransactorServer interface {
 }
 
 func RegisterTransactorServer(s grpc.ServiceRegistrar, srv TransactorServer) {
-	s.RegisterService(&_Transactor_serviceDesc, srv)
+	s.RegisterService(&Transactor_ServiceDesc, srv)
 }
 
 func _Transactor_AddTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -264,7 +292,7 @@ func _Transactor_NodeVersion_Handler(srv interface{}, ctx context.Context, dec f
 }
 
 func _Transactor_AddTag_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TagRequest)
+	in := new(AccountTagRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -276,13 +304,13 @@ func _Transactor_AddTag_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: "/transaction.Transactor/AddTag",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TransactorServer).AddTag(ctx, req.(*TagRequest))
+		return srv.(TransactorServer).AddTag(ctx, req.(*AccountTagRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Transactor_DeleteTag_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteTagRequest)
+	in := new(DeleteAccountTagRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -294,7 +322,7 @@ func _Transactor_DeleteTag_Handler(srv interface{}, ctx context.Context, dec fun
 		FullMethod: "/transaction.Transactor/DeleteTag",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TransactorServer).DeleteTag(ctx, req.(*DeleteTagRequest))
+		return srv.(TransactorServer).DeleteTag(ctx, req.(*DeleteAccountTagRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -371,7 +399,46 @@ func _Transactor_GetListing_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-var _Transactor_serviceDesc = grpc.ServiceDesc{
+func _Transactor_AddAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AccountTagRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TransactorServer).AddAccount(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/transaction.Transactor/AddAccount",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TransactorServer).AddAccount(ctx, req.(*AccountTagRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Transactor_DeleteAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteAccountTagRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TransactorServer).DeleteAccount(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/transaction.Transactor/DeleteAccount",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TransactorServer).DeleteAccount(ctx, req.(*DeleteAccountTagRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// Transactor_ServiceDesc is the grpc.ServiceDesc for Transactor service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var Transactor_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "transaction.Transactor",
 	HandlerType: (*TransactorServer)(nil),
 	Methods: []grpc.MethodDesc{
@@ -414,6 +481,14 @@ var _Transactor_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetListing",
 			Handler:    _Transactor_GetListing_Handler,
+		},
+		{
+			MethodName: "AddAccount",
+			Handler:    _Transactor_AddAccount_Handler,
+		},
+		{
+			MethodName: "DeleteAccount",
+			Handler:    _Transactor_DeleteAccount_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -59,9 +59,9 @@ var commandTagAccount = &cli.Command{
 		defer cancel()
 
 		if ctx.Bool("delete") {
-			req := &transaction.DeleteTagRequest{
+			req := &transaction.DeleteAccountTagRequest{
 				Account: ctx.Args().Get(0),
-				Tag:     ctx.Args().Get(1),
+				Tag:     []string{ctx.Args().Get(1)},
 			}
 
 			r, err := client.DeleteTag(ctxtimeout, req)
@@ -71,9 +71,9 @@ var commandTagAccount = &cli.Command{
 
 			log.Infof("Delete Tag Response: %s", r.GetMessage())
 		} else {
-			req := &transaction.TagRequest{
+			req := &transaction.AccountTagRequest{
 				Account: ctx.Args().Get(0),
-				Tag:     ctx.Args().Get(1),
+				Tag:     []string{ctx.Args().Get(1)},
 			}
 
 			r, err := client.AddTag(ctxtimeout, req)

@@ -30,6 +30,7 @@ type Database interface {
 	FindAccount(code string) (*core.Account, error)
 	AddAccount(*core.Account) error
 	SafeAddAccount(*core.Account) error
+	DeleteAccount(accountName string) error
 	FindUser(pubKey string) (*core.User, error)
 	AddUser(usr *core.User) error
 	SafeAddUser(usr *core.User) error
