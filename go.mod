@@ -5,7 +5,7 @@ go 1.13
 require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/go-sql-driver/mysql v1.5.0
-	github.com/golang/protobuf v1.4.3
+	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/joyt/godate v0.0.0-20150226210126-7151572574a7
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/marcmak/calc v0.0.0-20150509200512-5bbbfc3b3149
