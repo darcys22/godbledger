@@ -4,8 +4,10 @@ package tests
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"os"
+	"strconv"
 	"testing"
 	"time"
 
@@ -19,6 +21,7 @@ import (
 	e2e "github.com/darcys22/godbledger/tests/params"
 	"github.com/darcys22/godbledger/tests/types"
 
+	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
 )
 
@@ -48,7 +51,8 @@ func runEndToEndTest(t *testing.T, config *cmd.LedgerConfig) {
 	conns := make([]*grpc.ClientConn, 1)
 	for i := 0; i < len(conns); i++ {
 		t.Logf("Starting GoDBLedger %d", i)
-		conn, err := grpc.Dial(fmt.Sprintf("%s:%s", config.Host, config.RPCPort), grpc.WithInsecure())
+		port, _ := strconv.Atoi(config.RPCPort)
+		conn, err := grpc.Dial(fmt.Sprintf("%s:%d", config.Host, port+i), grpc.WithInsecure())
 		if err != nil {
 			t.Fatalf("Failed to dial: %v", err)
 		}
@@ -78,4 +82,25 @@ func runEndToEndTest(t *testing.T, config *cmd.LedgerConfig) {
 		})
 	}
 
+}
+
+func TestEndToEnd_MinimalConfig(t *testing.T) {
+
+	// Create a config from the defaults which would usually be created by the CLI library
+	set := flag.NewFlagSet("test", 0)
+	set.String("config", "", "doc")
+	ctx := cli.NewContext(nil, set, nil)
+	err, cfg := cmd.MakeConfig(ctx)
+	if err != nil {
+		t.Fatalf("New Config Failed: %v", err)
+	}
+
+	// Set the Database type to a SQLite3 in memory database
+	cfg.DatabaseType = "memorydb"
+
+	// Initialises Logpath etc
+	if err := e2e.Init(); err != nil {
+		t.Fatal(err)
+	}
+	runEndToEndTest(t, cfg)
 }
