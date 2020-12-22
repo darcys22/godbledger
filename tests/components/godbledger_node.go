@@ -43,5 +43,7 @@ func StartGoDBLedger(t *testing.T, config *cmd.LedgerConfig, index int) int {
 		t.Fatalf("could not find GRPC starting for server, this means the server had issues starting: %v", err)
 	}
 
+	defer stdOutFile.Close()
+
 	return cmd.Process.Pid
 }
