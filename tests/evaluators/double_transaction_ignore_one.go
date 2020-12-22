@@ -13,13 +13,13 @@ import (
 	"google.golang.org/grpc"
 )
 
-// DoubleTransaction submits a two transactions to the server and queries the trial balance, it expects both transactions to be in the trial balance and no errors as a response
-var DoubleTransaction = types.Evaluator{
-	Name:       "double_transaction",
-	Evaluation: doubleTransaction,
+// DoubleTransactionIgnoreOne submits a two transactions to the server and queries the trial balance at a date in between the two so it expects only one transaction in the trial balance and no errors as a response
+var DoubleTransactionIgnoreOne = types.Evaluator{
+	Name:       "double_transaction_ignore_one",
+	Evaluation: doubleTransactionIgnoreOne,
 }
 
-func doubleTransaction(conns ...*grpc.ClientConn) error {
+func doubleTransactionIgnoreOne(conns ...*grpc.ClientConn) error {
 	client := transaction.NewTransactorClient(conns[0])
 
 	date, _ := time.Parse("2006-01-02", "2011-03-15")
@@ -51,12 +51,19 @@ func doubleTransaction(conns ...*grpc.ClientConn) error {
 		return err
 	}
 
-	_, err = client.AddTransaction(context.Background(), req)
+	date, _ = time.Parse("2006-01-02", "2099-03-15")
+	req2 := &transaction.TransactionRequest{
+		Date:        date.Format("2006-01-02"),
+		Description: desc,
+		Lines:       transactionLines,
+	}
+	_, err = client.AddTransaction(context.Background(), req2)
 	if err != nil {
 		return err
 	}
 
-	res, err := client.GetTB(context.Background(), &transaction.TBRequest{Date: time.Now().Format("2006-01-02")})
+	querydate, _ := time.Parse("2006-01-02", "2050-03-15")
+	res, err := client.GetTB(context.Background(), &transaction.TBRequest{Date: querydate.Format("2006-01-02")})
 	if err != nil {
 		return err
 	}
@@ -68,11 +75,11 @@ func doubleTransaction(conns ...*grpc.ClientConn) error {
 		balance += res.Lines[i].Amount
 		switch res.Lines[i].Accountname {
 		case "Assets:Checking":
-			if res.Lines[i].Amount != int64(-15000) {
+			if res.Lines[i].Amount != int64(-7500) {
 				return errors.New("Trial Balance Checking Account Incorrect")
 			}
 		case "Expenses:Groceries":
-			if res.Lines[i].Amount != int64(15000) {
+			if res.Lines[i].Amount != int64(7500) {
 				return errors.New("Trial Balance Groceries Account Incorrect")
 			}
 		default:

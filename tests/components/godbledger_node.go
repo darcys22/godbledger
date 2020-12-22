@@ -5,8 +5,8 @@ package components
 import (
 	"os/exec"
 
-	//"strings"
 	"fmt"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -15,20 +15,22 @@ import (
 	e2e "github.com/darcys22/godbledger/tests/params"
 )
 
-func StartGoDBLedger(t *testing.T, config *cmd.LedgerConfig) int {
-	stdOutFile, err := helpers.DeleteAndCreateFile("", e2e.LogFileName)
+func StartGoDBLedger(t *testing.T, config *cmd.LedgerConfig, index int) int {
+	logfileName := fmt.Sprintf("%s-%d", e2e.LogFileName, index)
+	stdOutFile, err := helpers.DeleteAndCreateFile("", logfileName)
 
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	port, _ := strconv.Atoi(config.RPCPort)
 	args := []string{
 		fmt.Sprintf("--log-file=%s", stdOutFile.Name()),
 		"--verbosity=trace",
 		fmt.Sprintf("--rpc-host=%s", config.Host),
-		fmt.Sprintf("--rpc-port=%s", config.RPCPort),
+		fmt.Sprintf("--rpc-port=%d", port+index),
 		fmt.Sprintf("--database=%s", config.DatabaseType),
-		fmt.Sprintf("--database-location=%s", config.DatabaseLocation),
+		fmt.Sprintf("--database-location=%s-%d", config.DatabaseLocation, index),
 	}
 
 	cmd := exec.Command("../build/bin/native/godbledger", args...)
