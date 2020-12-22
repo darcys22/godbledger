@@ -15,7 +15,7 @@ import (
 
 // DoubleTransactionIgnoreOne submits a two transactions to the server and queries the trial balance at a date in between the two so it expects only one transaction in the trial balance and no errors as a response
 var DoubleTransactionIgnoreOne = types.Evaluator{
-	Name:       "double_transaction_ignore_one",
+	Name:       "Double Transaction Ignore One",
 	Evaluation: doubleTransactionIgnoreOne,
 }
 
@@ -85,6 +85,10 @@ func doubleTransactionIgnoreOne(conns ...*grpc.ClientConn) error {
 		default:
 			return fmt.Errorf("Unknown Account %s", res.Lines[i].Accountname)
 		}
+	}
+
+	if balance != int64(0) {
+		return errors.New("Trial Balance does not balance")
 	}
 
 	return nil

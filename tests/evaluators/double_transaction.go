@@ -15,7 +15,7 @@ import (
 
 // DoubleTransaction submits a two transactions to the server and queries the trial balance, it expects both transactions to be in the trial balance and no errors as a response
 var DoubleTransaction = types.Evaluator{
-	Name:       "double_transaction",
+	Name:       "Double Transaction",
 	Evaluation: doubleTransaction,
 }
 
@@ -78,6 +78,10 @@ func doubleTransaction(conns ...*grpc.ClientConn) error {
 		default:
 			return fmt.Errorf("Unknown Account %s", res.Lines[i].Accountname)
 		}
+	}
+
+	if balance != int64(0) {
+		return errors.New("Trial Balance does not balance")
 	}
 
 	return nil

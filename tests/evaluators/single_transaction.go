@@ -15,7 +15,7 @@ import (
 
 // SingleTransaction submits a single transaction to the server and expects no errors as a response
 var SingleTransaction = types.Evaluator{
-	Name:       "single_transaction",
+	Name:       "Single Transaction",
 	Evaluation: singleTransaction,
 }
 
@@ -73,6 +73,10 @@ func singleTransaction(conns ...*grpc.ClientConn) error {
 		default:
 			return fmt.Errorf("Unknown Account %s", res.Lines[i].Accountname)
 		}
+	}
+
+	if balance != int64(0) {
+		return errors.New("Trial Balance does not balance")
 	}
 
 	return nil
