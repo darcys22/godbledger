@@ -10,34 +10,20 @@ then
   exit
 fi
 
-if [ "$release_pattern" == "xgo" ]; then
-  # to build all: make VERSION=$version build-cross
-  make VERSION=$version build-linux-amd64
-  make VERSION=$version build-linux-arm-7
-  make VERSION=$version build-linux-arm64
+#make release
 
-  WORKING_DIR=release/
-  echo "Working in $WORKING_DIR..."
-  mkdir -p $WORKING_DIR
-  cd $WORKING_DIR
+cd build/dist
 
-  tar -czvf godbledger-linux-x64-v$version.tar.gz -C ../build/dist/linux-amd64 .
-  tar -czvf godbledger-arm7-v$version.tar.gz  -C ../build/dist/linux-arm-7 .
-  tar -czvf godbledger-arm64-v$version.tar.gz -C ../build/dist/linux-arm64 .
-else
-  make VERSION=$version linux
-  make VERSION=$version linux-arm-7
-  make VERSION=$version linux-arm-64
+for D in *; do
+    if [ -d "${D}" ]; then
+        echo "${D}"   # your processing here
+        tar -czvf ${D}-v$version.tar.gz ${D}/
+    fi
+done
 
-  WORKING_DIR=release/
-  echo "Working in $WORKING_DIR..."
-  mkdir -p $WORKING_DIR
-  cd $WORKING_DIR
+echo '#### sha256sum' >> release-notes.txt
+sha256sum *-v$version.tar.gz >> release-notes.txt
 
-  tar -czvf godbledger-linux-x64-v$version.tar.gz godbledger-linux-x64-v$version
-  tar -czvf godbledger-arm7-v$version.tar.gz godbledger-arm7-v$version
-  tar -czvf godbledger-arm64-v$version.tar.gz godbledger-arm64-v$version
-fi
 
-echo '#### sha256sum'
-sha256sum godbledger-*-v$version.tar.gz
+find . -name "*.gz" -o -name "*.txt" | tar -czvf godbledger-release-v$version.tar.gz -T -
+

@@ -26,4 +26,5 @@ require (
 	google.golang.org/grpc v1.34.0
 	google.golang.org/protobuf v1.25.0
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
+	src.techknowlogick.com/xgo v1.2.1-0.20201205054834-c7ddcb19c3f8 // indirect
 )
