@@ -10,7 +10,7 @@ then
   exit
 fi
 
-#make release
+make release
 
 cd build/dist
 
