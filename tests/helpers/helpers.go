@@ -41,12 +41,12 @@ func DeleteLogFiles(t *testing.T, logfiles []*os.File) {
 	for _, f := range logfiles {
 		err := f.Close()
 		if err != nil {
-			t.Errorf("error: %v\n", err)
+			t.Logf("error closing %s: %v\n", f.Name(), err)
 		}
 
 		err = os.Remove(f.Name())
 		if err != nil {
-			t.Errorf("error: %v\n", err)
+			t.Logf("error removing %s: %v\n", f.Name(), err)
 		}
 	}
 }
