@@ -40,4 +40,4 @@ jobs:
     - name: Build
       run: go run utils/ci.go build
     - name: Test
-      run: go run utils/ci.go test
+      run: go run utils/ci.go test -tags=integration

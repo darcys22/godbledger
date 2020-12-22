@@ -33,10 +33,10 @@ lint:
 # our tests include an integration test which expects the local
 # GOOS-based build output to be in the ./build/bin folder
 test: build-native
-	$(GORUN) utils/ci.go test
+	$(GORUN) utils/ci.go test --integration
 
 travis: build-native
-	$(GORUN) utils/ci.go test -coverage $$TEST_PACKAGES
+	$(GORUN) utils/ci.go test -coverage $$TEST_PACKAGES --integration
 
 # -------------------------------------
 # release_pattern=current
