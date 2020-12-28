@@ -1,0 +1,50 @@
+version: '3'
+ 
+services:
+  db:
+    image: mysql:8
+    container_name: db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${GDBL_DATA_ROOT_PASS:-pword}
+      MYSQL_DATABASE: ${GDBL_DATA_DBNAME:-ledger}
+      MYSQL_USER: ${GDBL_DATA_USER:-godbledger}
+      MYSQL_PASSWORD: ${GDBL_DATA_PASS:-godbledger}
+    ports:
+      - "3306:3306"
+    volumes:
+      - ${GDBL_DATA_DIR:-~/.ledger}/mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+  app:
+    image: godbledger:${GDBL_VERSION:-latest}
+    container_name: godbledger-server
+    depends_on:
+      - db
+    environment:
+      - WAIT_HOSTS=db:3306
+      - WAIT_HOSTS_TIMEOUT=300
+      - WAIT_SLEEP_INTERVAL=10
+      - WAIT_HOST_CONNECT_TIMEOUT=10
+    entrypoint:
+      - ./wait_entrypoint.sh
+      - ./godbledger
+      - --verbosity=${GDBL_LOG_LEVEL:-debug}
+      - --rpc-host=0.0.0.0 # listen to traffic from all ips
+      - --rpc-port=50051
+      - --datadir=/var/lib/ledger
+      - --config=/var/lib/ledger/config.toml
+      - --database=mysql
+      - --database-location=${GDBL_DATA_USER:-godbledger}:${GDBL_DATA_PASS:-godbledger}@tcp(db:3306)/${GDBL_DATA_DBNAME:-ledger}?charset=utf8mb4,utf8
+    ports:
+      - "50051:50051"
+    volumes:
+      - ${GDBL_DATA_DIR:-~/.ledger}/docker:/var/lib/ledger
+
+# to connect you will need local config.toml which includes the following values
+#
+# Host = "127.0.0.1"
+# RPCPort = "50051"
+# DatabaseType = "mysql"
+# DatabaseLocation = "godbledger:godbledger@tcp(localhost:3306)/ledger?charset=utf8mb4,utf8"
