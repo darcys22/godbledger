@@ -11,7 +11,6 @@
 
 GoDBLedger is an open source accounting system that aims to make the recording of double entry bookkeeping transactions programmable. It provide users with normal features that most finance systems tend to lack such as api endpoints for your scripts and a database backend with a clear schema so you can analyse your financial data using your software of choice. The ultimate goal is for your whole financial process to be automated from data entry to compilation of financials/tax returns.
 
-
 #### How it works:
 You are a business or individual wanting a system to record your profits and produce financial reports. You dont want to pay a cloud provider and you want to keep your financial data under your own control. You spin up a linux server (or raspberry pi) choose a database (Currently SQLite3 and MySQL are available) and you set up GoDBLedger to run on that server. You now have a place to send your double entry bookkeeping transactions which get saved into your own database! 
 
@@ -25,11 +24,11 @@ https://github.com/darcys22/godbledger/wiki/Quickstart
 
 ## Executables
 
-| Command| Description |
-| :----------------- | :---------------------------------------------------------------------------------------------------------| 
-| **`Godbledger`**    | The main server. It is the access point for transactions that will be saved to the accounting database. |
-| `Ledger_cli`     | A CLI client that can be used to transmit transactions to the server.                             |
-| `Reporter`      | Builds basic reports from the database on the command line.                                             |
+| Command          | Description                                                                                             |
+| :--------------- | :------------------------------------------------------------------------------------------------------ |
+| **`Godbledger`** | The main server. It is the access point for transactions that will be saved to the accounting database. |
+| `Ledger_cli`     | A CLI client that can be used to transmit transactions to the server.                                   |
+| `Reporter`       | Builds basic reports from the database on the command line.                                             |
 
 ## Communicating with Godbledger and software examples
 
@@ -66,12 +65,62 @@ Templates can be viewed [here](https://github.com/darcys22/pdf-generator)
 
 ## Database and configuration
 
-Godbledger will set a default configuration if none has been provided using Sqlite3 as the default database.
+Running `godbledger` locally will set a default configuration if none has been provided and use Sqlite3 as the default database, saving both the config file and the Sqlite3 database file in your default data directory.
 
-The config file can be found by default at:
-```
-~/.ledger/config.toml
-```
+### Default Data Directory
+
+The default data directory can be found here:
+
+| Host OS | Default Data Directory |
+| ------- | ---------------------- |
+| linux   | `~/.ledger/`           |
+| macos   | `~/Librar/ledger/`     |
+| windows | `%HOME%/.ledger/`      |
+
+### Running in Docker
+
+Godbledger comes with a `docker-compose.yml` file and some make targets to help build the `godbledger` server into a docker container and launch it with a mysql backend, configuring both to store state inside the host's default DATA_DIR so that state persists by default across restarts of the containers.
+
+1. Build the container image
+
+    ```
+    make docker-build
+    ```
+
+    This builds `godbledger` into an alpine-based container image tagged locally as `godbledger`
+
+1. Start mysql and godbledger server in docker
+
+    ```
+    make docker-start
+    ```
+
+    This invokes `docker-compose up` with a few env vars set for default configuration.
+
+    There are some env vars which can adjust configuration but by default:
+    - `mysql` is running and reachable through docker at `localhost:3306`
+      - a `ledger` database has been created along with the following local user account:
+        - username: `godbledger`
+        - password: `godbledger`
+    - `godbledger` server is available through docker at `localhost:50051` and configured to use that mysql service as a backend
+    - CLI tools running on your local host machine can connect with the following values in your local `config.toml` file:
+
+        ```toml
+        Host = "127.0.0.1"
+        RPCPort = "50051"
+        DatabaseType = "mysql"
+        DatabaseLocation = "godbledger:godbledger@tcp(localhost:3306)/ledger?charset=utf8mb4,utf8
+        ```
+
+1. Stop mysql and godbledger server
+
+   In the terminal where you ran `make docker-start` you can use `ctrl-c` to gracefully shut down both containers.
+
+   From another terminal you can run `make docker-stop` which invokes `docker-compose down`
+
+   Because the database and docker `config.toml` files are stored on your host machine, you can safely stop and start both apps without losing data.
+
+   **NOTE** you may risk losing data if you type `ctrl-c` twice and force an early shutdown of mysql
 
 ## Building the Proto Buffers
 Ensure that you have the latest version of the `protobuf` toolchain (currently at `3.14.0`):
