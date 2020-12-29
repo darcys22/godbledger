@@ -32,6 +32,14 @@ func StartGoDBLedger(t *testing.T, config *cmd.LedgerConfig, logfilename string,
 		fmt.Sprintf("--database-location=%s-%d", config.DatabaseLocation, index),
 	}
 
+	if config.Key != "" {
+		args = append(args,
+			fmt.Sprintf("--ca-cert=%s", config.CACert),
+			fmt.Sprintf("--tls-cert=%s", config.Cert),
+			fmt.Sprintf("--tls-key=%s", config.Key),
+		)
+	}
+
 	cmd := exec.Command("../build/bin/native/godbledger", args...)
 	t.Logf("Starting GoDBLedger with flags: %s", strings.Join(args[:], " "))
 	if err := cmd.Start(); err != nil {

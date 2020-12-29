@@ -80,10 +80,10 @@ func TestSecureConnection(t *testing.T) {
 
 	processIDs := []int{}
 	logFiles := []*os.File{}
-	goDBLedgerPID := components.StartGoDBLedger(t, cfg, "secure-connection.log", 1)
+	goDBLedgerPID := components.StartGoDBLedger(t, cfg, "secure-connection.log", 0)
 	processIDs = append(processIDs, goDBLedgerPID)
 	time.Sleep(time.Duration(1) * time.Second)
-	logfileName := fmt.Sprintf("%s-%d", "secure-connection.log", 1)
+	logfileName := fmt.Sprintf("%s-%d", "secure-connection.log", 0)
 	logFile, err := os.Open(logfileName)
 	if err != nil {
 		t.Fatal(err)
