@@ -12,11 +12,10 @@ import (
 
 	"github.com/darcys22/godbledger/godbledger/cmd"
 	"github.com/darcys22/godbledger/tests/helpers"
-	e2e "github.com/darcys22/godbledger/tests/params"
 )
 
-func StartGoDBLedger(t *testing.T, config *cmd.LedgerConfig, index int) int {
-	logfileName := fmt.Sprintf("%s-%d", e2e.LogFileName, index)
+func StartGoDBLedger(t *testing.T, config *cmd.LedgerConfig, logfilename string, index int) int {
+	logfileName := fmt.Sprintf("%s-%d", logfilename, index)
 	stdOutFile, err := helpers.DeleteAndCreateFile("", logfileName)
 
 	if err != nil {

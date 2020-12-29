@@ -36,7 +36,7 @@ test: build-native
 	$(GORUN) utils/ci.go test --integration
 
 travis: build-native
-	$(GORUN) utils/ci.go test -coverage $$TEST_PACKAGES --integration
+	$(GORUN) utils/ci.go test -coverage $$TEST_PACKAGES --integration -v
 
 # -------------------------------------
 # release_pattern=current
