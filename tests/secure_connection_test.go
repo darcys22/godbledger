@@ -51,6 +51,23 @@ func TestSecureConnection(t *testing.T) {
 	if err := cmd.Run(); err != nil {
 		t.Fatalf("Failed Generating Certificates and Keys: %v", err)
 	}
+	cmd = exec.Command("rm",
+		"ca-cert.pem",
+		"ca-cert.srl",
+		"ca-key.pem",
+		"client-cert.pem",
+		"client-ext.cnf",
+		"client-key.pem",
+		"client-req.pem",
+		"server-cert.pem",
+		"server-ext.cnf",
+		"server-key.pem",
+		"server-req.pem")
+	defer func() {
+		if err = cmd.Run(); err != nil {
+			t.Logf("Failed deleting files: %v", err)
+		}
+	}()
 
 	// Add the servers credential filenames to the configuration
 	cfg.CACert = "ca-cert.pem"
@@ -63,15 +80,15 @@ func TestSecureConnection(t *testing.T) {
 
 	processIDs := []int{}
 	logFiles := []*os.File{}
+	goDBLedgerPID := components.StartGoDBLedger(t, cfg, "secure-connection.log", 1)
+	processIDs = append(processIDs, goDBLedgerPID)
+	time.Sleep(time.Duration(1) * time.Second)
 	logfileName := fmt.Sprintf("%s-%d", "secure-connection.log", 1)
 	logFile, err := os.Open(logfileName)
 	if err != nil {
 		t.Fatal(err)
 	}
 	logFiles = append(logFiles, logFile)
-	goDBLedgerPID := components.StartGoDBLedger(t, cfg, logfileName, 1)
-	processIDs = append(processIDs, goDBLedgerPID)
-	time.Sleep(time.Duration(1) * time.Second)
 
 	t.Run("Server Started", func(t *testing.T) {
 		if err := helpers.WaitForTextInFile(logFile, "Starting GoDBLedger Server"); err != nil {
@@ -133,11 +150,7 @@ func TestSecureConnection(t *testing.T) {
 	}
 	_, err = client.NodeVersion(context.Background(), req)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("Node Version request failed: %v", err)
 	}
 
-	cmd = exec.Command("rm ca-cert.pem ca-cert.srl ca-key.pem client-cert.pem client-ext.cnf client-key.pem client-req.pem server-cert.pem server-ext.cnf server-key.pem server-req.pem")
-	if err = cmd.Run(); err != nil {
-		t.Logf("Failed deleting files: %v", err)
-	}
 }
