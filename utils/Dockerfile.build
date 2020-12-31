@@ -25,7 +25,7 @@ ADD https://github.com/ufoscout/docker-compose-wait/releases/download/$WAIT_VERS
 RUN chmod +x ./wait
 
 # wait needs a wrapper to help invoke it from a docker entrypoint
-COPY wait_entrypoint.sh .
+COPY utils/wait_entrypoint.sh .
 RUN chmod +x ./wait_entrypoint.sh
 
 ENV PATH=/app:${PATH}

@@ -73,7 +73,7 @@ linux-arm-64:
 build-docker: docker-build
 
 docker-build:
-	docker build -t godbledger:$(VERSION) -t godbledger:latest -f ./Dockerfile.build .
+	docker build -t godbledger:$(VERSION) -t godbledger:latest -f ./utils/Dockerfile.build .
 
 docker-login:
 	@$(if $(strip $(shell docker ps | grep godbledger-server)), @docker exec -it godbledger-server /bin/ash || 0, @docker run -it --rm --entrypoint /bin/ash godbledger:$(VERSION) )
