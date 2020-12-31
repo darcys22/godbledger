@@ -8,7 +8,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${GDBL_DATA_ROOT_PASS:-pword}
       MYSQL_DATABASE: ${GDBL_DATA_DBNAME:-ledger}
       MYSQL_USER: ${GDBL_DATA_USER:-godbledger}
-      MYSQL_PASSWORD: ${GDBL_DATA_PASS:-godbledger}
+      MYSQL_PASSWORD: ${GDBL_DATA_PASS:-password}
     ports:
       - "3306:3306"
     volumes:
@@ -36,7 +36,7 @@ services:
       - --datadir=/var/lib/ledger
       - --config=/var/lib/ledger/config.toml
       - --database=mysql
-      - --database-location=${GDBL_DATA_USER:-godbledger}:${GDBL_DATA_PASS:-godbledger}@tcp(db:3306)/${GDBL_DATA_DBNAME:-ledger}?charset=utf8mb4,utf8
+      - --database-location=${GDBL_DATA_USER:-godbledger}:${GDBL_DATA_PASS:-password}@tcp(db:3306)/${GDBL_DATA_DBNAME:-ledger}?charset=utf8mb4,utf8
     ports:
       - "50051:50051"
     volumes:
