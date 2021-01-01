@@ -1,0 +1,13 @@
+# comment
+.github/
+.travis.yaml
+.golangeci.yml
+build/.cache
+build/bin
+build/dist
+release/
+cert/
+Dockerfile.*
+# git submodules
+wait-for/
+!wait-for/wait-for

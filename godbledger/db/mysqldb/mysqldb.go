@@ -3,6 +3,7 @@ package mysqldb
 import (
 	"database/sql"
 	"errors"
+	"regexp"
 
 	"github.com/sirupsen/logrus"
 
@@ -10,6 +11,7 @@ import (
 )
 
 var log = logrus.WithField("prefix", "MySQL")
+var dsnRegex = regexp.MustCompile(`\:(.+?)\@`)
 
 type Database struct {
 	DB               *sql.DB
@@ -51,10 +53,15 @@ func ValidateConnectionString(dsn string) (string, error) {
 	log.Debugf("ParseTime := %v", cfg.ParseTime)
 	log.Debugf("Charset := %s", cfg.Params["charset"])
 
-	dsnstring := cfg.FormatDSN()
-	log.Debugf("DSN := %s", dsnstring)
+	dsnString := cfg.FormatDSN()
+	log.Debugf("DSN := %s", redactPassword(dsnString))
 
-	return dsnstring, nil
+	return dsnString, nil
+}
+
+func redactPassword(rawDSNString string) string {
+	cleanedDSNString := dsnRegex.ReplaceAll([]byte(rawDSNString), []byte(":**REDACTED**@"))
+	return string(cleanedDSNString)
 }
 
 // NewDB initializes a new DB.
