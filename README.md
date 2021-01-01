@@ -2,7 +2,7 @@
 
 [![Build Status]][Build Link] [![Book Status]][Book Link] [![Chat Badge]][Chat Link]
 
-[Build Status]: https://travis-ci.com/darcys22/godbledger.svg?branch=dev
+[Build Status]: https://github.com/darcys22/godbledger/workflows/CI/badge.svg
 [Build Link]: https://github.com/darcys22/godbledger/actions
 [Chat Badge]: https://img.shields.io/badge/chat-discord-%237289da
 [Chat Link]: https://discord.gg/xHFufYC
@@ -74,7 +74,7 @@ The default data directory can be found here:
 | Host OS | Default Data Directory |
 | ------- | ---------------------- |
 | linux   | `~/.ledger/`           |
-| macos   | `~/Librar/ledger/`     |
+| macos   | `~/Library/ledger/`    |
 | windows | `%HOME%/.ledger/`      |
 
 ### Running in Docker
@@ -101,7 +101,7 @@ Godbledger comes with a `docker-compose.yml` file and some make targets to help 
     - `mysql` is running and reachable through docker at `localhost:3306`
       - a `ledger` database has been created along with the following local user account:
         - username: `godbledger`
-        - password: `godbledger`
+        - password: `password`
     - `godbledger` server is available through docker at `localhost:50051` and configured to use that mysql service as a backend
     - CLI tools running on your local host machine can connect with the following values in your local `config.toml` file:
 
@@ -109,7 +109,7 @@ Godbledger comes with a `docker-compose.yml` file and some make targets to help 
         Host = "127.0.0.1"
         RPCPort = "50051"
         DatabaseType = "mysql"
-        DatabaseLocation = "godbledger:godbledger@tcp(localhost:3306)/ledger?charset=utf8mb4,utf8
+        DatabaseLocation = "godbledger:password@tcp(localhost:3306)/ledger?charset=utf8mb4,utf8
         ```
 
 1. Stop mysql and godbledger server
