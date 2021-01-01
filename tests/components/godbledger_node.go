@@ -12,11 +12,10 @@ import (
 
 	"github.com/darcys22/godbledger/godbledger/cmd"
 	"github.com/darcys22/godbledger/tests/helpers"
-	e2e "github.com/darcys22/godbledger/tests/params"
 )
 
-func StartGoDBLedger(t *testing.T, config *cmd.LedgerConfig, index int) int {
-	logfileName := fmt.Sprintf("%s-%d", e2e.LogFileName, index)
+func StartGoDBLedger(t *testing.T, config *cmd.LedgerConfig, logfilename string, index int) int {
+	logfileName := fmt.Sprintf("%s-%d", logfilename, index)
 	stdOutFile, err := helpers.DeleteAndCreateFile("", logfileName)
 
 	if err != nil {
@@ -31,6 +30,14 @@ func StartGoDBLedger(t *testing.T, config *cmd.LedgerConfig, index int) int {
 		fmt.Sprintf("--rpc-port=%d", port+index),
 		fmt.Sprintf("--database=%s", config.DatabaseType),
 		fmt.Sprintf("--database-location=%s-%d", config.DatabaseLocation, index),
+	}
+
+	if config.Key != "" {
+		args = append(args,
+			fmt.Sprintf("--ca-cert=%s", config.CACert),
+			fmt.Sprintf("--tls-cert=%s", config.Cert),
+			fmt.Sprintf("--tls-key=%s", config.Key),
+		)
 	}
 
 	cmd := exec.Command("../build/bin/native/godbledger", args...)

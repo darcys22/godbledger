@@ -52,7 +52,7 @@ func TestEndToEnd_MinimalConfig(t *testing.T) {
 	processIDs := []int{}
 	logFiles := []*os.File{}
 	for i := 0; i < len(evaluators); i++ {
-		goDBLedgerPID := components.StartGoDBLedger(t, cfg, i)
+		goDBLedgerPID := components.StartGoDBLedger(t, cfg, e2e.LogFileName, i)
 		processIDs = append(processIDs, goDBLedgerPID)
 		time.Sleep(time.Duration(1) * time.Second)
 		logfileName := fmt.Sprintf("%s-%d", e2e.LogFileName, i)
