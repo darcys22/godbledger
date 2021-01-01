@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"strconv"
 	"testing"
 	"time"
@@ -45,38 +44,16 @@ func TestSecureConnection(t *testing.T) {
 	// Set the RPC port to random higher port to not clash with other tests
 	cfg.RPCPort = "55051"
 
-	// Start by generating the Certificates and Private Keys necessary for both the server and the client.
-	// This is done by a bash script in the utils directory
-	cmd := exec.Command("../utils/gen.sh")
-	if err := cmd.Run(); err != nil {
-		t.Fatalf("Failed Generating Certificates and Keys: %v", err)
-	}
-	cmd = exec.Command("rm",
-		"ca-cert.pem",
-		"ca-cert.srl",
-		"ca-key.pem",
-		"client-cert.pem",
-		"client-ext.cnf",
-		"client-key.pem",
-		"client-req.pem",
-		"server-cert.pem",
-		"server-ext.cnf",
-		"server-key.pem",
-		"server-req.pem")
-	defer func() {
-		if err = cmd.Run(); err != nil {
-			t.Logf("Failed deleting files: %v", err)
-		}
-	}()
+	// The Certificates and Private Keys necessary for both the server and the client has previously been generated using utils/gen.sh these have been saved in the certs directory in this test folder.
 
 	// Add the servers credential filenames to the configuration
-	cfg.CACert = "ca-cert.pem"
-	cfg.Cert = "server-cert.pem"
-	cfg.Key = "server-key.pem"
+	cfg.CACert = "certs/ca-cert.pem"
+	cfg.Cert = "certs/server-cert.pem"
+	cfg.Key = "certs/server-key.pem"
 
 	// Also add the clients credentials to variables for later usage
-	clientCertFilename := "client-cert.pem"
-	clientKeyFilename := "client-key.pem"
+	clientCertFilename := "certs/client-cert.pem"
+	clientKeyFilename := "certs/client-key.pem"
 
 	processIDs := []int{}
 	logFiles := []*os.File{}
