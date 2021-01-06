@@ -333,7 +333,7 @@ func doTest(cmdline []string) {
 	if *integration {
 		gotest.Args = append(gotest.Args, "-tags=\"integration\"")
 	}
-	if *integration {
+	if *mysql {
 		gotest.Args = append(gotest.Args, "-tags=\"mysql\"")
 	}
 	if *verbose {
