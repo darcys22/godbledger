@@ -330,7 +330,7 @@ func doTest(cmdline []string) {
 		gotest.Args = append(gotest.Args, "-covermode=atomic", "-cover")
 	}
 	if *integration {
-		gotest.Args = append(gotest.Args, "-tags=integration")
+		gotest.Args = append(gotest.Args, "-tags=\"integration mysql\"")
 	}
 	if *verbose {
 		gotest.Args = append(gotest.Args, "-v")
