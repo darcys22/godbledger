@@ -76,4 +76,4 @@ jobs:
     - name: Build
       run: go run utils/ci.go build
     - name: Test
-      run: go run utils/ci.go test --integration -v
+      run: go run utils/ci.go test --mysql -v
