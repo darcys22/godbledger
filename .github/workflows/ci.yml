@@ -60,6 +60,13 @@ jobs:
           - 3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s
     steps:
+    - name: Verify MySQL connection
+      env:
+        PORT: ${{ job.services.mysql.ports[3306] }}
+      run: |
+        while ! mysqladmin ping -h"127.0.0.1" -P"$PORT" --silent; do
+          sleep 1
+        done
     - name: Install Go
       uses: actions/setup-go@v2
       with:
