@@ -138,7 +138,7 @@ func (db *Database) AddTransaction(txn *core.Transaction) (string, error) {
 	}
 	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
 
-	tx.Commit()
+	err = tx.Commit()
 
 	return txn.Id, err
 }

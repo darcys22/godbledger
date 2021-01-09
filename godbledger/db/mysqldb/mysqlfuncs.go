@@ -404,9 +404,9 @@ func (db *Database) AddTagToTransaction(txnID string, tag int) error {
 	}
 	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
 
-	tx.Commit()
+	err = tx.Commit()
 
-	return nil
+	return err
 
 }
 
