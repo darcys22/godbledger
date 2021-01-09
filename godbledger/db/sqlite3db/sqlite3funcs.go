@@ -54,14 +54,12 @@ func (db *Database) AddTransaction(txn *core.Transaction) (string, error) {
 		log.Fatal(err)
 	}
 	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
-	tx.Commit()
 
 	if longDescription {
 		insertLongDescriptionTransaction := `
 			INSERT INTO transactions_body(transaction_id, body)
 				VALUES(?,?);
 		`
-		tx, _ := db.DB.Begin()
 		stmt, _ := tx.Prepare(insertLongDescriptionTransaction)
 		log.Debug("Query: " + insertLongDescriptionTransaction)
 		log.Debug("Txn Id: " + txn.Id)
@@ -80,7 +78,6 @@ func (db *Database) AddTransaction(txn *core.Transaction) (string, error) {
 		}
 		log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
 		log.Debug("Saving Long Description into extended table")
-		tx.Commit()
 	}
 
 	sqlStr := "INSERT INTO splits(transaction_id, split_id, split_date, description, currency, amount) VALUES "
@@ -103,7 +100,6 @@ func (db *Database) AddTransaction(txn *core.Transaction) (string, error) {
 	}
 
 	sqlStr = strings.TrimSuffix(sqlStr, ",")
-	tx, _ = db.DB.Begin()
 	stmt, _ = tx.Prepare(sqlStr)
 	log.Debug("Query: " + sqlStr)
 	log.Debugf("NumberVals = %d", len(vals))
@@ -123,11 +119,8 @@ func (db *Database) AddTransaction(txn *core.Transaction) (string, error) {
 	}
 	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
 
-	tx.Commit()
-
 	sqlAccStr = strings.TrimSuffix(sqlAccStr, ",")
-	tx2, _ := db.DB.Begin()
-	accStmt, _ := tx2.Prepare(sqlAccStr)
+	accStmt, _ := tx.Prepare(sqlAccStr)
 	log.Debug("Query: " + sqlAccStr)
 	log.Debug("Adding Split Accounts to DB")
 	res, err = accStmt.Exec(accVals...)
@@ -145,7 +138,7 @@ func (db *Database) AddTransaction(txn *core.Transaction) (string, error) {
 	}
 	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
 
-	tx2.Commit()
+	tx.Commit()
 
 	return txn.Id, err
 }
