@@ -23,17 +23,34 @@ func (db *Database) AddTransaction(txn *core.Transaction) (string, error) {
 
 	posterID := ""
 	err := db.DB.QueryRow(`SELECT user_id FROM users WHERE username = ? LIMIT 1`, txn.Poster.Name).Scan(&posterID)
+
 	if err != nil {
 		log.Fatal(err)
+		return "", err
 	}
 
 	insertTransaction := `
 		INSERT INTO transactions(transaction_id, postdate, brief,poster_user_id)
 			VALUES(?,?,?,?);
 	`
-	tx, _ := db.DB.Begin()
-	stmt, _ := tx.Prepare(insertTransaction)
+	tx, err := db.DB.Begin()
+
+	if err != nil {
+		log.Fatal(err)
+		return "", err
+	}
+
+	stmt, err := tx.Prepare(insertTransaction)
 	log.Debug("Query: " + insertTransaction)
+
+	if err != nil {
+		log.Fatal(err)
+		err = tx.Rollback()
+		if err != nil {
+			log.Fatal(err)
+		}
+		return "", err
+	}
 
 	var res sql.Result
 	if longDescription {
@@ -41,43 +58,91 @@ func (db *Database) AddTransaction(txn *core.Transaction) (string, error) {
 	} else {
 		res, err = stmt.Exec(txn.Id, txn.Postdate, string(txn.Description[:]), posterID)
 	}
+
 	if err != nil {
 		log.Fatal(err)
+		err = tx.Rollback()
+		if err != nil {
+			log.Fatal(err)
+		}
+		return "", err
 	}
 
 	lastId, err := res.LastInsertId()
+
 	if err != nil {
 		log.Fatal(err)
+		err = tx.Rollback()
+		if err != nil {
+			log.Fatal(err)
+		}
+		return "", err
 	}
+
 	rowCnt, err := res.RowsAffected()
+	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
+
 	if err != nil {
 		log.Fatal(err)
+		err = tx.Rollback()
+		if err != nil {
+			log.Fatal(err)
+		}
+		return "", err
 	}
-	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
 
 	if longDescription {
 		insertLongDescriptionTransaction := `
 			INSERT INTO transactions_body(transaction_id, body)
 				VALUES(?,?);
 		`
-		stmt, _ := tx.Prepare(insertLongDescriptionTransaction)
+		stmt, err := tx.Prepare(insertLongDescriptionTransaction)
 		log.Debug("Query: " + insertLongDescriptionTransaction)
 		log.Debug("Txn Id: " + txn.Id)
-		res, err := stmt.Exec(txn.Id, string(txn.Description[:]))
+
 		if err != nil {
 			log.Fatal(err)
+			err = tx.Rollback()
+			if err != nil {
+				log.Fatal(err)
+			}
+			return "", err
+		}
+
+		res, err := stmt.Exec(txn.Id, string(txn.Description[:]))
+
+		if err != nil {
+			log.Fatal(err)
+			err = tx.Rollback()
+			if err != nil {
+				log.Fatal(err)
+			}
+			return "", err
 		}
 
 		lastId, err := res.LastInsertId()
+
 		if err != nil {
 			log.Fatal(err)
+			err = tx.Rollback()
+			if err != nil {
+				log.Fatal(err)
+			}
+			return "", err
 		}
+
 		rowCnt, err := res.RowsAffected()
-		if err != nil {
-			log.Fatal(err)
-		}
 		log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
 		log.Debug("Saving Long Description into extended table")
+
+		if err != nil {
+			log.Fatal(err)
+			err = tx.Rollback()
+			if err != nil {
+				log.Fatal(err)
+			}
+			return "", err
+		}
 	}
 
 	sqlStr := "INSERT INTO splits(transaction_id, split_id, split_date, description, currency, amount) VALUES "
@@ -100,45 +165,112 @@ func (db *Database) AddTransaction(txn *core.Transaction) (string, error) {
 	}
 
 	sqlStr = strings.TrimSuffix(sqlStr, ",")
-	stmt, _ = tx.Prepare(sqlStr)
+	stmt, err = tx.Prepare(sqlStr)
 	log.Debug("Query: " + sqlStr)
 	log.Debugf("NumberVals = %d", len(vals))
 	log.Debug("Adding Split to DB")
-	res, err = stmt.Exec(vals...)
+
 	if err != nil {
 		log.Fatal(err)
+		err = tx.Rollback()
+		if err != nil {
+			log.Fatal(err)
+		}
+		return "", err
+	}
+
+	res, err = stmt.Exec(vals...)
+
+	if err != nil {
+		log.Fatal(err)
+		err = tx.Rollback()
+		if err != nil {
+			log.Fatal(err)
+		}
+		return "", err
 	}
 
 	lastId, err = res.LastInsertId()
+
 	if err != nil {
 		log.Fatal(err)
+		err = tx.Rollback()
+		if err != nil {
+			log.Fatal(err)
+		}
+		return "", err
 	}
+
 	rowCnt, err = res.RowsAffected()
+	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
+
 	if err != nil {
 		log.Fatal(err)
+		err = tx.Rollback()
+		if err != nil {
+			log.Fatal(err)
+		}
+		return "", err
 	}
-	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
 
 	sqlAccStr = strings.TrimSuffix(sqlAccStr, ",")
-	accStmt, _ := tx.Prepare(sqlAccStr)
+	accStmt, err := tx.Prepare(sqlAccStr)
 	log.Debug("Query: " + sqlAccStr)
 	log.Debug("Adding Split Accounts to DB")
-	res, err = accStmt.Exec(accVals...)
+
 	if err != nil {
 		log.Fatal(err)
+		err = tx.Rollback()
+		if err != nil {
+			log.Fatal(err)
+		}
+		return "", err
+	}
+
+	res, err = accStmt.Exec(accVals...)
+
+	if err != nil {
+		log.Fatal(err)
+		err = tx.Rollback()
+		if err != nil {
+			log.Fatal(err)
+		}
+		return "", err
 	}
 
 	lastId, err = res.LastInsertId()
+
 	if err != nil {
 		log.Fatal(err)
+		err = tx.Rollback()
+		if err != nil {
+			log.Fatal(err)
+		}
+		return "", err
 	}
+
 	rowCnt, err = res.RowsAffected()
-	if err != nil {
-		log.Fatal(err)
-	}
 	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
 
-	tx.Commit()
+	if err != nil {
+		log.Fatal(err)
+		err = tx.Rollback()
+		if err != nil {
+			log.Fatal(err)
+		}
+		return "", err
+	}
+
+	err = tx.Commit()
+
+	if err != nil {
+		log.Fatal(err)
+		err = tx.Rollback()
+		if err != nil {
+			log.Fatal(err)
+		}
+		return "", err
+	}
 
 	return txn.Id, err
 }
