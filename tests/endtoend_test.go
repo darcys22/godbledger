@@ -33,6 +33,7 @@ var evaluators = []types.Evaluator{
 	ev.SingleTransaction,
 	ev.DoubleTransaction,
 	ev.DoubleTransactionIgnoreOne,
+	ev.TradingSimulator,
 }
 
 func TestEndToEnd_MinimalConfig(t *testing.T) {
