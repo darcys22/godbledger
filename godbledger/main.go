@@ -66,7 +66,7 @@ func main() {
 		}
 		return nil
 	}
-	app.Version = version.Version
+	app.Version = version.VersionWithCommit()
 	app.Commands = []*cli.Command{
 		// See cmd/config.go
 		cmd.DumpConfigCommand,
