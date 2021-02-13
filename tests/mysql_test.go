@@ -11,6 +11,7 @@ import (
 
 	"github.com/darcys22/godbledger/godbledger/cmd"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/urfave/cli/v2"
 )
 
@@ -28,5 +29,6 @@ func TestMySQL(t *testing.T) {
 	// Set the Database type to a MySQL database
 	cfg.DatabaseType = "mysql"
 
+	assert.Equal(t, "mysql", cfg.DatabaseType)
 	//runEndToEndTest(t, cfg)
 }

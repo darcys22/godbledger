@@ -1,8 +1,6 @@
 // Package performs full a end-to-end test for GoDBLedger using the SQLLite database backend,
 // including spinning up a server and making sure its running, and sending test data to verify
 
-// +build integration
-
 package tests
 
 import (
