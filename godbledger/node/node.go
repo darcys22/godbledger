@@ -50,7 +50,7 @@ func (n *Node) Register(constructor core.Service) error {
 func (n *Node) Start() {
 	n.lock.Lock()
 	log.WithFields(logrus.Fields{
-		"version": version.Version,
+		"version": version.VersionWithCommit(),
 	}).Info("Starting GoDBLedger Server")
 
 	n.services.StartAll()

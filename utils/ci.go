@@ -267,8 +267,9 @@ func doBuild(cmdline []string) {
 func buildFlags(env build.Environment) (flags []string) {
 	var ld []string
 	if env.Commit != "" {
-		ld = append(ld, "-X", "main.gitCommit="+env.Commit)
-		ld = append(ld, "-X", "main.gitDate="+env.Date)
+		ld = append(ld, "-X", "github.com/darcys22/godbledger/godbledger/version.gitCommit="+env.Commit)
+		ld = append(ld, "-X", "github.com/darcys22/godbledger/godbledger/version.gitDate="+env.Date)
+		ld = append(ld, "-X", "github.com/darcys22/godbledger/godbledger/version.gitBranch="+env.Branch)
 	}
 	if runtime.GOOS == "darwin" {
 		ld = append(ld, "-s")
@@ -367,7 +368,7 @@ func downloadLinter(cachedir string) string {
 	if err := csdb.DownloadFile(url, archivePath); err != nil {
 		log.Fatal(err)
 	}
-	if err := build.ExtractTarballArchive(archivePath, cachedir); err != nil {
+	if err := build.ExtractArchive(archivePath, cachedir); err != nil {
 		log.Fatal(err)
 	}
 	return filepath.Join(cachedir, base, "golangci-lint")
