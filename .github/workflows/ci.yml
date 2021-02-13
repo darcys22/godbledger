@@ -41,3 +41,39 @@ jobs:
       run: go run utils/ci.go build
     - name: Test
       run: go run utils/ci.go test --integration -v
+  mysqltest:
+    strategy:
+      fail-fast: false # dont' want one scenario failing to deprive us of feedback on the others
+      matrix:
+        go-version: [1.14.x, 1.15.x]
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_USER: godbledger
+          MYSQL_PASSWORD: password
+          MYSQL_DATABASE: ledger
+          MYSQL_ROOT_PASSWORD: password
+        ports:
+          - 3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s
+    steps:
+    - name: Verify MySQL connection
+      env:
+        PORT: ${{ job.services.mysql.ports[3306] }}
+      run: |
+        while ! mysqladmin ping -h"127.0.0.1" -P"$PORT" --silent; do
+          sleep 1
+        done
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: ${{ matrix.go-version }}
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Build
+      run: go run utils/ci.go build
+    - name: Test
+      run: go run utils/ci.go test --mysql -v

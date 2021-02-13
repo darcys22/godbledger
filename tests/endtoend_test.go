@@ -1,13 +1,10 @@
-// Package endtoend performs full a end-to-end test for GoDBLedger,
+// Package provides a full a end-to-end test for GoDBLedger,
 // including spinning up a server and making sure its running, and sending test data to verify
-
-// +build integration
 
 package tests
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"os"
 	"strconv"
@@ -24,7 +21,6 @@ import (
 	e2e "github.com/darcys22/godbledger/tests/params"
 	"github.com/darcys22/godbledger/tests/types"
 
-	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
 )
 
@@ -36,20 +32,7 @@ var evaluators = []types.Evaluator{
 	ev.TradingSimulator,
 }
 
-func TestEndToEnd_MinimalConfig(t *testing.T) {
-
-	// Create a config from the defaults which would usually be created by the CLI library
-	set := flag.NewFlagSet("test", 0)
-	set.String("config", "", "doc")
-	ctx := cli.NewContext(nil, set, nil)
-	err, cfg := cmd.MakeConfig(ctx)
-	if err != nil {
-		t.Fatalf("New Config Failed: %v", err)
-	}
-
-	// Set the Database type to a SQLite3 in memory database
-	cfg.DatabaseType = "memorydb"
-
+func runEndToEndTest(t *testing.T, cfg *cmd.LedgerConfig) {
 	processIDs := []int{}
 	logFiles := []*os.File{}
 	for i := 0; i < len(evaluators); i++ {
@@ -97,7 +80,7 @@ func TestEndToEnd_MinimalConfig(t *testing.T) {
 	req := &transaction.VersionRequest{
 		Message: "Test",
 	}
-	_, err = client.NodeVersion(context.Background(), req)
+	_, err := client.NodeVersion(context.Background(), req)
 	if err != nil {
 		t.Fatal(err)
 	}
