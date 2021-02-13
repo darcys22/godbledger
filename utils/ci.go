@@ -368,7 +368,7 @@ func downloadLinter(cachedir string) string {
 	if err := csdb.DownloadFile(url, archivePath); err != nil {
 		log.Fatal(err)
 	}
-	if err := build.ExtractTarballArchive(archivePath, cachedir); err != nil {
+	if err := build.ExtractArchive(archivePath, cachedir); err != nil {
 		log.Fatal(err)
 	}
 	return filepath.Join(cachedir, base, "golangci-lint")
