@@ -101,7 +101,7 @@ var (
 	// A debian package is created for all executables listed here.
 
 	debGoDBLedger = debPackage{
-		Name:        "GoDBLedger",
+		Name:        "godbledger",
 		Version:     version.Version,
 		Executables: debExecutables,
 	}
@@ -522,6 +522,7 @@ func doDebianSource(cmdline []string) {
 		for distro, goboot := range debDistroGoBoots {
 			// Prepare the debian package with the go-ethereum sources.
 			meta := newDebMetadata(distro, goboot, *signer, env, now, pkg.Name, pkg.Version, pkg.Executables)
+			fmt.Println(*workdir)
 			pkgdir := stageDebianSource(*workdir, meta)
 
 			// Add Go source code
@@ -743,17 +744,17 @@ func stageDebianSource(tmpdir string, meta debMetadata) (pkgdir string) {
 
 	// Put the debian build files in place.
 	debian := filepath.Join(pkgdir, "debian")
-	build.Render("build/deb/"+meta.PackageName+"/deb.rules", filepath.Join(debian, "rules"), 0755, meta)
-	build.Render("build/deb/"+meta.PackageName+"/deb.changelog", filepath.Join(debian, "changelog"), 0644, meta)
-	build.Render("build/deb/"+meta.PackageName+"/deb.control", filepath.Join(debian, "control"), 0644, meta)
-	build.Render("build/deb/"+meta.PackageName+"/deb.copyright", filepath.Join(debian, "copyright"), 0644, meta)
+	build.Render("utils/deb/deb.rules", filepath.Join(debian, "rules"), 0755, meta)
+	build.Render("utils/deb/deb.changelog", filepath.Join(debian, "changelog"), 0644, meta)
+	build.Render("utils/deb/deb.control", filepath.Join(debian, "control"), 0644, meta)
+	build.Render("utils/deb/deb.copyright", filepath.Join(debian, "copyright"), 0644, meta)
 	build.RenderString("8\n", filepath.Join(debian, "compat"), 0644, meta)
 	build.RenderString("3.0 (native)\n", filepath.Join(debian, "source/format"), 0644, meta)
 	for _, exe := range meta.Executables {
 		install := filepath.Join(debian, meta.ExeName(exe)+".install")
 		docs := filepath.Join(debian, meta.ExeName(exe)+".docs")
-		build.Render("build/deb/"+meta.PackageName+"/deb.install", install, 0644, exe)
-		build.Render("build/deb/"+meta.PackageName+"/deb.docs", docs, 0644, exe)
+		build.Render("utils/deb/deb.install", install, 0644, exe)
+		build.Render("utils/deb/deb.docs", docs, 0644, exe)
 	}
 	return pkgdir
 }

@@ -47,3 +47,4 @@ release
 build/_vendor/pkg
 /dist/
 cert
+/debian/
