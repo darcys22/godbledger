@@ -42,7 +42,7 @@ package main
 
 import (
 	//"bufio"
-	//"bytes"
+	"bytes"
 	"encoding/base64"
 	"flag"
 	"fmt"
@@ -58,10 +58,10 @@ import (
 	"runtime"
 	"strings"
 
-	//"time"
-	//"github.com/cespare/cp"
+	"github.com/cespare/cp"
 	"github.com/darcys22/godbledger/godbledger/version"
 	"github.com/darcys22/godbledger/internal/build"
+	"time"
 )
 
 var (
@@ -101,7 +101,7 @@ var (
 	// A debian package is created for all executables listed here.
 
 	debGoDBLedger = debPackage{
-		Name:        "GoDBLedger",
+		Name:        "godbledger",
 		Version:     version.Version,
 		Executables: debExecutables,
 	}
@@ -123,6 +123,11 @@ var (
 	debGoBootPaths = map[string]string{
 		"golang-go": "/usr/lib/go",
 	}
+
+	// This is the version of go that will be downloaded by
+	//
+	//     go run ci.go install -dlgo
+	dlgoVersion = "1.16"
 )
 
 var GOBIN, _ = filepath.Abs(filepath.Join("build", "bin"))
@@ -171,7 +176,7 @@ func main() {
 	case "archive":
 		//doArchive(os.Args[2:])
 	case "debsrc":
-		//doDebianSource(os.Args[2:])
+		doDebianSource(os.Args[2:])
 	case "nsis":
 		//doWindowsInstaller(os.Args[2:])
 	case "xgo":
@@ -460,129 +465,133 @@ func downloadLinter(cachedir string) string {
 //}
 
 // skips archiving for some build configurations.
-//func maybeSkipArchive(env build.Environment) {
-//if env.IsPullRequest {
-//log.Printf("skipping because this is a PR build")
-//os.Exit(0)
-//}
-//if env.IsCronJob {
-//log.Printf("skipping because this is a cron job")
-//os.Exit(0)
-//}
-//if env.Branch != "master" && !strings.HasPrefix(env.Tag, "v1.") {
-//log.Printf("skipping because branch %q, tag %q is not on the whitelist", env.Branch, env.Tag)
-//os.Exit(0)
-//}
-//}
-
-// Debian Packaging
-func doDebianSource(cmdline []string) {
-	//var (
-	//goversion = flag.String("goversion", "", `Go version to build with (will be included in the source package)`)
-	//cachedir  = flag.String("cachedir", "./build/cache", `Filesystem path to cache the downloaded Go bundles at`)
-	//signer    = flag.String("signer", "", `Signing key name, also used as package author`)
-	//upload    = flag.String("upload", "", `Where to upload the source package (usually "ethereum/ethereum")`)
-	//sshUser   = flag.String("sftp-user", "", `Username for SFTP upload (usually "geth-ci")`)
-	//workdir   = flag.String("workdir", "", `Output directory for packages (uses temp dir if unset)`)
-	//now       = time.Now()
-	//)
-	//flag.CommandLine.Parse(cmdline)
-	//*workdir = makeWorkdir(*workdir)
-	//env := build.Env()
-	//maybeSkipArchive(env)
-
-	//// Import the signing key.
-	//if key := getenvBase64("PPA_SIGNING_KEY"); len(key) > 0 {
-	//gpg := exec.Command("gpg", "--import")
-	//gpg.Stdin = bytes.NewReader(key)
-	//build.MustRun(gpg)
-	//}
-
-	//// Download and verify the Go source package.
-	//gobundle := downloadGoSources(*goversion, *cachedir)
-
-	//// Download all the dependencies needed to build the sources and run the ci script
-	//srcdepfetch := goTool("install", "-n", "./...")
-	//srcdepfetch.Env = append(os.Environ(), "GOPATH="+filepath.Join(*workdir, "modgopath"))
-	//build.MustRun(srcdepfetch)
-
-	//cidepfetch := goTool("run", "./build/ci.go")
-	//cidepfetch.Env = append(os.Environ(), "GOPATH="+filepath.Join(*workdir, "modgopath"))
-	//cidepfetch.Run() // Command fails, don't care, we only need the deps to start it
-
-	//// Create Debian packages and upload them.
-	//for _, pkg := range debPackages {
-	//for distro, goboot := range debDistroGoBoots {
-	//// Prepare the debian package with the go-ethereum sources.
-	//meta := newDebMetadata(distro, goboot, *signer, env, now, pkg.Name, pkg.Version, pkg.Executables)
-	//pkgdir := stageDebianSource(*workdir, meta)
-
-	//// Add Go source code
-	//if err := build.ExtractTarballArchive(gobundle, pkgdir); err != nil {
-	//log.Fatalf("Failed to extract Go sources: %v", err)
-	//}
-	//if err := os.Rename(filepath.Join(pkgdir, "go"), filepath.Join(pkgdir, ".go")); err != nil {
-	//log.Fatalf("Failed to rename Go source folder: %v", err)
-	//}
-	//// Add all dependency modules in compressed form
-	//os.MkdirAll(filepath.Join(pkgdir, ".mod", "cache"), 0755)
-	//if err := cp.CopyAll(filepath.Join(pkgdir, ".mod", "cache", "download"), filepath.Join(*workdir, "modgopath", "pkg", "mod", "cache", "download")); err != nil {
-	//log.Fatalf("Failed to copy Go module dependencies: %v", err)
-	//}
-	//// Run the packaging and upload to the PPA
-	//debuild := exec.Command("debuild", "-S", "-sa", "-us", "-uc", "-d", "-Zxz", "-nc")
-	//debuild.Dir = pkgdir
-	//build.MustRun(debuild)
-
-	//var (
-	//basename = fmt.Sprintf("%s_%s", meta.Name(), meta.VersionString())
-	//source   = filepath.Join(*workdir, basename+".tar.xz")
-	//dsc      = filepath.Join(*workdir, basename+".dsc")
-	//changes  = filepath.Join(*workdir, basename+"_source.changes")
-	//)
-	//if *signer != "" {
-	//build.MustRunCommand("debsign", changes)
-	//}
-	//if *upload != "" {
-	//ppaUpload(*workdir, *upload, *sshUser, []string{source, dsc, changes})
-	//}
-	//}
+func maybeSkipArchive(env build.Environment) {
+	if env.IsPullRequest {
+		log.Printf("skipping because this is a PR build")
+		os.Exit(0)
+	}
+	if env.IsCronJob {
+		log.Printf("skipping because this is a cron job")
+		os.Exit(0)
+	}
+	//if env.Branch != "master" && !strings.HasPrefix(env.Tag, "v1.") {
+	//log.Printf("skipping because branch %q, tag %q is not on the whitelist", env.Branch, env.Tag)
+	//os.Exit(0)
 	//}
 }
 
-//func downloadGoSources(version string, cachedir string) string {
-//csdb := build.MustLoadChecksums("build/checksums.txt")
-//file := fmt.Sprintf("go%s.src.tar.gz", version)
-//url := "https://dl.google.com/go/" + file
-//dst := filepath.Join(cachedir, file)
-//if err := csdb.DownloadFile(url, dst); err != nil {
-//log.Fatal(err)
-//}
-//return dst
-//}
+// Debian Packaging
+func doDebianSource(cmdline []string) {
+	var (
+		cachedir = flag.String("cachedir", "./build/cache", `Filesystem path to cache the downloaded Go bundles at`)
+		signer   = flag.String("signer", "", `Signing key name, also used as package author`)
+		upload   = flag.String("upload", "", `Where to upload the source package (usually "darcys22/godbledger")`)
+		sshUser  = flag.String("sftp-user", "", `Username for SFTP upload (usually "darcys22")`)
+		workdir  = flag.String("workdir", "", `Output directory for packages (uses temp dir if unset)`)
+		now      = time.Now()
+	)
+	flag.CommandLine.Parse(cmdline)
+	*workdir = makeWorkdir(*workdir)
+	env := build.Env()
+	maybeSkipArchive(env)
+
+	// Import the signing key.
+	if key := getenvBase64("PPA_SIGNING_KEY"); len(key) > 0 {
+		gpg := exec.Command("gpg", "--import")
+		gpg.Stdin = bytes.NewReader(key)
+		build.MustRun(gpg)
+	}
+
+	// Download and verify the Go source package.
+	gobundle := downloadGoSources(*cachedir)
+
+	// Download all the dependencies needed to build the sources and run the ci script
+	srcdepfetch := goTool("mod", "download")
+	//TODO sean remove
+	fmt.Println("GOPATH=" + filepath.Join(*workdir, "modgopath"))
+	gopath, _ := filepath.Abs(filepath.Join(*workdir, "modgopath"))
+	srcdepfetch.Env = append(os.Environ(), "GOPATH="+gopath)
+	build.MustRun(srcdepfetch)
+
+	cidepfetch := goTool("run", "./build/ci.go")
+	cidepfetch.Env = append(os.Environ(), "GOPATH="+filepath.Join(*workdir, "modgopath"))
+	cidepfetch.Run() // Command fails, don't care, we only need the deps to start it
+
+	// Create Debian packages and upload them.
+	for _, pkg := range debPackages {
+		for distro, goboot := range debDistroGoBoots {
+			// Prepare the debian package with the go-ethereum sources.
+			meta := newDebMetadata(distro, goboot, *signer, env, now, pkg.Name, pkg.Version, pkg.Executables)
+			fmt.Println(*workdir)
+			pkgdir := stageDebianSource(*workdir, meta)
+
+			// Add Go source code
+			if err := build.ExtractArchive(gobundle, pkgdir); err != nil {
+				log.Fatalf("Failed to extract Go sources: %v", err)
+			}
+			if err := os.Rename(filepath.Join(pkgdir, "go"), filepath.Join(pkgdir, ".go")); err != nil {
+				log.Fatalf("Failed to rename Go source folder: %v", err)
+			}
+			// Add all dependency modules in compressed form
+			os.MkdirAll(filepath.Join(pkgdir, ".mod", "cache"), 0755)
+			if err := cp.CopyAll(filepath.Join(pkgdir, ".mod", "cache", "download"), filepath.Join(*workdir, "modgopath", "pkg", "mod", "cache", "download")); err != nil {
+				log.Fatalf("Failed to copy Go module dependencies: %v", err)
+			}
+			// Run the packaging and upload to the PPA
+			debuild := exec.Command("debuild", "-S", "-sa", "-us", "-uc", "-d", "-Zxz", "-nc")
+			debuild.Dir = pkgdir
+			build.MustRun(debuild)
+
+			var (
+				basename = fmt.Sprintf("%s_%s", meta.Name(), meta.VersionString())
+				source   = filepath.Join(*workdir, basename+".tar.xz")
+				dsc      = filepath.Join(*workdir, basename+".dsc")
+				changes  = filepath.Join(*workdir, basename+"_source.changes")
+			)
+			if *signer != "" {
+				build.MustRunCommand("debsign", changes)
+			}
+			if *upload != "" {
+				ppaUpload(*workdir, *upload, *sshUser, []string{source, dsc, changes})
+			}
+		}
+	}
+}
+
+// downloadGoSources downloads the Go source tarball.
+func downloadGoSources(cachedir string) string {
+	csdb := build.MustLoadChecksums("utils/checksums.txt")
+	file := fmt.Sprintf("go%s.src.tar.gz", dlgoVersion)
+	url := "https://dl.google.com/go/" + file
+	dst := filepath.Join(cachedir, file)
+	if err := csdb.DownloadFile(url, dst); err != nil {
+		log.Fatal(err)
+	}
+	return dst
+}
 
 func ppaUpload(workdir, ppa, sshUser string, files []string) {
-	//p := strings.Split(ppa, "/")
-	//if len(p) != 2 {
-	//log.Fatal("-upload PPA name must contain single /")
-	//}
-	//if sshUser == "" {
-	//sshUser = p[0]
-	//}
-	//incomingDir := fmt.Sprintf("~%s/ubuntu/%s", p[0], p[1])
-	//// Create the SSH identity file if it doesn't exist.
-	//var idfile string
-	//if sshkey := getenvBase64("PPA_SSH_KEY"); len(sshkey) > 0 {
-	//idfile = filepath.Join(workdir, "sshkey")
-	//if _, err := os.Stat(idfile); os.IsNotExist(err) {
-	//ioutil.WriteFile(idfile, sshkey, 0600)
-	//}
-	//}
-	//// Upload
-	//dest := sshUser + "@ppa.launchpad.net"
-	//if err := build.UploadSFTP(idfile, dest, incomingDir, files); err != nil {
-	//log.Fatal(err)
-	//}
+	p := strings.Split(ppa, "/")
+	if len(p) != 2 {
+		log.Fatal("-upload PPA name must contain single /")
+	}
+	if sshUser == "" {
+		sshUser = p[0]
+	}
+	incomingDir := fmt.Sprintf("~%s/ubuntu/%s", p[0], p[1])
+	// Create the SSH identity file if it doesn't exist.
+	var idfile string
+	if sshkey := getenvBase64("PPA_SSH_KEY"); len(sshkey) > 0 {
+		idfile = filepath.Join(workdir, "sshkey")
+		if _, err := os.Stat(idfile); os.IsNotExist(err) {
+			ioutil.WriteFile(idfile, sshkey, 0600)
+		}
+	}
+	// Upload
+	dest := sshUser + "@ppa.launchpad.net"
+	if err := build.UploadSFTP(idfile, dest, incomingDir, files); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func getenvBase64(variable string) []byte {
@@ -598,7 +607,7 @@ func makeWorkdir(wdflag string) string {
 	if wdflag != "" {
 		err = os.MkdirAll(wdflag, 0744)
 	} else {
-		wdflag, err = ioutil.TempDir("", "geth-build-")
+		wdflag, err = ioutil.TempDir("", "godbledger-build-")
 	}
 	if err != nil {
 		log.Fatal(err)
@@ -606,21 +615,21 @@ func makeWorkdir(wdflag string) string {
 	return wdflag
 }
 
-//func isUnstableBuild(env build.Environment) bool {
-//if env.Tag != "" {
-//return false
-//}
-//return true
-//}
+func isUnstableBuild(env build.Environment) bool {
+	if env.Tag != "" {
+		return false
+	}
+	return true
+}
 
 type debPackage struct {
-	Name        string          // the name of the Debian package to produce, e.g. "ethereum"
+	Name        string          // the name of the Debian package to produce, e.g. "godbledger"
 	Version     string          // the clean version of the debPackage, e.g. 1.8.12, without any metadata
 	Executables []debExecutable // executables to be included in the package
 }
 
 type debMetadata struct {
-	//Env           build.Environment
+	Env           build.Environment
 	GoBootPackage string
 	GoBootPath    string
 
@@ -651,104 +660,104 @@ func (d debExecutable) Package() string {
 	return d.BinaryName
 }
 
-//func newDebMetadata(distro, goboot, author string, env build.Environment, t time.Time, name string, version string, exes []debExecutable) debMetadata {
-//if author == "" {
-//// No signing key, use default author.
-//author = "Ethereum Builds <fjl@ethereum.org>"
-//}
-//return debMetadata{
-//GoBootPackage: goboot,
-//GoBootPath:    debGoBootPaths[goboot],
-//PackageName:   name,
-//Env:           env,
-//Author:        author,
-//Distro:        distro,
-//Version:       version,
-//Time:          t.Format(time.RFC1123Z),
-//Executables:   exes,
-//}
-//}
+func newDebMetadata(distro, goboot, author string, env build.Environment, t time.Time, name string, version string, exes []debExecutable) debMetadata {
+	if author == "" {
+		// No signing key, use default author.
+		author = "Sean Darcy <sean@darcyfinanical.com>"
+	}
+	return debMetadata{
+		GoBootPackage: goboot,
+		GoBootPath:    debGoBootPaths[goboot],
+		PackageName:   name,
+		Env:           env,
+		Author:        author,
+		Distro:        distro,
+		Version:       version,
+		Time:          t.Format(time.RFC1123Z),
+		Executables:   exes,
+	}
+}
 
 // Name returns the name of the metapackage that depends
 // on all executable packages.
-//func (meta debMetadata) Name() string {
-//if isUnstableBuild(meta.Env) {
-//return meta.PackageName + "-unstable"
-//}
-//return meta.PackageName
-//}
+func (meta debMetadata) Name() string {
+	if isUnstableBuild(meta.Env) {
+		return meta.PackageName + "-unstable"
+	}
+	return meta.PackageName
+}
 
 // VersionString returns the debian version of the packages.
-//func (meta debMetadata) VersionString() string {
-//vsn := meta.Version
-//if meta.Env.Buildnum != "" {
-//vsn += "+build" + meta.Env.Buildnum
-//}
-//if meta.Distro != "" {
-//vsn += "+" + meta.Distro
-//}
-//return vsn
-//}
+func (meta debMetadata) VersionString() string {
+	vsn := meta.Version
+	if meta.Env.Buildnum != "" {
+		vsn += "+build" + meta.Env.Buildnum
+	}
+	if meta.Distro != "" {
+		vsn += "+" + meta.Distro
+	}
+	return vsn
+}
 
 // ExeList returns the list of all executable packages.
-//func (meta debMetadata) ExeList() string {
-//names := make([]string, len(meta.Executables))
-//for i, e := range meta.Executables {
-//names[i] = meta.ExeName(e)
-//}
-//return strings.Join(names, ", ")
-//}
+func (meta debMetadata) ExeList() string {
+	names := make([]string, len(meta.Executables))
+	for i, e := range meta.Executables {
+		names[i] = meta.ExeName(e)
+	}
+	return strings.Join(names, ", ")
+}
 
 // ExeName returns the package name of an executable package.
-//func (meta debMetadata) ExeName(exe debExecutable) string {
-//if isUnstableBuild(meta.Env) {
-//return exe.Package() + "-unstable"
-//}
-//return exe.Package()
-//}
+func (meta debMetadata) ExeName(exe debExecutable) string {
+	if isUnstableBuild(meta.Env) {
+		return exe.Package() + "-unstable"
+	}
+	return exe.Package()
+}
 
 // ExeConflicts returns the content of the Conflicts field
 // for executable packages.
-//func (meta debMetadata) ExeConflicts(exe debExecutable) string {
-//if isUnstableBuild(meta.Env) {
-//// Set up the conflicts list so that the *-unstable packages
-//// cannot be installed alongside the regular version.
-////
-//// https://www.debian.org/doc/debian-policy/ch-relationships.html
-//// is very explicit about Conflicts: and says that Breaks: should
-//// be preferred and the conflicting files should be handled via
-//// alternates. We might do this eventually but using a conflict is
-//// easier now.
-//return "ethereum, " + exe.Package()
-//}
-//return ""
-//}
+func (meta debMetadata) ExeConflicts(exe debExecutable) string {
+	if isUnstableBuild(meta.Env) {
+		// Set up the conflicts list so that the *-unstable packages
+		// cannot be installed alongside the regular version.
+		//
+		// https://www.debian.org/doc/debian-policy/ch-relationships.html
+		// is very explicit about Conflicts: and says that Breaks: should
+		// be preferred and the conflicting files should be handled via
+		// alternates. We might do this eventually but using a conflict is
+		// easier now.
+		return "godbledger, " + exe.Package()
+	}
+	return ""
+}
 
-//func stageDebianSource(tmpdir string, meta debMetadata) (pkgdir string) {
-//pkg := meta.Name() + "-" + meta.VersionString()
-//pkgdir = filepath.Join(tmpdir, pkg)
-//if err := os.Mkdir(pkgdir, 0755); err != nil {
-//log.Fatal(err)
-//}
-//// Copy the source code.
-//build.MustRunCommand("git", "checkout-index", "-a", "--prefix", pkgdir+string(filepath.Separator))
+func stageDebianSource(tmpdir string, meta debMetadata) (pkgdir string) {
+	pkg := meta.Name() + "-" + meta.VersionString()
+	pkgdir = filepath.Join(tmpdir, pkg)
+	if err := os.Mkdir(pkgdir, 0755); err != nil {
+		log.Fatal(err)
+	}
+	// Copy the source code.
+	build.MustRunCommand("git", "checkout-index", "-a", "--prefix", pkgdir+string(filepath.Separator))
 
-//// Put the debian build files in place.
-//debian := filepath.Join(pkgdir, "debian")
-//build.Render("build/deb/"+meta.PackageName+"/deb.rules", filepath.Join(debian, "rules"), 0755, meta)
-//build.Render("build/deb/"+meta.PackageName+"/deb.changelog", filepath.Join(debian, "changelog"), 0644, meta)
-//build.Render("build/deb/"+meta.PackageName+"/deb.control", filepath.Join(debian, "control"), 0644, meta)
-//build.Render("build/deb/"+meta.PackageName+"/deb.copyright", filepath.Join(debian, "copyright"), 0644, meta)
-//build.RenderString("8\n", filepath.Join(debian, "compat"), 0644, meta)
-//build.RenderString("3.0 (native)\n", filepath.Join(debian, "source/format"), 0644, meta)
-//for _, exe := range meta.Executables {
-//install := filepath.Join(debian, meta.ExeName(exe)+".install")
-//docs := filepath.Join(debian, meta.ExeName(exe)+".docs")
-//build.Render("build/deb/"+meta.PackageName+"/deb.install", install, 0644, exe)
-//build.Render("build/deb/"+meta.PackageName+"/deb.docs", docs, 0644, exe)
-//}
-//return pkgdir
-//}
+	// Put the debian build files in place.
+	debian := filepath.Join(pkgdir, "debian")
+	build.Render("utils/deb/deb.rules", filepath.Join(debian, "rules"), 0755, meta)
+	build.Render("utils/deb/deb.changelog", filepath.Join(debian, "changelog"), 0644, meta)
+	build.Render("utils/deb/deb.control", filepath.Join(debian, "control"), 0644, meta)
+	build.Render("utils/deb/deb.copyright", filepath.Join(debian, "copyright"), 0644, meta)
+	build.RenderString("8\n", filepath.Join(debian, "compat"), 0644, meta)
+	build.RenderString("3.0 (native)\n", filepath.Join(debian, "source/format"), 0644, meta)
+	for _, exe := range meta.Executables {
+		install := filepath.Join(debian, meta.ExeName(exe)+".install")
+		docs := filepath.Join(debian, meta.ExeName(exe)+".docs")
+		build.Render("utils/deb/deb.install", install, 0644, exe)
+		build.Render("utils/deb/deb.docs", docs, 0644, exe)
+	}
+	return pkgdir
+}
 
 //// Windows installer
 //func doWindowsInstaller(cmdline []string) {

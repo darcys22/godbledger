@@ -1,0 +1,25 @@
+Source: {{.Name}}
+Section: science
+Priority: extra
+Maintainer: {{.Author}}
+Build-Depends: debhelper (>= 8.0.0), {{.GoBootPackage}}
+Standards-Version: 3.9.5
+Homepage: https://godbledger.com
+Vcs-Git: git://github.com/darcys22/godbledger.git
+Vcs-Browser: https://github.com/darcys22/godbledger
+
+Package: {{.Name}}
+Architecture: any
+Depends: ${misc:Depends}, {{.ExeList}}
+Description: Meta-package to install GoDBledger and other tools
+ Meta-package to install GoDBLedger and other tools
+
+{{range .Executables}}
+Package: {{$.ExeName .}}
+Conflicts: {{$.ExeConflicts .}}
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Built-Using: ${misc:Built-Using}
+Description: {{.Description}}
+ {{.Description}}
+{{end}}

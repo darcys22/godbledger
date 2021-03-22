@@ -45,4 +45,6 @@ release
 /build/bin/
 /build/dist/
 build/_vendor/pkg
+/dist/
 cert
+/debian/
