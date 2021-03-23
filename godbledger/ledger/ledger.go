@@ -210,6 +210,14 @@ func (l *Ledger) GetAccounts(txn *core.Transaction) ([]*core.Account, error) {
 	return accounts, nil
 }
 
+func (l *Ledger) ReconcileTransactions(splitIDs []string) (string, error) {
+
+	//TODO sean loop here to check that splits exist
+	//for _, splitID := range splitIDs {
+	//}
+	return l.LedgerDb.ReconcileTransactions(splitIDs)
+}
+
 func (l *Ledger) GetTB(date time.Time) (*[]core.TBAccount, error) {
 	return l.LedgerDb.GetTB(date)
 }

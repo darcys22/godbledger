@@ -859,6 +859,10 @@ func (db *Database) Query(query string, args ...interface{}) (*sql.Rows, error) 
 
 }
 
+func (db *Database) ReconcileTransactions(splitIDs []string) (string, error) {
+	return "", nil
+}
+
 func (db *Database) GetListing(startDate, endDate time.Time) (*[]core.Transaction, error) {
 
 	var txns []core.Transaction
