@@ -1,0 +1,67 @@
+# apt update
+# apt-get update
+# apt install net-tools
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: godbledger
+  labels:
+    name: mysql
+spec:
+  type: NodePort
+  ports:
+    - port: 3306
+      targetPort: 3306
+      nodePort: 30036
+      name: mysql
+  selector:
+    app: mysql
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+spec:
+  selector:
+    matchLabels:
+      app: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - image: mysql:5.6
+        name: mysql
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-creds
+              key: root_password
+        - name: MYSQL_DATABASE
+          value: ledger
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: mysql-creds
+              key: godbledger_user
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-creds
+              key: godbledger_pass
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-pv-claim

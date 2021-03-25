@@ -122,6 +122,10 @@ Godbledger comes with a `docker-compose.yml` file and some make targets to help 
 
    **NOTE** you may risk losing data if you type `ctrl-c` twice and force an early shutdown of mysql
 
+### Running in Kubernetes
+
+We provide [sample yaml files](./utils/kubernetes/README.md) which demonstrate how to configure and deploy `mysql` and `godbledger` to a kubernetes cluster. 
+
 ## Building the Proto Buffers
 Ensure that you have the latest version of the `protobuf` toolchain (currently at `3.14.0`):
 
