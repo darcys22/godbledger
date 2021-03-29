@@ -870,11 +870,11 @@ func (db *Database) ReconcileTransactions(reconciliationID string, splitIDs []st
 
 	for _, split := range splitIDs {
 		sqlStr += "(?, ?),"
-    vals = append(vals, reconciliationID, split)
+		vals = append(vals, reconciliationID, split)
 	}
 
 	sqlStr = strings.TrimSuffix(sqlStr, ",")
-  stmt, err := tx.Prepare(sqlStr)
+	stmt, err := tx.Prepare(sqlStr)
 	log.Debug("Query: " + sqlStr)
 	log.Debugf("NumberVals = %d", len(vals))
 	log.Debug("Adding Reconciliation to DB")
@@ -900,7 +900,7 @@ func (db *Database) ReconcileTransactions(reconciliationID string, splitIDs []st
 		return "", err
 	}
 
-  lastId, err := res.LastInsertId()
+	lastId, err := res.LastInsertId()
 
 	if err != nil {
 		log.Fatal(err)
@@ -911,7 +911,7 @@ func (db *Database) ReconcileTransactions(reconciliationID string, splitIDs []st
 		return "", err
 	}
 
-  rowCnt, err := res.RowsAffected()
+	rowCnt, err := res.RowsAffected()
 	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
 
 	if err != nil {
