@@ -171,7 +171,6 @@ func (s *LedgerServer) AddCurrency(ctx context.Context, in *transaction.Currency
 	if err != nil {
 		log.Error(err)
 	}
-
 	return &transaction.TransactionResponse{Message: "Accepted"}, nil
 }
 
@@ -180,6 +179,21 @@ func (s *LedgerServer) DeleteCurrency(ctx context.Context, in *transaction.Delet
 	s.ld.DeleteCurrency(in.GetCurrency())
 
 	return &transaction.TransactionResponse{Message: "Accepted"}, nil
+}
+
+func (s *LedgerServer) ReconcileTransactions(ctx context.Context, in *transaction.ReconciliationRequest) (*transaction.TransactionResponse, error) {
+	log.WithField("Request", in).Info("Received New Reconciliation Request")
+	response := transaction.TransactionResponse{}
+	reconciliationID, err := s.ld.ReconcileTransactions(in.GetSplitID())
+
+	if err != nil {
+		return &response, err
+	}
+
+	log.WithField("reconciliation ID", reconciliationID).Debug("Created Reconciliation")
+
+	response.Message = reconciliationID
+	return &response, nil
 }
 
 func (s *LedgerServer) GetTB(ctx context.Context, in *transaction.TBRequest) (*transaction.TBResponse, error) {

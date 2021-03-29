@@ -13,6 +13,8 @@ import (
 	"github.com/darcys22/godbledger/godbledger/db"
 	"github.com/darcys22/godbledger/godbledger/db/mysqldb"
 	"github.com/darcys22/godbledger/godbledger/db/sqlite3db"
+
+	"github.com/rs/xid"
 )
 
 const ledgerDBName = "ledgerdata"
@@ -208,6 +210,15 @@ func (l *Ledger) GetAccounts(txn *core.Transaction) ([]*core.Account, error) {
 	}
 
 	return accounts, nil
+}
+
+func (l *Ledger) ReconcileTransactions(splitIDs []string) (string, error) {
+
+	//TODO sean loop here to check that splits exist
+	//for _, splitID := range splitIDs {
+	//}
+	guid := xid.New()
+	return l.LedgerDb.ReconcileTransactions(guid.String(), splitIDs)
 }
 
 func (l *Ledger) GetTB(date time.Time) (*[]core.TBAccount, error) {

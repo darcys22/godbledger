@@ -856,6 +856,87 @@ func (db *Database) Query(query string, args ...interface{}) (*sql.Rows, error) 
 
 }
 
+func (db *Database) ReconcileTransactions(reconciliationID string, splitIDs []string) (string, error) {
+
+	tx, err := db.DB.Begin()
+
+	if err != nil {
+		log.Fatal(err)
+		return "", err
+	}
+
+	sqlStr := "INSERT INTO reconciliations(reconciliation_id, split_id) VALUES "
+	vals := []interface{}{}
+
+	for _, split := range splitIDs {
+		sqlStr += "(?, ?),"
+		vals = append(vals, reconciliationID, split)
+	}
+
+	sqlStr = strings.TrimSuffix(sqlStr, ",")
+	stmt, err := tx.Prepare(sqlStr)
+	log.Debug("Query: " + sqlStr)
+	log.Debugf("NumberVals = %d", len(vals))
+	log.Debug("Adding Reconciliation to DB")
+
+	if err != nil {
+		log.Fatal(err)
+		err = tx.Rollback()
+		if err != nil {
+			log.Fatal(err)
+		}
+		return "", err
+	}
+
+	var res sql.Result
+	res, err = stmt.Exec(vals...)
+
+	if err != nil {
+		log.Fatal(err)
+		err = tx.Rollback()
+		if err != nil {
+			log.Fatal(err)
+		}
+		return "", err
+	}
+
+	lastId, err := res.LastInsertId()
+
+	if err != nil {
+		log.Fatal(err)
+		err = tx.Rollback()
+		if err != nil {
+			log.Fatal(err)
+		}
+		return "", err
+	}
+
+	rowCnt, err := res.RowsAffected()
+	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
+
+	if err != nil {
+		log.Fatal(err)
+		err = tx.Rollback()
+		if err != nil {
+			log.Fatal(err)
+		}
+		return "", err
+	}
+
+	err = tx.Commit()
+
+	if err != nil {
+		log.Fatal(err)
+		err = tx.Rollback()
+		if err != nil {
+			log.Fatal(err)
+		}
+		return "", err
+	}
+
+	return reconciliationID, err
+}
+
 func (db *Database) GetListing(startDate, endDate time.Time) (*[]core.Transaction, error) {
 
 	var txns []core.Transaction

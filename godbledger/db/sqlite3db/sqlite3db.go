@@ -194,6 +194,20 @@ func (db *Database) InitDB() error {
 		log.Fatal(err)
 	}
 
+	//RECONCILIATIONS
+	createDB = `
+	CREATE TABLE IF NOT EXISTS reconciliations (
+		reconciliation_id VARCHAR(255) NOT NULL,
+		split_id VARCHAR(255) NOT NULL,
+		FOREIGN KEY (split_id) REFERENCES splits (split_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+		PRIMARY KEY (reconciliation_id, split_id)
+	);`
+	log.Debug("Query: " + createDB)
+	_, err = db.DB.Exec(createDB)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	//ENTITIES
 	createDB = `
 	CREATE TABLE IF NOT EXISTS entities (
