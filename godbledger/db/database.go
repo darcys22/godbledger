@@ -33,7 +33,7 @@ type Database interface {
 	DeleteAccount(accountName string) error
 	FindUser(pubKey string) (*core.User, error)
 	AddUser(usr *core.User) error
-	ReconcileTransactions(splitIDs []string) (string, error)
+	ReconcileTransactions(reconciliationID string, splitIDs []string) (string, error)
 	SafeAddUser(usr *core.User) error
 	GetTB(date time.Time) (*[]core.TBAccount, error)
 	GetListing(startdate, enddate time.Time) (*[]core.Transaction, error)

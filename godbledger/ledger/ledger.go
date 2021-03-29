@@ -7,6 +7,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
+	"github.com/rs/xid"
 
 	"github.com/darcys22/godbledger/godbledger/cmd"
 	"github.com/darcys22/godbledger/godbledger/core"
@@ -215,7 +216,8 @@ func (l *Ledger) ReconcileTransactions(splitIDs []string) (string, error) {
 	//TODO sean loop here to check that splits exist
 	//for _, splitID := range splitIDs {
 	//}
-	return l.LedgerDb.ReconcileTransactions(splitIDs)
+	guid := xid.New()
+	return l.LedgerDb.ReconcileTransactions(guid.String(), splitIDs)
 }
 
 func (l *Ledger) GetTB(date time.Time) (*[]core.TBAccount, error) {
