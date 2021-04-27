@@ -22,6 +22,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
     - name: Push PPA
+      shell: 'script -q -e -c "bash {0}"'
       env: 
         PPA_SIGNING_KEY: ${{ secrets.PPA_SIGNING_KEY }}
         PPA_SSH_KEY: ${{ secrets.PPA_SSH_KEY }}
