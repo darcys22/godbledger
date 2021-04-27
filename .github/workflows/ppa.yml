@@ -27,6 +27,7 @@ jobs:
         PPA_SSH_KEY: ${{ secrets.PPA_SSH_KEY }}
       run: |
         mkdir -p /home/runner/.ssh
+        mkdir -p /home/runner/.gnupg
         echo 'use-agent' >> ~/.gnupg/gpg.conf
         echo 'pinentry-mode loopback' >> ~/.gnupg/gpg.conf
         echo 'allow-loopback-pinentry' >> ~/.gnupg/gpg-agent.conf
