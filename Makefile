@@ -97,6 +97,11 @@ docker-logs-follow:
 	@docker logs -f godbledger-server
 
 # -------------------------------
+# debs
+
+debs:
+	go run utils/ci.go debsrc -upload darcys22/godbledger -sftp-user darcys22 -signer "Sean Darcy <sean@darcyfinancial.com>"
+# -------------------------------
 # cross
 
 build-cross: build-linux build-darwin build-windows
