@@ -16,6 +16,8 @@ jobs:
       uses: actions/setup-go@v2
       with:
         go-version: ${{ matrix.go-version }}
+    - name: Install debscripts
+      run: sudo apt-get install debscripts
     - name: Checkout code
       uses: actions/checkout@v2
     - name: Push PPA
