@@ -17,6 +17,7 @@ service Transactor {
   rpc GetListing(ReportRequest) returns (ListingResponse) {}
   rpc AddAccount(AccountTagRequest) returns (TransactionResponse) {}
   rpc DeleteAccount(DeleteAccountTagRequest) returns (TransactionResponse) {}
+  rpc ReconcileTransactions(ReconciliationRequest) returns (TransactionResponse) {}
 }
 
 message LineItem {
@@ -88,6 +89,10 @@ message TBResponse {
 
 message ListingResponse {
     repeated Transaction transactions = 1;
+}
+
+message ReconciliationRequest {
+    repeated string splitID = 1;
 }
 
 message VersionRequest {

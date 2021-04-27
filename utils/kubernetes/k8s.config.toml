@@ -1,0 +1,8 @@
+Host = "127.0.0.1"
+RPCPort = "30080"
+CACert = ""
+Cert = ""
+Key = ""
+LogVerbosity = "debug"
+DatabaseType = "mysql"
+DatabaseLocation = "godbledger:password@tcp(localhost:30036)/ledger?charset=utf8mb4,utf8"

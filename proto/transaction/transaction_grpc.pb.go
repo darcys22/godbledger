@@ -29,6 +29,7 @@ type TransactorClient interface {
 	GetListing(ctx context.Context, in *ReportRequest, opts ...grpc.CallOption) (*ListingResponse, error)
 	AddAccount(ctx context.Context, in *AccountTagRequest, opts ...grpc.CallOption) (*TransactionResponse, error)
 	DeleteAccount(ctx context.Context, in *DeleteAccountTagRequest, opts ...grpc.CallOption) (*TransactionResponse, error)
+	ReconcileTransactions(ctx context.Context, in *ReconciliationRequest, opts ...grpc.CallOption) (*TransactionResponse, error)
 }
 
 type transactorClient struct {
@@ -147,6 +148,15 @@ func (c *transactorClient) DeleteAccount(ctx context.Context, in *DeleteAccountT
 	return out, nil
 }
 
+func (c *transactorClient) ReconcileTransactions(ctx context.Context, in *ReconciliationRequest, opts ...grpc.CallOption) (*TransactionResponse, error) {
+	out := new(TransactionResponse)
+	err := c.cc.Invoke(ctx, "/transaction.Transactor/ReconcileTransactions", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TransactorServer is the server API for Transactor service.
 // All implementations must embed UnimplementedTransactorServer
 // for forward compatibility
@@ -163,6 +173,7 @@ type TransactorServer interface {
 	GetListing(context.Context, *ReportRequest) (*ListingResponse, error)
 	AddAccount(context.Context, *AccountTagRequest) (*TransactionResponse, error)
 	DeleteAccount(context.Context, *DeleteAccountTagRequest) (*TransactionResponse, error)
+	ReconcileTransactions(context.Context, *ReconciliationRequest) (*TransactionResponse, error)
 	mustEmbedUnimplementedTransactorServer()
 }
 
@@ -205,6 +216,9 @@ func (UnimplementedTransactorServer) AddAccount(context.Context, *AccountTagRequ
 }
 func (UnimplementedTransactorServer) DeleteAccount(context.Context, *DeleteAccountTagRequest) (*TransactionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteAccount not implemented")
+}
+func (UnimplementedTransactorServer) ReconcileTransactions(context.Context, *ReconciliationRequest) (*TransactionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReconcileTransactions not implemented")
 }
 func (UnimplementedTransactorServer) mustEmbedUnimplementedTransactorServer() {}
 
@@ -435,6 +449,24 @@ func _Transactor_DeleteAccount_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Transactor_ReconcileTransactions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReconciliationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TransactorServer).ReconcileTransactions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/transaction.Transactor/ReconcileTransactions",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TransactorServer).ReconcileTransactions(ctx, req.(*ReconciliationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Transactor_ServiceDesc is the grpc.ServiceDesc for Transactor service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -489,6 +521,10 @@ var Transactor_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteAccount",
 			Handler:    _Transactor_DeleteAccount_Handler,
+		},
+		{
+			MethodName: "ReconcileTransactions",
+			Handler:    _Transactor_ReconcileTransactions_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
