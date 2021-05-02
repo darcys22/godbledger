@@ -556,7 +556,8 @@ func doDebianSource(cmdline []string) {
 				changes  = filepath.Join(*workdir, basename+"_source.changes")
 			)
 			if *signer != "" {
-				build.MustRunCommand("debsign", changes)
+				debsign := exec.Command("debsign", changes)
+				build.MustRun(debsign)
 			}
 			if *upload != "" {
 				ppaUpload(*workdir, *upload, *sshUser, []string{source, dsc, changes})
