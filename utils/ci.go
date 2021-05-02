@@ -496,15 +496,9 @@ func doDebianSource(cmdline []string) {
 	maybeSkipArchive(env)
 
 	// Import the signing key.
+	//gpg --export-secret-key sean@darcyfinancial.com  | base64 | paste -s -d '' > secret-key-base64-encoded.gpg
 	if key := getenvBase64("PPA_SIGNING_KEY"); len(key) > 0 {
 		gpg := exec.Command("gpg", "--import", "--no-tty", "--batch", "--yes")
-		//if passphrase := getenvBase64("PPA_SIGNING_KEY_PASSPHRASE"); len(passphrase) > 0 {
-		//passphrasefile := filepath.Join(*workdir, "passphrase")
-		//if _, err := os.Stat(passphrasefile); os.IsNotExist(err) {
-		//ioutil.WriteFile(passphrasefile, passphrase, 0600)
-		//}
-		//gpg = exec.Command("gpg", "--passphrase-file", passphrasefile, "--import")
-		//}
 		gpg.Stdin = bytes.NewReader(key)
 		build.MustRun(gpg)
 	}
