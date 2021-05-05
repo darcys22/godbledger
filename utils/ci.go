@@ -113,11 +113,11 @@ var (
 
 	// Distros for which packages are created.
 	debDistroGoBoots = map[string]string{
-		"xenial": "golang-go",
-		"bionic": "golang-go",
-		"disco":  "golang-go",
-		"eoan":   "golang-go",
-		"focal":  "golang-go",
+		"xenial":  "golang-go",
+		"bionic":  "golang-go",
+		"focal":   "golang-go",
+		"groovy":  "golang-go",
+		"hirsute": "golang-go",
 	}
 
 	debGoBootPaths = map[string]string{

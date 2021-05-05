@@ -1,1 +1,1 @@
-build/bin/{{.BinaryName}} usr/bin
+build/bin/native/{{.BinaryName}} usr/bin
