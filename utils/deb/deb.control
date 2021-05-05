@@ -1,4 +1,4 @@
-Source: {{.Name}}
+Source: {{.Name}}a
 Section: science
 Priority: extra
 Maintainer: {{.Author}}
