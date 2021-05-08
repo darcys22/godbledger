@@ -1,6 +1,6 @@
 // secure connection test establishes a connection using mutual tls, and sending test transaction to verify
 
-// +build integration
+// +build integration,secure
 
 package tests
 

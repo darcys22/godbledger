@@ -318,7 +318,8 @@ func doTest(cmdline []string) {
 	coverage := flag.Bool("coverage", false, "Whether to record code coverage")
 	verbose := flag.Bool("v", false, "Whether to log verbosely")
 	integration := flag.Bool("integration", false, "Whether to run integration tests")
-	mysql := flag.Bool("mysql", false, "Whether to run mysql integration tests")
+	mysql := flag.Bool("mysql", false, "Whether to run mysql integration tests (not currently supported)")
+	secure := flag.Bool("secure", false, "Whether to run secure integration tests")
 	flag.CommandLine.Parse(cmdline)
 	env := build.Env()
 
@@ -339,7 +340,10 @@ func doTest(cmdline []string) {
 		gotest.Args = append(gotest.Args, "-tags=integration")
 	}
 	if *mysql {
-		gotest.Args = append(gotest.Args, "-tags=mysql")
+		gotest.Args = append(gotest.Args, "-tags=integration,mysql")
+	}
+	if *secure {
+		gotest.Args = append(gotest.Args, "-tags=integration,secure")
 	}
 	if *verbose {
 		gotest.Args = append(gotest.Args, "-v")
