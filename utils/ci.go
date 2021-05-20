@@ -69,7 +69,7 @@ var (
 	//       into a ./cmd folder (see: https://github.com/golang-standards/project-layout#cmd)
 	packagesToBuild = []string{
 		"godbledger",
-		"ledger_cli",
+		"ledger-cli",
 		"reporter",
 	}
 
