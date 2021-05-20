@@ -33,7 +33,7 @@ const (
 
 var commandFile = &cli.Command{
 	Name:      "file",
-	Usage:     "ledger_cli file ./test/transaction-codes-1.test",
+	Usage:     "ledger-cli file ./test/transaction-codes-1.test",
 	ArgsUsage: "[]",
 	Description: `
 	Loads a file in the ledger cli format

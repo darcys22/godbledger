@@ -18,14 +18,14 @@ import (
 
 var commandAddCurrency = &cli.Command{
 	Name:      "currency",
-	Usage:     "ledger_cli currency <currency name> <decimals>",
+	Usage:     "ledger-cli currency <currency name> <decimals>",
 	ArgsUsage: "[]",
 	Description: `
 	Adds the tag specified in the second argument to the account specified in the first argument
 
 	Example
 
-	ledger_cli currency BTC 9
+	ledger-cli currency BTC 9
 `,
 	Flags: []cli.Flag{
 		&cli.BoolFlag{

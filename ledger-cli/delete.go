@@ -17,7 +17,7 @@ import (
 
 var commandDeleteTransaction = &cli.Command{
 	Name:      "delete",
-	Usage:     "ledger_cli delete <transaction_id>",
+	Usage:     "ledger-cli delete <transaction_id>",
 	ArgsUsage: "[]",
 	Description: `
 	Deletes a transaction from the database
@@ -73,7 +73,7 @@ var commandDeleteTransaction = &cli.Command{
 
 var commandVoidTransaction = &cli.Command{
 	Name:      "void",
-	Usage:     "ledger_cli void <transaction_id>",
+	Usage:     "ledger-cli void <transaction_id>",
 	ArgsUsage: "[]",
 	Description: `
 	Reverses a transaction by creating an identical inverse and tags both transactions as void 

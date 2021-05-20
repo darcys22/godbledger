@@ -76,7 +76,7 @@ var (
 	// Files that end up in the godbledger*.zip archive.
 	godbledgerArchiveFiles = []string{
 		executablePath("godbledger"),
-		executablePath("ledger_cli"),
+		executablePath("ledger-cli"),
 		executablePath("reporter"),
 	}
 
@@ -89,7 +89,7 @@ var (
 			Description: "Accounting server to manage financial databases and record double entry bookkeeping transactions",
 		},
 		{
-			BinaryName:  "ledger_cli",
+			BinaryName:  "ledger-cli",
 			Description: "Godbledger grpc client",
 		},
 		{

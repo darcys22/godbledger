@@ -39,7 +39,7 @@ func init() {
 	customFormatter.TimestampFormat = "2006-01-02 15:04:05"
 	customFormatter.FullTimestamp = true
 	logrus.SetFormatter(customFormatter)
-	log = logrus.WithField("prefix", "ledger_cli")
+	log = logrus.WithField("prefix", "ledger-cli")
 	app = cli.NewApp()
 	app.Name = "Ledger CLI"
 	app.Usage = "Command Line for GoDBLedger gRPC"
