@@ -32,7 +32,7 @@ var output struct {
 
 var commandTransactionListing = &cli.Command{
 	Name:  "transactions",
-	Usage: "ledger_cli transactions [(--json | --csv) <output-filename> ]",
+	Usage: "reporter transactions [(--json | --csv) <output-filename> ]",
 	Description: `
 Lists all Transactions in the Database
 

@@ -69,14 +69,14 @@ var (
 	//       into a ./cmd folder (see: https://github.com/golang-standards/project-layout#cmd)
 	packagesToBuild = []string{
 		"godbledger",
-		"ledger_cli",
+		"ledger-cli",
 		"reporter",
 	}
 
 	// Files that end up in the godbledger*.zip archive.
 	godbledgerArchiveFiles = []string{
 		executablePath("godbledger"),
-		executablePath("ledger_cli"),
+		executablePath("ledger-cli"),
 		executablePath("reporter"),
 	}
 
@@ -89,7 +89,7 @@ var (
 			Description: "Accounting server to manage financial databases and record double entry bookkeeping transactions",
 		},
 		{
-			BinaryName:  "ledger_cli",
+			BinaryName:  "ledger-cli",
 			Description: "Godbledger grpc client",
 		},
 		{
@@ -113,11 +113,11 @@ var (
 
 	// Distros for which packages are created.
 	debDistroGoBoots = map[string]string{
-		"xenial": "golang-go",
-		"bionic": "golang-go",
-		"disco":  "golang-go",
-		"eoan":   "golang-go",
-		"focal":  "golang-go",
+		"xenial":  "golang-go",
+		"bionic":  "golang-go",
+		"focal":   "golang-go",
+		"groovy":  "golang-go",
+		"hirsute": "golang-go",
 	}
 
 	debGoBootPaths = map[string]string{
@@ -500,8 +500,9 @@ func doDebianSource(cmdline []string) {
 	maybeSkipArchive(env)
 
 	// Import the signing key.
+	//gpg --export-secret-key sean@darcyfinancial.com  | base64 | paste -s -d '' > secret-key-base64-encoded.gpg
 	if key := getenvBase64("PPA_SIGNING_KEY"); len(key) > 0 {
-		gpg := exec.Command("gpg", "--import")
+		gpg := exec.Command("gpg", "--import", "--no-tty", "--batch", "--yes")
 		gpg.Stdin = bytes.NewReader(key)
 		build.MustRun(gpg)
 	}
@@ -547,16 +548,18 @@ func doDebianSource(cmdline []string) {
 			build.MustRun(debuild)
 
 			var (
-				basename = fmt.Sprintf("%s_%s", meta.Name(), meta.VersionString())
-				source   = filepath.Join(*workdir, basename+".tar.xz")
-				dsc      = filepath.Join(*workdir, basename+".dsc")
-				changes  = filepath.Join(*workdir, basename+"_source.changes")
+				basename  = fmt.Sprintf("%s_%s", meta.Name(), meta.VersionString())
+				source    = filepath.Join(*workdir, basename+".tar.xz")
+				dsc       = filepath.Join(*workdir, basename+".dsc")
+				changes   = filepath.Join(*workdir, basename+"_source.changes")
+				buildinfo = filepath.Join(*workdir, basename+"_source.buildinfo")
 			)
 			if *signer != "" {
-				build.MustRunCommand("debsign", changes)
+				debsign := exec.Command("debsign", changes)
+				build.MustRun(debsign)
 			}
 			if *upload != "" {
-				ppaUpload(*workdir, *upload, *sshUser, []string{source, dsc, changes})
+				ppaUpload(*workdir, *upload, *sshUser, []string{source, dsc, changes, buildinfo})
 			}
 		}
 	}

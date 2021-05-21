@@ -91,7 +91,7 @@ You can run these commands from any directory; simply adjust the pathed argument
 
     This creates a `godbledger` deployment and service able to receive traffic internally via cluster DNS at `godbledger:8080` and over the nodePort on port `30080`.
 
-    This `nodePort` value is configured also in `k8s.config.toml` to allow `ledger_cli` running on the host machine to connect directly to the godbledger server:
+    This `nodePort` value is configured also in `k8s.config.toml` to allow `ledger-cli` running on the host machine to connect directly to the godbledger server:
 
     ```toml
     Host = "127.0.0.1"
@@ -106,10 +106,10 @@ You can run these commands from any directory; simply adjust the pathed argument
         make build-native
         ```
 
-    - `ledger_cli` connects to the godbledger server API over gRPC:
+    - `ledger-cli` connects to the godbledger server API over gRPC:
 
         ```
-        ledger_cli --config ./k8s.config.toml
+        ledger-cli --config ./k8s.config.toml
         ```
 
     - `reporter` connects directly to the database:

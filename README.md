@@ -27,7 +27,7 @@ https://github.com/darcys22/godbledger/wiki/Quickstart
 | Command          | Description                                                                                             |
 | :--------------- | :------------------------------------------------------------------------------------------------------ |
 | **`Godbledger`** | The main server. It is the access point for transactions that will be saved to the accounting database. |
-| `Ledger_cli`     | A CLI client that can be used to transmit transactions to the server.                                   |
+| `Ledger-cli`     | A CLI client that can be used to transmit transactions to the server.                                   |
 | `Reporter`       | Builds basic reports from the database on the command line.                                             |
 
 ## Communicating with Godbledger and software examples
@@ -37,9 +37,9 @@ The primary way to communicate with Godbledger is through the GRPC endpoint, sub
 
 a python client with example calls can be found [here](https://github.com/darcys22/godbledger-pythonclient)
 
-**Ledger_cli** included with this repo communicates with Godbledger using GRPC and gives some convenient CLI commands
+**Ledger-cli** included with this repo communicates with Godbledger using GRPC and gives some convenient CLI commands
 
-**Ledger files** `ledger_cli` allows for the processing of [ledger files](https://www.ledger-cli.org/). This has been roughly implemented by forking https://github.com/howeyc/ledger
+**Ledger files** `ledger-cli` allows for the processing of [ledger files](https://www.ledger-cli.org/). This has been roughly implemented by forking https://github.com/howeyc/ledger
 
 **Trading Simulator** 
 An [example project](https://github.com/darcys22/Trading-Simulator) has been developed that simulates a market trader bot and the trades are recorded using Godbledger

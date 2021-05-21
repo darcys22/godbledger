@@ -15,7 +15,7 @@ import (
 
 var commandTagAccount = &cli.Command{
 	Name:      "tag",
-	Usage:     "ledger_cli tag <account> <tag>",
+	Usage:     "ledger-cli tag <account> <tag>",
 	ArgsUsage: "[]",
 	Description: `
 	Adds the tag specified in the second argument to the account specified in the first argument

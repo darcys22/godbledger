@@ -2,8 +2,7 @@
 # -*- makefile -*-
 
 # Uncomment this to turn on verbose mode.
-#export DH_VERBOSE=1
-
+export DH_VERBOSE=1
 # Launchpad rejects Go's access to $HOME, use custom folders
 export GOCACHE=/tmp/go-build
 export GOPATH=/tmp/gopath
@@ -24,7 +23,7 @@ override_dh_auto_build:
 	mv .mod $(GOPATH)/pkg/mod
 
 	# A fresh Go was built, all dependency downloads faked, hope build works now
-	../.go/bin/go run build/ci.go install -git-commit={{.Env.Commit}} -git-branch={{.Env.Branch}} -git-tag={{.Env.Tag}} -buildnum={{.Env.Buildnum}} -pull-request={{.Env.IsPullRequest}}
+	GO111MODULE=on ../.go/bin/go run utils/ci.go build -git-commit={{.Env.Commit}} -git-branch={{.Env.Branch}} -git-tag={{.Env.Tag}} -buildnum={{.Env.Buildnum}} -pull-request={{.Env.IsPullRequest}}
 
 override_dh_auto_test:
 
