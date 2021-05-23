@@ -36,6 +36,21 @@ func KillProcesses(t *testing.T, pIDs []int) {
 	}
 }
 
+// DeleteLogFiles cleans up the lingering log files
+func DeleteLogFiles(t *testing.T, logfiles []*os.File) {
+	for _, f := range logfiles {
+		err := f.Close()
+		if err != nil {
+			t.Logf("error closing %s: %v\n", f.Name(), err)
+		}
+
+		err = os.Remove(f.Name())
+		if err != nil {
+			t.Logf("error removing %s: %v\n", f.Name(), err)
+		}
+	}
+}
+
 // DeleteAndCreateFile checks if the file path given exists, if it does, it deletes it and creates a new file.
 // If not, it just creates the requested file.
 func DeleteAndCreateFile(tmpPath string, fileName string) (*os.File, error) {

@@ -1,5 +1,18 @@
 VERSION ?= latest
 
+# set default data directory by OS
+ifeq ($(OS),Windows_NT)
+  DEFAULT_DATA_DIR=$(HOME)/.ledger
+else
+  ifeq ($(shell uname -s),Darwin)
+    DEFAULT_DATA_DIR=$(HOME)/Library/ledger
+  else
+    DEFAULT_DATA_DIR=$(HOME)/.ledger
+  endif
+endif
+
+GDBL_DATA_DIR ?= $(DEFAULT_DATA_DIR)
+
 GODIST = ./build/dist
 GO ?= latest
 GORUN = env GO111MODULE=on go run
@@ -33,10 +46,10 @@ lint:
 # our tests include an integration test which expects the local
 # GOOS-based build output to be in the ./build/bin folder
 test: build-native
-	$(GORUN) utils/ci.go test
+	$(GORUN) utils/ci.go test --integration
 
 travis: build-native
-	$(GORUN) utils/ci.go test -coverage $$TEST_PACKAGES
+	$(GORUN) utils/ci.go test -coverage $$TEST_PACKAGES --integration -v
 
 # -------------------------------------
 # release_pattern=current
@@ -52,7 +65,44 @@ linux-arm-7:
 linux-arm-64:
 		mkdir -p release/godbledger-arm64-v$(VERSION)/
 		env CC=aarch64-linux-gnu-gcc CXX=aarch-linux-gnu-g++ CGO_ENABLED=1 GOOS=linux GOARCH=arm64 GO111MODULE=on go build -o release/godbledger-arm64-v$(VERSION)/ ./...
+
 # -------------------------------
+# docker
+
+# convenience target which looks like the other top-level build-* targets
+build-docker: docker-build
+
+docker-build:
+	docker build -t godbledger:$(VERSION) -t godbledger:latest -f ./utils/Dockerfile.build .
+
+docker-login:
+	@$(if $(strip $(shell docker ps | grep godbledger-server)), @docker exec -it godbledger-server /bin/ash || 0, @docker run -it --rm --entrypoint /bin/ash godbledger:$(VERSION) )
+
+docker-start:
+	GDBL_DATA_DIR=$(GDBL_DATA_DIR) GDBL_LOG_LEVEL=$(GDBL_LOG_LEVEL) GDBL_VERSION=$(VERSION) docker-compose up
+
+docker-stop:
+	docker-compose down
+
+docker-status:
+	@$(if $(strip $(shell docker ps | grep godbledger-server)), @echo "godbledger-server is running on localhost:50051", @echo "godbledger-server is not running")
+
+docker-inspect:
+	docker inspect godbledger-server
+
+docker-logs:
+	@docker logs godbledger-server
+
+docker-logs-follow:
+	@docker logs -f godbledger-server
+
+# -------------------------------
+# debs
+
+debs:
+	go run utils/ci.go debsrc -upload darcys22/godbledger -sftp-user darcys22 -signer "Sean Darcy <sean@darcyfinancial.com>"
+# -------------------------------
+# cross
 
 build-cross: build-linux build-darwin build-windows
 

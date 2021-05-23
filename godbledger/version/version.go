@@ -23,9 +23,14 @@ import (
 const (
 	VersionMajor = 0       // Major version component of the current release
 	VersionMinor = 5       // Minor version component of the current release
-	VersionPatch = 1       // Patch version component of the current release
+	VersionPatch = 10      // Patch version component of the current release
 	VersionMeta  = "alpha" // Version metadata to append to the version string
 )
+
+// Git SHA1 commit hash of the release (set via linker flags)
+var gitCommit string
+var gitDate string
+var gitBranch string
 
 // Version holds the textual version string.
 var Version = func() string {
@@ -55,10 +60,12 @@ func ArchiveVersion(gitCommit string) string {
 	return vsn
 }
 
-func VersionWithCommit(gitCommit string) string {
+func VersionWithCommit() string {
 	vsn := Version
+	vsn += "-" + gitBranch
 	if len(gitCommit) >= 8 {
 		vsn += "-" + gitCommit[:8]
 	}
+	vsn += "-" + gitDate
 	return vsn
 }

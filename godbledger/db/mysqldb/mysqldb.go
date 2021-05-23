@@ -3,6 +3,7 @@ package mysqldb
 import (
 	"database/sql"
 	"errors"
+	"regexp"
 
 	"github.com/sirupsen/logrus"
 
@@ -10,6 +11,7 @@ import (
 )
 
 var log = logrus.WithField("prefix", "MySQL")
+var dsnRegex = regexp.MustCompile(`\:(.+?)\@`)
 
 type Database struct {
 	DB               *sql.DB
@@ -51,10 +53,15 @@ func ValidateConnectionString(dsn string) (string, error) {
 	log.Debugf("ParseTime := %v", cfg.ParseTime)
 	log.Debugf("Charset := %s", cfg.Params["charset"])
 
-	dsnstring := cfg.FormatDSN()
-	log.Debugf("DSN := %s", dsnstring)
+	dsnString := cfg.FormatDSN()
+	log.Debugf("DSN := %s", redactPassword(dsnString))
 
-	return dsnstring, nil
+	return dsnString, nil
+}
+
+func redactPassword(rawDSNString string) string {
+	cleanedDSNString := dsnRegex.ReplaceAll([]byte(rawDSNString), []byte(":**REDACTED**@"))
+	return string(cleanedDSNString)
 }
 
 // NewDB initializes a new DB.
@@ -214,6 +221,20 @@ func (db *Database) InitDB() error {
 		account_id VARCHAR(255),
 		FOREIGN KEY(split_id) REFERENCES splits(split_id) ON DELETE CASCADE,
 		FOREIGN KEY(account_id) REFERENCES accounts(account_id) ON DELETE CASCADE
+	);`
+	log.Debug("Query: " + createDB)
+	_, err = db.DB.Exec(createDB)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	//RECONCILIATIONS
+	createDB = `
+	CREATE TABLE IF NOT EXISTS reconciliations (
+		reconciliation_id VARCHAR(255) NOT NULL,
+		split_id VARCHAR(255) NOT NULL,
+		FOREIGN KEY (split_id) REFERENCES splits (split_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+		PRIMARY KEY (reconciliation_id, split_id)
 	);`
 	log.Debug("Query: " + createDB)
 	_, err = db.DB.Exec(createDB)

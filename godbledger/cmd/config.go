@@ -17,9 +17,9 @@ var log = logrus.WithField("prefix", "Config")
 type LedgerConfig struct {
 	Host             string // Host defines the address that the RPC will be opened on. Combined with RPC Port
 	RPCPort          string // RPCPort defines the port that the server will listen for transactions on
-	CACert           string // CACertFlag defines a flag for the server's Certificate Authority certificate.
-	Cert             string // CertFlag defines a flag for the server's TLS certificate.
-	Key              string // KeyFlag defines a flag for the server's TLS key.
+	CACert           string // CACertFlag defines a flag for the server's Certificate Authority certificate (Public Key of Authority that signs clients Public Keys).
+	Cert             string // CertFlag defines a flag for the server's TLS certificate (Servers Public Key to broadcast).
+	Key              string // KeyFlag defines a flag for the server's TLS key (Servers Private Key).
 	DataDirectory    string // DataDirectory defines the host systems folder directory holding the database and config files
 	LogVerbosity     string // LogVerbosity defines the logging level {debug, info, warn, error, fatal, panic}
 	ConfigFile       string // Location of the TOML config file, including directory path
@@ -159,7 +159,7 @@ func initConfig(ctx *cli.Context) error {
 	config := defaultLedgerConfig
 	if ctx.Bool("mysql") {
 		config.DatabaseType = "mysql"
-		config.DatabaseLocation = "godbledger:password@tcp(127.0.0.1:3306)/ledger"
+		config.DatabaseLocation = "godbledger:password@tcp(127.0.0.1:3306)/ledger?parseTime=true&charset=utf8"
 	}
 
 	if len(ctx.Args().Get(0)) > 0 {

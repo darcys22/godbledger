@@ -28,7 +28,7 @@ var tboutput struct {
 
 var commandTrialBalance = &cli.Command{
 	Name:  "trialbalance",
-	Usage: "ledger_cli trialbalance [(--json | --csv) <output-filename> ]",
+	Usage: "reporter trialbalance [(--json | --csv) <output-filename> ]",
 	Description: `
 Sums the value of the transactions per account in the Database
 
