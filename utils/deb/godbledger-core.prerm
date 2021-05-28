@@ -1,0 +1,24 @@
+#!/bin/sh
+
+set -e
+
+case "$1" in
+    remove|deconfigure|remove-in-favour|deconfigure-in-favour)
+        if [ -x "/etc/init.d/godbledger" ]; then
+            if [ -x "`which invoke-rc.d 2>/dev/null`" ]; then
+                invoke-rc.d godbledger stop || exit $?
+             else
+                /etc/init.d/godbledger stop || exit $?
+             fi
+        fi
+        ;;
+    upgrade|failed-upgrade)
+        ;;
+    *)
+        echo "prerm called with unknown argument \`$1'" >&2
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0
