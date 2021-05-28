@@ -9,7 +9,7 @@ import (
 
 	"github.com/darcys22/godbledger/godbledger/cmd"
 	"github.com/darcys22/godbledger/godbledger/ledger"
-	"github.com/darcys22/godbledger/shared"
+	"github.com/darcys22/godbledger/internal"
 
 	"github.com/sirupsen/logrus"
 	logTest "github.com/sirupsen/logrus/hooks/test"
@@ -51,7 +51,7 @@ func TestLifecycle_OK(t *testing.T) {
 
 	rpcService.Start()
 
-	shared.LogsContain(t.Fatalf, hook, "GRPC Listening on port", true)
+	internal.LogsContain(t.Fatalf, hook, "GRPC Listening on port", true)
 	assert.NoError(t, rpcService.Stop())
 }
 
@@ -85,7 +85,7 @@ func TestRPC_InsecureEndpoint(t *testing.T) {
 
 	rpcService.Start()
 
-	shared.LogsContain(t.Fatalf, hook, "GRPC Listening on port", true)
-	shared.LogsContain(t.Fatalf, hook, "You are using an insecure gRPC server", true)
+	internal.LogsContain(t.Fatalf, hook, "GRPC Listening on port", true)
+	internal.LogsContain(t.Fatalf, hook, "You are using an insecure gRPC server", true)
 	assert.NoError(t, rpcService.Stop())
 }

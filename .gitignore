@@ -42,6 +42,7 @@ password.txt
 release
 /build/_workspace/
 /build/.cache/
+/build/cache/
 /build/bin/
 /build/dist/
 build/_vendor/pkg

@@ -16,7 +16,7 @@ import (
 
 	"github.com/darcys22/godbledger/godbledger/cmd"
 	"github.com/darcys22/godbledger/godbledger/ledger"
-	"github.com/darcys22/godbledger/shared"
+	"github.com/darcys22/godbledger/internal"
 
 	"github.com/sirupsen/logrus"
 	logTest "github.com/sirupsen/logrus/hooks/test"
@@ -47,7 +47,7 @@ func TestNodeClose_OK(t *testing.T) {
 
 	node.Close()
 
-	shared.LogsContain(t.Fatalf, hook, "Stopping ledger node", true)
+	internal.LogsContain(t.Fatalf, hook, "Stopping ledger node", true)
 }
 
 // TestClearDB tests clearing the database
@@ -82,7 +82,7 @@ func TestClearDB(t *testing.T) {
 	contextWithDeadline, cancel := context.WithDeadline(context.Background(), d)
 	defer cancel()
 	<-contextWithDeadline.Done()
-	shared.LogsContain(t.Fatalf, hook, "Clearing SQLite3 DB", true)
+	internal.LogsContain(t.Fatalf, hook, "Clearing SQLite3 DB", true)
 	//case <-contextWithDeadline.Done():
 
 	node.Close()
