@@ -85,6 +85,7 @@ var (
 	// A debian package is created for all executables listed here.
 	debExecutables = []debExecutable{
 		{
+			PackageName: "godbledger-core",
 			BinaryName:  "godbledger",
 			Description: "Accounting server to manage financial databases and record double entry bookkeeping transactions",
 		},
