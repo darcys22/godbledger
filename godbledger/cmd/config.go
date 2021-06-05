@@ -37,13 +37,13 @@ var (
 		Description: `The dumpconfig command shows configuration values.`,
 	}
 
-	InitConfigCommand = &cli.Command{
-		Action:      initConfig,
-		Name:        "init",
-		Usage:       "godbledger init [-m] [databaseLocation]",
+	GenConfigCommand = &cli.Command{
+		Action:      genConfig,
+		Name:        "genconfig",
+		Usage:       "godbledger genconfig [-m] [configFileLocation]",
 		ArgsUsage:   "",
 		Category:    "MISCELLANEOUS COMMANDS",
-		Description: `The init command creates configuration file.`,
+		Description: `The init command creates a configuration file at the optional [configFileLocation] else will default to HOME/.ledger/config.toml`,
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
 				Name:    "mysql",
@@ -153,8 +153,8 @@ func dumpConfig(ctx *cli.Context) error {
 	return nil
 }
 
-// initConfig is the init command.
-func initConfig(ctx *cli.Context) error {
+// genConfig generates a default config file for godbledger.
+func genConfig(ctx *cli.Context) error {
 
 	config := defaultLedgerConfig
 	if ctx.Bool("mysql") {
@@ -163,7 +163,7 @@ func initConfig(ctx *cli.Context) error {
 	}
 
 	if len(ctx.Args().Get(0)) > 0 {
-		config.DatabaseLocation = ctx.Args().Get(0)
+		config.ConfigFile = ctx.Args().Get(0)
 	}
 	_, err := os.Stat(config.ConfigFile)
 	if os.IsNotExist(err) {
