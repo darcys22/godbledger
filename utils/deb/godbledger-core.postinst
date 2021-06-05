@@ -10,7 +10,7 @@ if [ "$1" != "configure" ]; then
 fi
 
 if [ ! -e "${GODBLEDGERHOME}/config.toml" ]; then
-    cd $GODBLEDGERHOME && su -p $GODBLEDGERUSER -c "godbledger --init ${GODBLEDGERHOME}/config.toml"
+    cd $GODBLEDGERHOME && su -p $GODBLEDGERUSER -c "godbledger genconfig ${GODBLEDGERHOME}/config.toml"
 fi
 
 #DEBHELPER#
