@@ -68,7 +68,7 @@ var (
 	// NOTE: this could be inferred if these 'main' packages were moved
 	//       into a ./cmd folder (see: https://github.com/golang-standards/project-layout#cmd)
 	packagesToBuild = []string{
-		"godbledger",
+		"godbledger-server",
 		"ledger-cli",
 		"reporter",
 	}
@@ -85,6 +85,7 @@ var (
 	// A debian package is created for all executables listed here.
 	debExecutables = []debExecutable{
 		{
+			PackageName: "godbledger-core",
 			BinaryName:  "godbledger",
 			Description: "Accounting server to manage financial databases and record double entry bookkeeping transactions",
 		},
@@ -512,8 +513,6 @@ func doDebianSource(cmdline []string) {
 
 	// Download all the dependencies needed to build the sources and run the ci script
 	srcdepfetch := goTool("mod", "download")
-	//TODO sean remove
-	fmt.Println("GOPATH=" + filepath.Join(*workdir, "modgopath"))
 	gopath, _ := filepath.Abs(filepath.Join(*workdir, "modgopath"))
 	srcdepfetch.Env = append(os.Environ(), "GOPATH="+gopath)
 	build.MustRun(srcdepfetch)
@@ -527,7 +526,7 @@ func doDebianSource(cmdline []string) {
 		for distro, goboot := range debDistroGoBoots {
 			// Prepare the debian package with the go-ethereum sources.
 			meta := newDebMetadata(distro, goboot, *signer, env, now, pkg.Name, pkg.Version, pkg.Executables)
-			fmt.Println(*workdir)
+			fmt.Println("Building debian package in: " + *workdir)
 			pkgdir := stageDebianSource(*workdir, meta)
 
 			// Add Go source code
@@ -759,9 +758,27 @@ func stageDebianSource(tmpdir string, meta debMetadata) (pkgdir string) {
 	build.RenderString("3.0 (native)\n", filepath.Join(debian, "source/format"), 0644, meta)
 	for _, exe := range meta.Executables {
 		install := filepath.Join(debian, meta.ExeName(exe)+".install")
-		docs := filepath.Join(debian, meta.ExeName(exe)+".docs")
 		build.Render("utils/deb/deb.install", install, 0644, exe)
+
+		docs := filepath.Join(debian, meta.ExeName(exe)+".docs")
 		build.Render("utils/deb/deb.docs", docs, 0644, exe)
+
+		if exe.PackageName == "godbledger-core" {
+			preinst := filepath.Join(debian, meta.ExeName(exe)+".preinst")
+			build.Render("utils/deb/godbledger-core.preinst", preinst, 0644, meta)
+
+			postinst := filepath.Join(debian, meta.ExeName(exe)+".postinst")
+			build.Render("utils/deb/godbledger-core.postinst", postinst, 0644, meta)
+
+			prerm := filepath.Join(debian, meta.ExeName(exe)+".prerm")
+			build.Render("utils/deb/godbledger-core.prerm", prerm, 0644, meta)
+
+			postrm := filepath.Join(debian, meta.ExeName(exe)+".postrm")
+			build.Render("utils/deb/godbledger-core.postrm", postrm, 0644, meta)
+
+			servicefile := filepath.Join(debian, meta.ExeName(exe)+".service")
+			build.Render("utils/deb/godbledger-core.service", servicefile, 0644, meta)
+		}
 	}
 	return pkgdir
 }

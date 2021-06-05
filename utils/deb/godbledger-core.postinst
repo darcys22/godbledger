@@ -1,0 +1,18 @@
+#!/bin/sh
+
+set -e
+
+GODBLEDGERHOME='/var/lib/godbledger'
+GODBLEDGERUSER='debian-godbledger'
+
+if [ "$1" != "configure" ]; then
+    exit 0
+fi
+
+if [ ! -e "${GODBLEDGERHOME}/config.toml" ]; then
+    cd $GODBLEDGERHOME && su -p $GODBLEDGERUSER -c "godbledger genconfig ${GODBLEDGERHOME}/config.toml"
+fi
+
+#DEBHELPER#
+
+exit 0

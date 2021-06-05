@@ -70,7 +70,7 @@ func main() {
 	app.Commands = []*cli.Command{
 		// See cmd/config.go
 		cmd.DumpConfigCommand,
-		cmd.InitConfigCommand,
+		cmd.GenConfigCommand,
 	}
 
 	app.Flags = []cli.Flag{

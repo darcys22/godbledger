@@ -1,0 +1,45 @@
+#!/bin/sh
+set -e
+
+GODBLEDGERHOME='/var/lib/godbledger'
+GODBLEDGERUSER='debian-godbledger'
+
+godbledgeradduser() {
+    if ! getent group $GODBLEDGERUSER >/dev/null; then
+        addgroup --system $GODBLEDGERUSER >/dev/null
+    fi
+
+    if ! getent passwd $GODBLEDGERUSER >/dev/null; then
+        adduser \
+          --system \
+          --disabled-login \
+          --ingroup $GODBLEDGERUSER \
+          --home $GODBLEDGERHOME \
+          --gecos "GoDBLedger server user" \
+          --shell /bin/false \
+          $GODBLEDGERUSER >/dev/null
+    fi
+    install --directory --group=$GODBLEDGERUSER --owner=$GODBLEDGERUSER /var/run/godbledger -m644
+}
+
+case "$1" in
+    install)
+        godbledgeradduser
+        ;;
+
+    upgrade)
+        godbledgeradduser
+        ;;
+
+    abort-upgrade)
+        ;;
+
+    *)
+        echo "preinst called with unknown argument \`$1'" >&2
+        exit 0
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0

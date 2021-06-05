@@ -1,0 +1,18 @@
+[Unit]
+Description=GoDBLedger Accounting Server
+After=network-online.target
+Wants=network-online.target
+StartLimitInterval=0
+
+[Service]
+User=debian-godbledger
+Type=simple
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+ExecStart=/usr/bin/godbledger --config /var/lib/godbledger/config.toml --datadir /var/lib/godbledger --log-file /var/lib/godbledger/log.txt 
+WorkingDirectory=/var/lib/godbledger
+Restart=on-failure
+RestartSec=4
+
+[Install]
+WantedBy=multi-user.target

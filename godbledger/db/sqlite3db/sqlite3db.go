@@ -29,7 +29,7 @@ func (db *Database) Close() error {
 // NewDB initializes a new DB.
 func NewDB(dirPath, mode string) (*Database, error) {
 	log.Debug("Creating DB")
-	if err := os.MkdirAll(dirPath, 0700); err != nil {
+	if err := os.MkdirAll(dirPath, 0770); err != nil {
 		return nil, err
 	}
 	datafile := path.Join(dirPath, fmt.Sprintf("%s?_foreign_keys=true&parseTime=true&mode=%s", ledgerDBName, mode))
