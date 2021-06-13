@@ -43,6 +43,7 @@ package main
 import (
 	//"bufio"
 	"bytes"
+	"context"
 	"encoding/base64"
 	"flag"
 	"fmt"
@@ -61,6 +62,9 @@ import (
 	"github.com/cespare/cp"
 	"github.com/darcys22/godbledger/godbledger/version"
 	"github.com/darcys22/godbledger/internal/build"
+	"github.com/google/go-github/github"
+	"github.com/pkg/errors"
+	"golang.org/x/sync/errgroup"
 	"time"
 )
 
@@ -389,44 +393,260 @@ func downloadLinter(cachedir string) string {
 }
 
 // Release Packaging
-//func doArchive(cmdline []string) {
-//var (
-//arch   = flag.String("arch", runtime.GOARCH, "Architecture cross packaging")
-//atype  = flag.String("type", "zip", "Type of archive to write (zip|tar)")
-//signer = flag.String("signer", "", `Environment variable holding the signing key (e.g. LINUX_SIGNING_KEY)`)
-//upload = flag.String("upload", "", `Destination to upload the archives (usually "gethstore/builds")`)
-//ext    string
-//)
-//flag.CommandLine.Parse(cmdline)
-//switch *atype {
-//case "zip":
-//ext = ".zip"
-//case "tar":
-//ext = ".tar.gz"
-//default:
-//log.Fatal("unknown archive type: ", atype)
-//}
+func doArchive(cmdline []string) {
 
-//var (
-////env = build.Env()
+	var (
+		owner string
+		repo  string
+		token string
 
-////basegeth = archiveBasename(*arch, params.ArchiveVersion(env.Commit))
-////geth     = "geth-" + basegeth + ext
-////alltools = "geth-alltools-" + basegeth + ext
-//)
-////maybeSkipArchive(env)
-//if err := build.WriteArchive(geth, gethArchiveFiles); err != nil {
-//log.Fatal(err)
-//}
-//if err := build.WriteArchive(alltools, allToolsArchiveFiles); err != nil {
-//log.Fatal(err)
-//}
-//for _, archive := range []string{geth, alltools} {
-//if err := archiveUpload(archive, *upload, *signer); err != nil {
-//log.Fatal(err)
-//}
-//}
-//}
+		commitish  string
+		name       string
+		body       string
+		draft      bool
+		prerelease bool
+
+		parallel int
+
+		recreate bool
+		replace  bool
+		soft     bool
+		//version bool
+	)
+
+	baseURLStr := "https://api.github.com/"
+
+	path := ""
+	localAssets, err := build.LocalAssets(path)
+	if err != nil {
+		log.Fatalf("Failed to find assets from %s: %s\n", path, err)
+	}
+
+	log.Printf("Number of file to upload: %d", len(localAssets))
+
+	// Create a GitHub client
+	gitHubClient, err := build.NewGitHubClient(owner, repo, token, baseURLStr)
+	if err != nil {
+		log.Fatalf("Failed to construct GitHub client: %s\n", err)
+	}
+
+	ghr := GHR{
+		GitHub: gitHubClient,
+	}
+
+	log.Printf("Name: %s", name)
+	tag := ""
+
+	// Prepare create release request
+	req := &github.RepositoryRelease{
+		Name:            github.String(name),
+		TagName:         github.String(tag),
+		Prerelease:      github.Bool(prerelease),
+		Draft:           github.Bool(draft),
+		TargetCommitish: github.String(commitish),
+		Body:            github.String(body),
+	}
+
+	ctx := context.TODO()
+
+	if soft {
+		_, err := ghr.GitHub.GetRelease(ctx, *req.TagName)
+
+		if err == nil {
+			log.Fatalf("ghr aborted since tag `%s` already exists\n", *req.TagName)
+		}
+
+		if err != nil {
+			log.Fatalf("Failed to get GitHub release: %s\n", err)
+		}
+	}
+
+	release, err := ghr.CreateRelease(ctx, req, recreate)
+	if err != nil {
+		log.Fatalf("Failed to create GitHub release page: %s\n", err)
+	}
+
+	if replace {
+		err := ghr.DeleteAssets(ctx, *release.ID, localAssets, parallel)
+		if err != nil {
+			log.Fatalf("Failed to delete existing assets: %s\n", err)
+		}
+	}
+
+	err = ghr.UploadAssets(ctx, *release.ID, localAssets, parallel)
+	if err != nil {
+		log.Fatalf("Failed to upload one of assets: %s\n", err)
+	}
+
+	if !draft {
+		_, err := ghr.GitHub.EditRelease(ctx, *release.ID, &github.RepositoryRelease{
+			Draft: github.Bool(false),
+		})
+		if err != nil {
+			log.Fatalf("Failed to publish release: %s\n", err)
+		}
+	}
+}
+
+// GHR contains the top level GitHub object
+// https://github.com/tcnksm/ghr/blob/master/ghr.go
+type GHR struct {
+	GitHub build.GitHub
+}
+
+// CreateRelease creates (or recreates) a new package release
+func (g *GHR) CreateRelease(ctx context.Context, req *github.RepositoryRelease, recreate bool) (*github.RepositoryRelease, error) {
+
+	// When draft release creation is requested,
+	// create it without any check (it can).
+	if *req.Draft {
+		log.Printf("Create a draft release")
+		return g.GitHub.CreateRelease(ctx, req)
+	}
+
+	// Always create release as draft first. After uploading assets, turn off
+	// draft unless the `-draft` flag is explicitly specified.
+	// It is to prevent users from seeing empty release.
+	req.Draft = github.Bool(true)
+
+	// Check release exists.
+	// If release is not found, then create a new release.
+	release, err := g.GitHub.GetRelease(ctx, *req.TagName)
+	if err != nil {
+		if err != build.ErrReleaseNotFound {
+			return nil, errors.Wrap(err, "failed to get release")
+		}
+		log.Printf("Release (with tag %s) not found: create a new one",
+			*req.TagName)
+
+		if recreate {
+			log.Printf("WARNING: '-recreate' is specified but release (%s) not found", *req.TagName)
+		}
+
+		log.Println("==> Create a new release")
+		return g.GitHub.CreateRelease(ctx, req)
+	}
+
+	// recreate is not true. Then use that existing release.
+	if !recreate {
+		log.Printf("Release (with tag %s) exists: use existing one",
+			*req.TagName)
+
+		log.Printf("found release (%s). Use existing one.\n",
+			*req.TagName)
+		return release, nil
+	}
+
+	// When recreate is requested, delete existing release and create a
+	// new release.
+	log.Printf("Recreate a release")
+	if err := g.DeleteRelease(ctx, *release.ID, *req.TagName); err != nil {
+		return nil, err
+	}
+
+	return g.GitHub.CreateRelease(ctx, req)
+}
+
+// DeleteRelease removes an existing release, if it exists. If it does not exist,
+// DeleteRelease returns an error
+func (g *GHR) DeleteRelease(ctx context.Context, ID int64, tag string) error {
+
+	err := g.GitHub.DeleteRelease(ctx, ID)
+	if err != nil {
+		return err
+	}
+
+	err = g.GitHub.DeleteTag(ctx, tag)
+	if err != nil {
+		return err
+	}
+
+	// This is because sometimes the process of creating a release on GitHub
+	// is faster than deleting a tag.
+	time.Sleep(5 * time.Second)
+
+	return nil
+}
+
+// UploadAssets uploads the designated assets in parallel (determined by parallelism setting)
+func (g *GHR) UploadAssets(ctx context.Context, releaseID int64, localAssets []string, parallel int) error {
+	start := time.Now()
+	defer func() {
+		log.Printf("UploadAssets: time: %d ms", int(time.Since(start).Seconds()*1000))
+	}()
+
+	eg, ctx := errgroup.WithContext(ctx)
+	semaphore := make(chan struct{}, parallel)
+	for _, localAsset := range localAssets {
+		localAsset := localAsset
+		eg.Go(func() error {
+			semaphore <- struct{}{}
+			defer func() {
+				<-semaphore
+			}()
+
+			log.Printf("Uploading: %15s\n", filepath.Base(localAsset))
+			_, err := g.GitHub.UploadAsset(ctx, releaseID, localAsset)
+			if err != nil {
+				return errors.Wrapf(err,
+					"failed to upload asset: %s", localAsset)
+			}
+			return nil
+		})
+	}
+
+	if err := eg.Wait(); err != nil {
+		return errors.Wrap(err, "one of the goroutines failed")
+	}
+
+	return nil
+}
+
+// DeleteAssets removes uploaded assets for a given release
+func (g *GHR) DeleteAssets(ctx context.Context, releaseID int64, localAssets []string, parallel int) error {
+	start := time.Now()
+	defer func() {
+		log.Printf("DeleteAssets: time: %d ms", int(time.Since(start).Seconds()*1000))
+	}()
+
+	eg, ctx := errgroup.WithContext(ctx)
+
+	assets, err := g.GitHub.ListAssets(ctx, releaseID)
+	if err != nil {
+		return errors.Wrap(err, "failed to list assets")
+	}
+
+	semaphore := make(chan struct{}, parallel)
+	for _, localAsset := range localAssets {
+		for _, asset := range assets {
+			// https://golang.org/doc/faq#closures_and_goroutines
+			localAsset, asset := localAsset, asset
+
+			// Uploaded asset name is same as basename of local file
+			if *asset.Name == filepath.Base(localAsset) {
+				eg.Go(func() error {
+					semaphore <- struct{}{}
+					defer func() {
+						<-semaphore
+					}()
+
+					log.Printf("Deleting: %15s\n", *asset.Name)
+					if err := g.GitHub.DeleteAsset(ctx, *asset.ID); err != nil {
+						return errors.Wrapf(err,
+							"failed to delete asset: %s", *asset.Name)
+					}
+					return nil
+				})
+			}
+		}
+	}
+
+	if err := eg.Wait(); err != nil {
+		return errors.Wrap(err, "one of the goroutines failed")
+	}
+
+	return nil
+}
 
 //func archiveBasename(arch string, archiveVersion string) string {
 //platform := runtime.GOOS + "-" + arch
