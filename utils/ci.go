@@ -68,7 +68,7 @@ var (
 	// NOTE: this could be inferred if these 'main' packages were moved
 	//       into a ./cmd folder (see: https://github.com/golang-standards/project-layout#cmd)
 	packagesToBuild = []string{
-		"godbledger-server",
+		"godbledger",
 		"ledger-cli",
 		"reporter",
 	}

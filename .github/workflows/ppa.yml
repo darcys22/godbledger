@@ -1,8 +1,8 @@
 name: PPA
 on:
   push:
-    branches:
-      - stable
+    tags:
+      - 'v*'
 jobs:
   ubuntu:
     strategy:
