@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/BurntSushi/toml v0.3.1
-	github.com/cespare/cp v1.1.1 // indirect
+	github.com/cespare/cp v1.1.1
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/joyt/godate v0.0.0-20150226210126-7151572574a7
@@ -27,5 +27,4 @@ require (
 	google.golang.org/grpc v1.34.0
 	google.golang.org/protobuf v1.25.0
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
-	src.techknowlogick.com/xgo v1.2.1-0.20201205054834-c7ddcb19c3f8 // indirect
 )
