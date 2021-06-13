@@ -86,6 +86,14 @@ If you want to see all the transactions in the database, or export to CSV/JSON
 					WHERE
 						tt.transaction_id = splits.transaction_id
 				)
+				AND "main" IN (
+				  SELECT
+					  t.tag_name
+					FROM
+					  tags AS t
+					  JOIN account_tag AS at ON at.tag_id = t.tag_id
+					WHERE
+						at.account_id = split_accounts.account_id)
 		;`
 
 		log.Debug("Querying Database")
