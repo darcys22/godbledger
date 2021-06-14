@@ -19,21 +19,17 @@
 /*
 The ci command is called from Continuous Integration scripts.
 
-Usage: go run build/ci.go <command> <command flags/arguments>
+Usage: go run utils/ci.go <command> <command flags/arguments>
 
 Available commands are:
 
    install    [ -arch architecture ] [ -cc compiler ] [ packages... ]                          -- builds packages and executables
    test       [ -coverage ] [ packages... ]                                                    -- runs the tests
    lint                                                                                        -- runs certain pre-selected linters
-   archive    [ -arch architecture ] [ -type zip|tar ] [ -signer key-envvar ] [ -upload dest ] -- archives build artifacts
+   archive                                                                                     -- creates github release
    importkeys                                                                                  -- imports signing keys from env
    debsrc     [ -signer key-id ] [ -upload dest ]                                              -- creates a debian source package
-   nsis                                                                                        -- creates a Windows NSIS installer
-   aar        [ -local ] [ -sign key-id ] [-deploy repo] [ -upload dest ]                      -- creates an Android archive
-   xcode      [ -local ] [ -sign key-id ] [-deploy repo] [ -upload dest ]                      -- creates an iOS XCode framework
    xgo        [ -alltools ] [ options ]                                                        -- cross builds according to options
-   purge      [ -store blobstore ] [ -days threshold ]                                         -- purges old archives from the blobstore
 
 For all commands, -n prevents execution of external programs (dry run mode).
 
@@ -43,6 +39,7 @@ package main
 import (
 	//"bufio"
 	"bytes"
+	"context"
 	"encoding/base64"
 	"flag"
 	"fmt"
@@ -61,26 +58,19 @@ import (
 	"github.com/cespare/cp"
 	"github.com/darcys22/godbledger/godbledger/version"
 	"github.com/darcys22/godbledger/internal/build"
+	"github.com/google/go-github/github"
+	"github.com/pkg/errors"
+	"golang.org/x/sync/errgroup"
 	"time"
 )
 
 var (
-	// NOTE: this could be inferred if these 'main' packages were moved
-	//       into a ./cmd folder (see: https://github.com/golang-standards/project-layout#cmd)
+	// Make Release iterates through these executables
 	packagesToBuild = []string{
 		"godbledger",
 		"ledger-cli",
 		"reporter",
 	}
-
-	// Files that end up in the godbledger*.zip archive.
-	godbledgerArchiveFiles = []string{
-		executablePath("godbledger"),
-		executablePath("ledger-cli"),
-		executablePath("reporter"),
-	}
-
-	allToolsArchiveFiles = godbledgerArchiveFiles
 
 	// A debian package is created for all executables listed here.
 	debExecutables = []debExecutable{
@@ -100,7 +90,6 @@ var (
 	}
 
 	// A debian package is created for all executables listed here.
-
 	debGoDBLedger = debPackage{
 		Name:        "godbledger",
 		Version:     version.Version,
@@ -175,15 +164,11 @@ func main() {
 	case "lint":
 		doLint(os.Args[2:])
 	case "archive":
-		//doArchive(os.Args[2:])
+		doArchive(os.Args[2:])
 	case "debsrc":
 		doDebianSource(os.Args[2:])
-	case "nsis":
-		//doWindowsInstaller(os.Args[2:])
 	case "xgo":
 		doXgo(os.Args[2:])
-	case "purge":
-		//doPurge(os.Args[2:])
 	default:
 		log.Fatal("unknown command ", os.Args[1])
 	}
@@ -389,85 +374,272 @@ func downloadLinter(cachedir string) string {
 }
 
 // Release Packaging
-//func doArchive(cmdline []string) {
-//var (
-//arch   = flag.String("arch", runtime.GOARCH, "Architecture cross packaging")
-//atype  = flag.String("type", "zip", "Type of archive to write (zip|tar)")
-//signer = flag.String("signer", "", `Environment variable holding the signing key (e.g. LINUX_SIGNING_KEY)`)
-//upload = flag.String("upload", "", `Destination to upload the archives (usually "gethstore/builds")`)
-//ext    string
-//)
-//flag.CommandLine.Parse(cmdline)
-//switch *atype {
-//case "zip":
-//ext = ".zip"
-//case "tar":
-//ext = ".tar.gz"
-//default:
-//log.Fatal("unknown archive type: ", atype)
-//}
+func doArchive(cmdline []string) {
+	baseURLStr := "https://api.github.com/"
 
-//var (
-////env = build.Env()
+	var (
+		owner      = flag.String("owner", "darcys22", `github user who is owner of the repo`)
+		repo       = flag.String("repo", "godbledger", `github repo to upload releases to`)
+		path       = flag.String("path", "build/dist/", `folder containing assets to upload`)
+		tag        = flag.String("tag", version.Version, `version of assets being uploaded`)
+		name       = flag.String("name", fmt.Sprintf("v%s", version.Version), `name of the release`)
+		commitish  = flag.String("commitish", "", `commit hash`)
+		draft      = flag.Bool("draft", true, `whether to create the release as a draft`)
+		prerelease = flag.Bool("prerelease", false, `whether to create the release as a prerelease`)
+		soft       = flag.Bool("soft", false, `fail if the tag already exists`)
+		replace    = flag.Bool("replace", false, `whether the upload will replace all assets on an already existing release`)
+		recreate   = flag.Bool("recrease", false, `whether the upload will enforce the replacement of an already existing release`)
+		parallel   = flag.Int("parallel", 1, `uploads the designated assets in parallel`)
+	)
+	flag.CommandLine.Parse(cmdline)
 
-////basegeth = archiveBasename(*arch, params.ArchiveVersion(env.Commit))
-////geth     = "geth-" + basegeth + ext
-////alltools = "geth-alltools-" + basegeth + ext
-//)
-////maybeSkipArchive(env)
-//if err := build.WriteArchive(geth, gethArchiveFiles); err != nil {
-//log.Fatal(err)
-//}
-//if err := build.WriteArchive(alltools, allToolsArchiveFiles); err != nil {
-//log.Fatal(err)
-//}
-//for _, archive := range []string{geth, alltools} {
-//if err := archiveUpload(archive, *upload, *signer); err != nil {
-//log.Fatal(err)
-//}
-//}
-//}
+	log.Printf("Name: %s", *name)
+	if len(*commitish) == 0 {
+		env := build.Env()
+		*commitish = env.Commit
+	}
+	log.Printf("Commit: %s", *commitish)
 
-//func archiveBasename(arch string, archiveVersion string) string {
-//platform := runtime.GOOS + "-" + arch
-//if arch == "arm" {
-//platform += os.Getenv("GOARM")
-//}
-//if arch == "android" {
-//platform = "android-all"
-//}
-//if arch == "ios" {
-//platform = "ios-all"
-//}
-//return platform + "-" + archiveVersion
-//}
+	localAssets, err := build.LocalAssets(*path)
+	if err != nil {
+		log.Fatalf("Failed to find assets from %s: %s\n", path, err)
+	}
 
-//func archiveUpload(archive string, blobstore string, signer string) error {
-//If signing was requested, generate the signature files
-//if signer != "" {
-//key := getenvBase64(signer)
-//if err := build.PGPSignFile(archive, archive+".asc", string(key)); err != nil {
-//return err
-//}
-//}
-//If uploading to Azure was requested, push the archive possibly with its signature
-//if blobstore != "" {
-//auth := build.AzureBlobstoreConfig{
-//Account:   strings.Split(blobstore, "/")[0],
-//Token:     os.Getenv("AZURE_BLOBSTORE_TOKEN"),
-//Container: strings.SplitN(blobstore, "/", 2)[1],
-//}
-//if err := build.AzureBlobstoreUpload(archive, filepath.Base(archive), auth); err != nil {
-//return err
-//}
-//if signer != "" {
-//if err := build.AzureBlobstoreUpload(archive+".asc", filepath.Base(archive+".asc"), auth); err != nil {
-//return err
-//}
-//}
-//}
-//return nil
-//}
+	log.Printf("Number of file to upload: %d", len(localAssets))
+
+	//Create the checksums
+	checksums, err := build.SHA256Assets(localAssets)
+	var b bytes.Buffer
+	b.WriteString("**sha256sum**\n\n")
+	for i, localAsset := range localAssets {
+		fmt.Fprintf(&b, "%s %s\n", checksums[i], filepath.Base(localAsset))
+	}
+	body := b.String()
+
+	// Create a GitHub client
+	token := os.Getenv("GH_ACCESS_TOKEN")
+	if len(token) == 0 {
+		log.Fatal("Failed to get GitHub access token")
+	}
+	gitHubClient, err := build.NewGitHubClient(*owner, *repo, token, baseURLStr)
+	if err != nil {
+		log.Fatalf("Failed to construct GitHub client: %s\n", err)
+	}
+
+	ghr := GHR{
+		GitHub: gitHubClient,
+	}
+
+	// Prepare create release request
+	req := &github.RepositoryRelease{
+		Name:            github.String(*name),
+		TagName:         github.String(*tag),
+		Prerelease:      github.Bool(*prerelease),
+		Draft:           github.Bool(*draft),
+		TargetCommitish: github.String(*commitish),
+		Body:            github.String(body),
+	}
+
+	ctx := context.TODO()
+
+	if *soft {
+		_, err := ghr.GitHub.GetRelease(ctx, *req.TagName)
+
+		if err == nil {
+			log.Fatalf("ghr aborted since tag `%s` already exists\n", *req.TagName)
+		}
+
+		if err != nil {
+			log.Fatalf("Failed to get GitHub release: %s\n", err)
+		}
+	}
+
+	release, err := ghr.CreateRelease(ctx, req, *recreate)
+	if err != nil {
+		log.Fatalf("Failed to create GitHub release page: %s\n", err)
+	}
+
+	if *replace {
+		err := ghr.DeleteAssets(ctx, *release.ID, localAssets, *parallel)
+		if err != nil {
+			log.Fatalf("Failed to delete existing assets: %s\n", err)
+		}
+	}
+
+	err = ghr.UploadAssets(ctx, *release.ID, localAssets, *parallel)
+	if err != nil {
+		log.Fatalf("Failed to upload one of assets: %s\n", err)
+	}
+
+	if !*draft {
+		_, err := ghr.GitHub.EditRelease(ctx, *release.ID, &github.RepositoryRelease{
+			Draft: github.Bool(false),
+		})
+		if err != nil {
+			log.Fatalf("Failed to publish release: %s\n", err)
+		}
+	}
+}
+
+// GHR contains the top level GitHub object
+// https://github.com/tcnksm/ghr/blob/master/ghr.go
+type GHR struct {
+	GitHub build.GitHub
+}
+
+// CreateRelease creates (or recreates) a new package release
+func (g *GHR) CreateRelease(ctx context.Context, req *github.RepositoryRelease, recreate bool) (*github.RepositoryRelease, error) {
+
+	// When draft release creation is requested,
+	// create it without any check (it can).
+	if *req.Draft {
+		log.Printf("Create a draft release")
+		return g.GitHub.CreateRelease(ctx, req)
+	}
+
+	// Always create release as draft first. After uploading assets, turn off
+	// draft unless the `-draft` flag is explicitly specified.
+	// It is to prevent users from seeing empty release.
+	req.Draft = github.Bool(true)
+
+	// Check release exists.
+	// If release is not found, then create a new release.
+	release, err := g.GitHub.GetRelease(ctx, *req.TagName)
+	if err != nil {
+		if err != build.ErrReleaseNotFound {
+			return nil, errors.Wrap(err, "failed to get release")
+		}
+		log.Printf("Release (with tag %s) not found: create a new one",
+			*req.TagName)
+
+		if recreate {
+			log.Printf("WARNING: '-recreate' is specified but release (%s) not found", *req.TagName)
+		}
+
+		log.Println("==> Create a new release")
+		return g.GitHub.CreateRelease(ctx, req)
+	}
+
+	// recreate is not true. Then use that existing release.
+	if !recreate {
+		log.Printf("Release (with tag %s) exists: use existing one",
+			*req.TagName)
+
+		log.Printf("found release (%s). Use existing one.\n",
+			*req.TagName)
+		return release, nil
+	}
+
+	// When recreate is requested, delete existing release and create a
+	// new release.
+	log.Printf("Recreate a release")
+	if err := g.DeleteRelease(ctx, *release.ID, *req.TagName); err != nil {
+		return nil, err
+	}
+
+	return g.GitHub.CreateRelease(ctx, req)
+}
+
+// DeleteRelease removes an existing release, if it exists. If it does not exist,
+// DeleteRelease returns an error
+func (g *GHR) DeleteRelease(ctx context.Context, ID int64, tag string) error {
+
+	err := g.GitHub.DeleteRelease(ctx, ID)
+	if err != nil {
+		return err
+	}
+
+	err = g.GitHub.DeleteTag(ctx, tag)
+	if err != nil {
+		return err
+	}
+
+	// This is because sometimes the process of creating a release on GitHub
+	// is faster than deleting a tag.
+	time.Sleep(5 * time.Second)
+
+	return nil
+}
+
+// UploadAssets uploads the designated assets in parallel (determined by parallelism setting)
+func (g *GHR) UploadAssets(ctx context.Context, releaseID int64, localAssets []string, parallel int) error {
+	start := time.Now()
+	defer func() {
+		log.Printf("UploadAssets: time: %d ms", int(time.Since(start).Seconds()*1000))
+	}()
+
+	eg, ctx := errgroup.WithContext(ctx)
+	semaphore := make(chan struct{}, parallel)
+	for _, localAsset := range localAssets {
+		localAsset := localAsset
+		eg.Go(func() error {
+			semaphore <- struct{}{}
+			defer func() {
+				<-semaphore
+			}()
+
+			log.Printf("Uploading: %15s\n", filepath.Base(localAsset))
+			_, err := g.GitHub.UploadAsset(ctx, releaseID, localAsset)
+			if err != nil {
+				return errors.Wrapf(err,
+					"failed to upload asset: %s", localAsset)
+			}
+			return nil
+		})
+	}
+
+	if err := eg.Wait(); err != nil {
+		return errors.Wrap(err, "one of the goroutines failed")
+	}
+
+	return nil
+}
+
+// DeleteAssets removes uploaded assets for a given release
+func (g *GHR) DeleteAssets(ctx context.Context, releaseID int64, localAssets []string, parallel int) error {
+	start := time.Now()
+	defer func() {
+		log.Printf("DeleteAssets: time: %d ms", int(time.Since(start).Seconds()*1000))
+	}()
+
+	eg, ctx := errgroup.WithContext(ctx)
+
+	assets, err := g.GitHub.ListAssets(ctx, releaseID)
+	if err != nil {
+		return errors.Wrap(err, "failed to list assets")
+	}
+
+	semaphore := make(chan struct{}, parallel)
+	for _, localAsset := range localAssets {
+		for _, asset := range assets {
+			// https://golang.org/doc/faq#closures_and_goroutines
+			localAsset, asset := localAsset, asset
+
+			// Uploaded asset name is same as basename of local file
+			if *asset.Name == filepath.Base(localAsset) {
+				eg.Go(func() error {
+					semaphore <- struct{}{}
+					defer func() {
+						<-semaphore
+					}()
+
+					log.Printf("Deleting: %15s\n", *asset.Name)
+					if err := g.GitHub.DeleteAsset(ctx, *asset.ID); err != nil {
+						return errors.Wrapf(err,
+							"failed to delete asset: %s", *asset.Name)
+					}
+					return nil
+				})
+			}
+		}
+	}
+
+	if err := eg.Wait(); err != nil {
+		return errors.Wrap(err, "one of the goroutines failed")
+	}
+
+	return nil
+}
 
 // skips archiving for some build configurations.
 func maybeSkipArchive(env build.Environment) {
@@ -783,78 +955,6 @@ func stageDebianSource(tmpdir string, meta debMetadata) (pkgdir string) {
 	return pkgdir
 }
 
-//// Windows installer
-//func doWindowsInstaller(cmdline []string) {
-//// Parse the flags and make skip installer generation on PRs
-//var (
-//arch    = flag.String("arch", runtime.GOARCH, "Architecture for cross build packaging")
-//signer  = flag.String("signer", "", `Environment variable holding the signing key (e.g. WINDOWS_SIGNING_KEY)`)
-//upload  = flag.String("upload", "", `Destination to upload the archives (usually "gethstore/builds")`)
-//workdir = flag.String("workdir", "", `Output directory for packages (uses temp dir if unset)`)
-//)
-//flag.CommandLine.Parse(cmdline)
-//*workdir = makeWorkdir(*workdir)
-//env := build.Env()
-//maybeSkipArchive(env)
-
-//// Aggregate binaries that are included in the installer
-//var (
-//devTools []string
-//allTools []string
-//gethTool string
-//)
-//for _, file := range allToolsArchiveFiles {
-//if file == "COPYING" { // license, copied later
-//continue
-//}
-//allTools = append(allTools, filepath.Base(file))
-//if filepath.Base(file) == "geth.exe" {
-//gethTool = file
-//} else {
-//devTools = append(devTools, file)
-//}
-//}
-
-//// Render NSIS scripts: Installer NSIS contains two installer sections,
-//// first section contains the geth binary, second section holds the dev tools.
-//templateData := map[string]interface{}{
-//"License":  "COPYING",
-//"Geth":     gethTool,
-//"DevTools": devTools,
-//}
-//build.Render("build/nsis.geth.nsi", filepath.Join(*workdir, "geth.nsi"), 0644, nil)
-//build.Render("build/nsis.install.nsh", filepath.Join(*workdir, "install.nsh"), 0644, templateData)
-//build.Render("build/nsis.uninstall.nsh", filepath.Join(*workdir, "uninstall.nsh"), 0644, allTools)
-//build.Render("build/nsis.pathupdate.nsh", filepath.Join(*workdir, "PathUpdate.nsh"), 0644, nil)
-//build.Render("build/nsis.envvarupdate.nsh", filepath.Join(*workdir, "EnvVarUpdate.nsh"), 0644, nil)
-//if err := cp.CopyFile(filepath.Join(*workdir, "SimpleFC.dll"), "build/nsis.simplefc.dll"); err != nil {
-//log.Fatal("Failed to copy SimpleFC.dll: %v", err)
-//}
-//if err := cp.CopyFile(filepath.Join(*workdir, "COPYING"), "COPYING"); err != nil {
-//log.Fatal("Failed to copy copyright note: %v", err)
-//}
-// Build the installer. This assumes that all the needed files have been previously
-// built (don't mix building and packaging to keep cross compilation complexity to a
-// minimum).
-//version := strings.Split(params.Version, ".")
-//if env.Commit != "" {
-//version[2] += "-" + env.Commit[:8]
-//}
-//installer, _ := filepath.Abs("geth-" + archiveBasename(*arch, params.ArchiveVersion(env.Commit)) + ".exe")
-//build.MustRunCommand("makensis.exe",
-//"/DOUTPUTFILE="+installer,
-//"/DMAJORVERSION="+version[0],
-//"/DMINORVERSION="+version[1],
-//"/DBUILDVERSION="+version[2],
-//"/DARCH="+*arch,
-//filepath.Join(*workdir, "geth.nsi"),
-//)
-// Sign and publish installer.
-//if err := archiveUpload(installer, *upload, *signer); err != nil {
-//log.Fatal(err)
-//}
-//}
-
 //// Cross compilation
 
 func doXgo(cmdline []string) {
@@ -934,56 +1034,3 @@ func xgoTool(args []string) *exec.Cmd {
 	}
 	return cmd
 }
-
-// Binary distribution cleanups
-
-//func doPurge(cmdline []string) {
-//var (
-//store = flag.String("store", "", `Destination from where to purge archives (usually "gethstore/builds")`)
-//limit = flag.Int("days", 30, `Age threshold above which to delete unstable archives`)
-//)
-//flag.CommandLine.Parse(cmdline)
-
-//if env := build.Env(); !env.IsCronJob {
-//log.Printf("skipping because not a cron job")
-//os.Exit(0)
-//}
-//// Create the azure authentication and list the current archives
-//auth := build.AzureBlobstoreConfig{
-//Account:   strings.Split(*store, "/")[0],
-//Token:     os.Getenv("AZURE_BLOBSTORE_TOKEN"),
-//Container: strings.SplitN(*store, "/", 2)[1],
-//}
-//blobs, err := build.AzureBlobstoreList(auth)
-//if err != nil {
-//log.Fatal(err)
-//}
-//fmt.Printf("Found %d blobs\n", len(blobs))
-
-// Iterate over the blobs, collect and sort all unstable builds
-//for i := 0; i < len(blobs); i++ {
-//if !strings.Contains(blobs[i].Name, "unstable") {
-//blobs = append(blobs[:i], blobs[i+1:]...)
-//i--
-//}
-//}
-//for i := 0; i < len(blobs); i++ {
-//for j := i + 1; j < len(blobs); j++ {
-//if blobs[i].Properties.LastModified.After(blobs[j].Properties.LastModified) {
-//blobs[i], blobs[j] = blobs[j], blobs[i]
-//}
-//}
-//}
-// Filter out all archives more recent that the given threshold
-//for i, blob := range blobs {
-//if time.Since(blob.Properties.LastModified) < time.Duration(*limit)*24*time.Hour {
-//blobs = blobs[:i]
-//break
-//}
-//}
-//fmt.Printf("Deleting %d blobs\n", len(blobs))
-// Delete all marked as such and return
-//if err := build.AzureBlobstoreDelete(auth, blobs); err != nil {
-//log.Fatal(err)
-//}
-//}
