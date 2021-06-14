@@ -1,6 +1,9 @@
 package build
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"io"
 	"os"
 	"path/filepath"
 
@@ -50,4 +53,26 @@ func LocalAssets(path string) ([]string, error) {
 	}
 
 	return assets, nil
+}
+
+// SHA256Assets contains the local objects SHA Hashes
+func SHA256Assets(files []string) ([]string, error) {
+	h := sha256.New()
+	checksums := make([]string, 0, len(files))
+	for _, f := range files {
+		file, err := os.Open(f)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to open file")
+		}
+		defer file.Close()
+		if _, err := io.Copy(h, file); err != nil {
+			return nil, errors.Wrap(err, "failed to copy file into hasher")
+		}
+
+		sha1_hash := hex.EncodeToString(h.Sum(nil))
+
+		checksums = append(checksums, sha1_hash)
+		h.Reset()
+	}
+	return checksums, nil
 }
