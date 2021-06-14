@@ -417,7 +417,7 @@ func doArchive(cmdline []string) {
 	body := b.String()
 
 	// Create a GitHub client
-	token := getenvBase64("GH_ACCESS_TOKEN")
+	token := os.Getenv("GH_ACCESS_TOKEN")
 	if len(token) == 0 {
 		log.Fatal("Failed to get GitHub access token")
 	}
