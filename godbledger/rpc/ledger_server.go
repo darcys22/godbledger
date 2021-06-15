@@ -48,7 +48,7 @@ func (s *LedgerServer) AddTransaction(ctx context.Context, in *transaction.Trans
 		}
 
 		b := line.GetCurrency()
-		curr, err := core.NewCurrency(b, 2)
+		curr, err := s.ld.GetCurrency(b)
 		if err != nil {
 			log.Error(err)
 		}
