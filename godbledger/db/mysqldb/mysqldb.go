@@ -257,6 +257,19 @@ func (db *Database) InitDB() error {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	//Default Currencies
+	insertCurrency := `
+		INSERT INTO currencies(name,decimals)
+			VALUES("USD",2),
+			("AUD",2),
+			("GBP",2),
+			("BTC",8),
+			("ETH",9),
+			("LOKI",9);
+	`
+	log.Debug("Query: " + insertCurrency)
+	_, _ = db.DB.Exec(insertCurrency)
 	return err
 }
 
