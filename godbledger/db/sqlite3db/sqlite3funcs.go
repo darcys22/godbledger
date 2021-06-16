@@ -661,12 +661,13 @@ func (db *Database) AddAccount(acc *core.Account) error {
 	return err
 }
 
-func (db *Database) SafeAddAccount(acc *core.Account) error {
-	u, _ := db.FindAccount(acc.Code)
+//Returns True if account was created
+func (db *Database) SafeAddAccount(acc *core.Account) (bool, error) {
+	u, _ := db.FindAccount(strings.TrimSpace(acc.Code))
 	if u != nil {
-		return nil
+		return false, nil
 	}
-	return db.AddAccount(acc)
+	return true, db.AddAccount(acc)
 
 }
 
