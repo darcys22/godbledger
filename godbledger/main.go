@@ -21,7 +21,7 @@ func startNode(ctx *cli.Context) error {
 		return err
 	}
 
-	fullnode, err := node.New(ctx)
+	fullnode, err := node.New(ctx, cfg)
 	if err != nil {
 		return err
 	}
@@ -87,6 +87,7 @@ func main() {
 		cmd.LogFileName,
 		cmd.DatabaseTypeFlag,
 		cmd.DatabaseLocationFlag,
+		cmd.PidFileFlag,
 	}
 
 	if err := app.Run(os.Args); err != nil {

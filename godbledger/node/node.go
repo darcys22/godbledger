@@ -1,14 +1,18 @@
 package node
 
 import (
+	"io/ioutil"
 	"os"
 	"os/signal"
+	"path/filepath"
+	"strconv"
 	"sync"
 	"syscall"
 
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 
+	"github.com/darcys22/godbledger/godbledger/cmd"
 	"github.com/darcys22/godbledger/godbledger/core"
 	"github.com/darcys22/godbledger/godbledger/db"
 	"github.com/darcys22/godbledger/godbledger/version"
@@ -22,9 +26,10 @@ type Node struct {
 	services *core.ServiceRegistry
 	stop     chan struct{} // Channel to wait for termination notifications.
 	DB       *db.Database
+	PidFile  string
 }
 
-func New(ctx *cli.Context) (*Node, error) {
+func New(ctx *cli.Context, cfg *cmd.LedgerConfig) (*Node, error) {
 
 	registry := core.NewServiceRegistry()
 
@@ -32,6 +37,7 @@ func New(ctx *cli.Context) (*Node, error) {
 		ctx:      ctx,
 		services: registry,
 		stop:     make(chan struct{}),
+		PidFile:  cfg.PidFile,
 	}
 
 	return ledger, nil
@@ -53,6 +59,7 @@ func (n *Node) Start() {
 		"version": version.VersionWithCommit(),
 	}).Info("Starting GoDBLedger Server")
 
+	n.writePIDFile()
 	n.services.StartAll()
 	stop := n.stop
 	n.lock.Unlock()
@@ -82,6 +89,33 @@ func (n *Node) Close() {
 	defer n.lock.Unlock()
 
 	log.Info("Stopping ledger node")
+	if len(n.PidFile) > 0 {
+		_ = os.Remove(n.PidFile)
+	}
 	n.services.StopAll()
 	close(n.stop)
+}
+
+// writePIDFile retrieves the current process ID and writes it to file.
+func (n *Node) writePIDFile() {
+
+	if n.PidFile == "" {
+		return
+	}
+
+	// Ensure the required directory structure exists.
+	err := os.MkdirAll(filepath.Dir(n.PidFile), 0700)
+	if err != nil {
+		log.Error("Failed to verify pid directory", "error", err)
+		os.Exit(1)
+	}
+
+	// Retrieve the PID and write it to file.
+	pid := strconv.Itoa(os.Getpid())
+	if err := ioutil.WriteFile(n.PidFile, []byte(pid), 0644); err != nil {
+		log.Error("Failed to write pidfile", "error", err)
+		os.Exit(1)
+	}
+
+	log.Info("Writing PID file", "path", n.PidFile, "pid", pid)
 }

@@ -42,7 +42,10 @@ func TestNodeClose_OK(t *testing.T) {
 
 	ctx := cli.NewContext(&app, set, nil)
 
-	node, err := New(ctx)
+	err, cfg := cmd.MakeConfig(ctx)
+	assert.NoError(t, err)
+
+	node, err := New(ctx, cfg)
 	assert.NoError(t, err)
 
 	node.Close()
@@ -70,7 +73,7 @@ func TestClearDB(t *testing.T) {
 	cfg.DatabaseType = "memorydb"
 	cfg.DataDirectory = tmp
 
-	node, err := New(ctx)
+	node, err := New(ctx, cfg)
 	assert.NoError(t, err)
 
 	ledger, err := ledger.New(ctx, cfg)

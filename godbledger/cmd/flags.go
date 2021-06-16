@@ -98,6 +98,10 @@ var (
 		Name:  "database-location",
 		Usage: "location of database file or connection string",
 	}
+	PidFileFlag = &cli.StringFlag{
+		Name:  "pidfile",
+		Usage: "location of PID File (blank will mean none is created)",
+	}
 )
 
 func setConfig(ctx *cli.Context, cfg *LedgerConfig) {
@@ -131,5 +135,8 @@ func setConfig(ctx *cli.Context, cfg *LedgerConfig) {
 	}
 	if ctx.IsSet(DatabaseLocationFlag.Name) {
 		cfg.DatabaseLocation = ctx.String(DatabaseLocationFlag.Name)
+	}
+	if ctx.IsSet(PidFileFlag.Name) {
+		cfg.PidFile = ctx.String(PidFileFlag.Name)
 	}
 }
