@@ -86,8 +86,13 @@ func (l *Ledger) Insert(txn *core.Transaction) (string, error) {
 	accounts, _ := l.GetAccounts(txn)
 
 	for _, account := range accounts {
-		l.LedgerDb.SafeAddAccount(account)
-		l.LedgerDb.SafeAddTagToAccount(account.Name, "main")
+		newaccount, err := l.LedgerDb.SafeAddAccount(account)
+		if err != nil {
+			return "", err
+		}
+		if newaccount {
+			l.LedgerDb.SafeAddTagToAccount(account.Name, "main")
+		}
 	}
 
 	response, err := l.LedgerDb.AddTransaction(txn)
@@ -151,7 +156,8 @@ func (l *Ledger) InsertAccount(accountStr string) error {
 	if err != nil {
 		log.Error(err)
 	}
-	return l.LedgerDb.SafeAddAccount(acc)
+	_, err = l.LedgerDb.SafeAddAccount(acc)
+	return err
 }
 
 func (l *Ledger) DeleteAccount(accountStr string) error {
