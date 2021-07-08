@@ -22,7 +22,7 @@ import (
 
 func copyAndCapture(w io.Writer, r io.Reader) ([]byte, error) {
 	var out []byte
-	buf := make([]byte, 1024, 1024)
+	buf := make([]byte, 1024)
 	for {
 		n, err := r.Read(buf[:])
 		if n > 0 {
@@ -70,7 +70,7 @@ func TestCommandLine(t *testing.T) {
 	}
 
 	// Start up ledger CLI and use the journal wizard
-	cmd := exec.Command("ledger-cli", "journal")
+	cmd := exec.Command("../build/bin/native/ledger-cli", "journal")
 	var stdout, stderr []byte
 	var errStdout, errStderr error
 	stdoutIn, _ := cmd.StdoutPipe()
