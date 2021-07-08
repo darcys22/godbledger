@@ -53,4 +53,5 @@ func StartGoDBLedger(t *testing.T, config *cmd.LedgerConfig, logfilename string,
 	defer stdOutFile.Close()
 
 	return cmd.Process.Pid
+
 }

@@ -673,7 +673,7 @@ func doDebianSource(cmdline []string) {
 	maybeSkipArchive(env)
 
 	// Import the signing key.
-	//gpg --export-secret-key sean@darcyfinancial.com  | base64 | paste -s -d '' > secret-key-base64-encoded.gpg
+	//gpg --export-secret-key sean@darcyfinancial.com  | base64 | paste -s -d '' > secret-signing-key-base64-encoded.gpg
 	if key := getenvBase64("PPA_SIGNING_KEY"); len(key) > 0 {
 		gpg := exec.Command("gpg", "--import", "--no-tty", "--batch", "--yes")
 		gpg.Stdin = bytes.NewReader(key)
@@ -759,6 +759,7 @@ func ppaUpload(workdir, ppa, sshUser string, files []string) {
 	incomingDir := fmt.Sprintf("~%s/ubuntu/%s", p[0], p[1])
 	// Create the SSH identity file if it doesn't exist.
 	var idfile string
+	//cat ppakey  | base64 | paste -s -d '' > secret-ssh-key-base64-encoded
 	if sshkey := getenvBase64("PPA_SSH_KEY"); len(sshkey) > 0 {
 		idfile = filepath.Join(workdir, "sshkey")
 		if _, err := os.Stat(idfile); os.IsNotExist(err) {
