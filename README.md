@@ -218,13 +218,7 @@ The Docker web site includes detailed instructions on [installing and running Do
 
 NOTE: if installing Docker Engine on a linux system make sure to follow the [Post-installation steps for Linux](https://docs.docker.com/engine/install/linux-postinstall/) in order to be able to run `docker` commands from local user accounts.
 
-### TODO/Milestones
-- ~~GoDBLedger server runs and accepts transactions~~
-- ~~trial balance and transaction reports of journals~~
-- ~~analyse database using metabase to create financial dashboard~~
-- ~~authenticated api using mutual TLS~~
-- web interface (GoDBLedger-Web)
-- triple entry bookkeeping using signed transactions
-- reconciliations and "bank feed"
-- profit and loss and balance sheet reports
-- Create Yurnell - programmable journal entries
+### Roadmap
+Discussion can be found on this github issue:
+https://github.com/darcys22/godbledger/issues/169
+
