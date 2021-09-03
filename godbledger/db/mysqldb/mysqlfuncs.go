@@ -30,7 +30,7 @@ func (db *Database) AddTransaction(txn *core.Transaction) (string, error) {
 	}
 
 	insertTransaction := `
-		INSERT INTO transactions(transaction_id, postdate, brief,poster_user_id)
+		INSERT INTO transactions(transaction_id, postdate, description, poster_user_id)
 			VALUES(?,?,?,?);
 	`
 	tx, err := db.DB.Begin()
@@ -284,7 +284,7 @@ func (db *Database) FindTransaction(txnID string) (*core.Transaction, error) {
 	err := db.DB.QueryRow(`
 			SELECT t.transaction_id,
 						 t.postdate,
-						 t.brief,
+						 t.description,
 						 u.user_id,
 						 u.username
 			FROM   transactions AS t
@@ -949,7 +949,7 @@ func (db *Database) GetListing(startDate, endDate time.Time) (*[]core.Transactio
 		SELECT
         t.transaction_id
         ,t.postdate
-        ,t.brief
+        ,t.description
         ,u.user_id
         ,u.username
     FROM
