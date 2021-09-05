@@ -231,8 +231,8 @@ func (db *Database) InitDB() error {
 			("AUD",2),
 			("GBP",2),
 			("BTC",8),
-			("ETH",9),
-			("LOKI",9);
+			("ETH",18),
+			("OXEN",9);
 	`
 	log.Debug("Query: " + insertCurrency)
 	_, _ = db.DB.Exec(insertCurrency)
