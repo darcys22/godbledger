@@ -29,7 +29,7 @@ func (db *Database) AddTransaction(txn *core.Transaction) (string, error) {
 	}
 
 	insertTransaction := `
-		INSERT INTO transactions(transaction_id, postdate, brief,poster_user_id)
+		INSERT INTO transactions(transaction_id, postdate, description, poster_user_id)
 			VALUES(?,?,?,?);
 	`
 	tx, err := db.DB.Begin()
@@ -282,7 +282,7 @@ func (db *Database) FindTransaction(txnID string) (*core.Transaction, error) {
 	err := db.DB.QueryRow(`
 			SELECT t.transaction_id,
 						 t.postdate,
-						 t.brief,
+						 t.description,
 						 u.user_id,
 						 u.username
 			FROM   transactions AS t
@@ -661,12 +661,13 @@ func (db *Database) AddAccount(acc *core.Account) error {
 	return err
 }
 
-func (db *Database) SafeAddAccount(acc *core.Account) error {
-	u, _ := db.FindAccount(acc.Code)
+//Returns True if account was created
+func (db *Database) SafeAddAccount(acc *core.Account) (bool, error) {
+	u, _ := db.FindAccount(strings.TrimSpace(acc.Code))
 	if u != nil {
-		return nil
+		return false, nil
 	}
-	return db.AddAccount(acc)
+	return true, db.AddAccount(acc)
 
 }
 
@@ -952,7 +953,7 @@ func (db *Database) GetListing(startDate, endDate time.Time) (*[]core.Transactio
 		SELECT
         t.transaction_id
         ,t.postdate
-        ,t.brief
+        ,t.description
         ,u.user_id
         ,u.username
     FROM

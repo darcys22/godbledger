@@ -25,6 +25,7 @@ type LedgerConfig struct {
 	ConfigFile       string // Location of the TOML config file, including directory path
 	DatabaseType     string // Type of Database being used
 	DatabaseLocation string // Location of the database file, including directory path or connection string
+	PidFile          string // Location of the PID file, if blank will not be created
 }
 
 var (
@@ -72,11 +73,20 @@ func MakeConfig(cli *cli.Context) (error, *LedgerConfig) {
 		log.Debugf("Error Parsing level: %s", err)
 		return err, nil
 	}
+
 	logrus.SetLevel(level)
 	setConfig(cli, config)
 	if config.DataDirectory != DefaultDataDir() {
 		config.ConfigFile = config.DataDirectory + "/config.toml"
 		config.DatabaseLocation = config.DataDirectory + "/ledgerdata/ledger.db"
+	} else {
+		_, configerr := os.Stat("/var/lib/godbledger/config.toml")
+		_, pidfileerr := os.Stat("/var/lib/godbledger/pidfile")
+		if !os.IsNotExist(configerr) && !os.IsNotExist(pidfileerr) {
+			config.DataDirectory = "/var/lib/godbledger"
+			config.ConfigFile = config.DataDirectory + "/config.toml"
+			config.DatabaseLocation = config.DataDirectory + "/ledgerdata/ledger.db"
+		}
 	}
 	err = InitConfig(config)
 	if err != nil {

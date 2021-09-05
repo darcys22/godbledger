@@ -29,7 +29,7 @@ type Database interface {
 	DeleteCurrency(currency string) error
 	FindAccount(code string) (*core.Account, error)
 	AddAccount(*core.Account) error
-	SafeAddAccount(*core.Account) error
+	SafeAddAccount(*core.Account) (bool, error)
 	DeleteAccount(accountName string) error
 	FindUser(pubKey string) (*core.User, error)
 	AddUser(usr *core.User) error

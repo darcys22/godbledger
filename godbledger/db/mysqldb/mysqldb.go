@@ -156,7 +156,7 @@ func (db *Database) InitDB() error {
 	CREATE TABLE IF NOT EXISTS transactions (
 		transaction_id VARCHAR(255) NOT NULL,
 		postdate DATETIME NOT NULL,
-		brief VARCHAR(255),
+		description VARCHAR(255),
 		poster_user_id VARCHAR(255),
 		PRIMARY KEY(transaction_id),
     FOREIGN KEY (poster_user_id) REFERENCES users (user_id) ON DELETE RESTRICT
@@ -257,6 +257,19 @@ func (db *Database) InitDB() error {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	//Default Currencies
+	insertCurrency := `
+		INSERT INTO currencies(name,decimals)
+			VALUES("USD",2),
+			("AUD",2),
+			("GBP",2),
+			("BTC",8),
+			("ETH",9),
+			("LOKI",9);
+	`
+	log.Debug("Query: " + insertCurrency)
+	_, _ = db.DB.Exec(insertCurrency)
 	return err
 }
 
