@@ -23,22 +23,22 @@ func (s *LedgerServer) AddTransaction(ctx context.Context, in *transaction.Trans
 
 	usr, err := core.NewUser("MainUser")
 	if err != nil {
-    log.Infof("Add Transaction error: %s", err.Error())
-    return &transaction.TransactionResponse{}, err
+		log.Infof("Add Transaction error: %s", err.Error())
+		return &transaction.TransactionResponse{}, err
 	}
 
 	txn, err := core.NewTransaction(usr)
 	if err != nil {
-    log.Infof("Add Transaction error: %s", err.Error())
-    return &transaction.TransactionResponse{}, err
+		log.Infof("Add Transaction error: %s", err.Error())
+		return &transaction.TransactionResponse{}, err
 	}
 	txn.Description = []byte(in.GetDescription())
 
 	layout := "2006-01-02"
 	t, err := time.Parse(layout, in.GetDate())
 	if err != nil {
-    log.Infof("Add Transaction error: %s", err.Error())
-    return &transaction.TransactionResponse{}, err
+		log.Infof("Add Transaction error: %s", err.Error())
+		return &transaction.TransactionResponse{}, err
 	}
 
 	lines := in.GetLines()
@@ -47,35 +47,35 @@ func (s *LedgerServer) AddTransaction(ctx context.Context, in *transaction.Trans
 		a := line.GetAccountname()
 		acc, err := core.NewAccount(a, a)
 		if err != nil {
-      log.Infof("Add Transaction error: %s", err.Error())
-      return &transaction.TransactionResponse{}, err
+			log.Infof("Add Transaction error: %s", err.Error())
+			return &transaction.TransactionResponse{}, err
 		}
 
 		b := line.GetCurrency()
 		curr, err := s.ld.GetCurrency(b)
 		if err != nil {
-      log.Infof("Add Transaction error: %s", err.Error())
-      return &transaction.TransactionResponse{}, err
+			log.Infof("Add Transaction error: %s", err.Error())
+			return &transaction.TransactionResponse{}, err
 		}
 
 		s, err := core.NewSplit(t, txn.Description, []*core.Account{acc}, curr, big.NewInt(line.GetAmount()))
 		if err != nil {
-      log.Infof("Add Transaction error: %s", err.Error())
-      return &transaction.TransactionResponse{}, err
+			log.Infof("Add Transaction error: %s", err.Error())
+			return &transaction.TransactionResponse{}, err
 		}
 
 		err = txn.AppendSplit(s)
 		if err != nil {
-      log.Infof("Add Transaction error: %s", err.Error())
-      return &transaction.TransactionResponse{}, err
+			log.Infof("Add Transaction error: %s", err.Error())
+			return &transaction.TransactionResponse{}, err
 		}
 
 	}
 
 	response, err := s.ld.Insert(txn)
 	if err != nil {
-    log.Infof("Add Transaction error: %s", err.Error())
-    return &transaction.TransactionResponse{}, err
+		log.Infof("Add Transaction error: %s", err.Error())
+		return &transaction.TransactionResponse{}, err
 	}
 
 	return &transaction.TransactionResponse{Message: response}, nil
@@ -93,15 +93,15 @@ func (s *LedgerServer) VoidTransaction(ctx context.Context, in *transaction.Dele
 
 	usr, err := core.NewUser("MainUser")
 	if err != nil {
-    log.Infof("Void Transaction error: %s", err.Error())
-    return &transaction.TransactionResponse{}, err
+		log.Infof("Void Transaction error: %s", err.Error())
+		return &transaction.TransactionResponse{}, err
 	}
 
 	message := "Accepted"
 	err = s.ld.Void(in.GetIdentifier(), usr)
 	if err != nil {
-    log.Infof("Void Transaction error: %s", err.Error())
-    return &transaction.TransactionResponse{}, err
+		log.Infof("Void Transaction error: %s", err.Error())
+		return &transaction.TransactionResponse{}, err
 	}
 
 	return &transaction.TransactionResponse{Message: message}, nil
@@ -140,8 +140,8 @@ func (s *LedgerServer) AddAccount(ctx context.Context, in *transaction.AccountTa
 	accountRequested := in.GetAccount()
 	err := s.ld.InsertAccount(accountRequested)
 	if err != nil {
-    log.Infof("Add Account error: %s", err.Error())
-    return &transaction.TransactionResponse{}, err
+		log.Infof("Add Account error: %s", err.Error())
+		return &transaction.TransactionResponse{}, err
 	}
 
 	tags := in.GetTag()
@@ -164,8 +164,8 @@ func (s *LedgerServer) DeleteAccount(ctx context.Context, in *transaction.Delete
 
 	err := s.ld.DeleteAccount(accountRequested)
 	if err != nil {
-    log.Infof("Delete Account error: %s", err.Error())
-    return &transaction.TransactionResponse{}, err
+		log.Infof("Delete Account error: %s", err.Error())
+		return &transaction.TransactionResponse{}, err
 	}
 
 	return &transaction.TransactionResponse{Message: "Accepted"}, nil
@@ -176,14 +176,14 @@ func (s *LedgerServer) AddCurrency(ctx context.Context, in *transaction.Currency
 
 	curr, err := core.NewCurrency(in.GetCurrency(), int(in.GetDecimals()))
 	if err != nil {
-    log.Infof("Add Currency error: %s", err.Error())
-    return &transaction.TransactionResponse{}, err
+		log.Infof("Add Currency error: %s", err.Error())
+		return &transaction.TransactionResponse{}, err
 	}
 
 	err = s.ld.InsertCurrency(curr)
 	if err != nil {
-    log.Infof("Add Currency error: %s", err.Error())
-    return &transaction.TransactionResponse{}, err
+		log.Infof("Add Currency error: %s", err.Error())
+		return &transaction.TransactionResponse{}, err
 	}
 	return &transaction.TransactionResponse{Message: "Accepted"}, nil
 }
@@ -201,8 +201,8 @@ func (s *LedgerServer) ReconcileTransactions(ctx context.Context, in *transactio
 	reconciliationID, err := s.ld.ReconcileTransactions(in.GetSplitID())
 
 	if err != nil {
-    log.Infof("Reconcile Transactions error: %s", err.Error())
-    return &transaction.TransactionResponse{}, err
+		log.Infof("Reconcile Transactions error: %s", err.Error())
+		return &transaction.TransactionResponse{}, err
 	}
 
 	log.WithField("reconciliation ID", reconciliationID).Debug("Created Reconciliation")
@@ -217,13 +217,13 @@ func (s *LedgerServer) GetTB(ctx context.Context, in *transaction.TBRequest) (*t
 
 	querydate, err := time.Parse("2006-01-02", in.Date)
 	if err != nil {
-    log.Infof("Get Trial Balance error: %s", err.Error())
-    return &transaction.TBResponse{}, err
+		log.Infof("Get Trial Balance error: %s", err.Error())
+		return &transaction.TBResponse{}, err
 	}
 	accounts, err := s.ld.GetTB(querydate)
 	if err != nil {
-    log.Infof("Get Trial Balance error: %s", err.Error())
-    return &transaction.TBResponse{}, err
+		log.Infof("Get Trial Balance error: %s", err.Error())
+		return &transaction.TBResponse{}, err
 	}
 
 	log.Debug("Building TB Response")
@@ -259,18 +259,18 @@ func (s *LedgerServer) GetListing(ctx context.Context, in *transaction.ReportReq
 
 	startdate, err := time.Parse("2006-01-02", in.Startdate)
 	if err != nil {
-    log.Infof("Get Listing error: %s", err.Error())
-    return &transaction.ListingResponse{}, err
+		log.Infof("Get Listing error: %s", err.Error())
+		return &transaction.ListingResponse{}, err
 	}
 	enddate, err := time.Parse("2006-01-02", in.Date)
 	if err != nil {
-    log.Infof("Get Listing error: %s", err.Error())
-    return &transaction.ListingResponse{}, err
+		log.Infof("Get Listing error: %s", err.Error())
+		return &transaction.ListingResponse{}, err
 	}
 	txns, err := s.ld.GetListing(startdate, enddate)
 	if err != nil {
-    log.Infof("Get Listing error: %s", err.Error())
-    return &transaction.ListingResponse{}, err
+		log.Infof("Get Listing error: %s", err.Error())
+		return &transaction.ListingResponse{}, err
 	}
 
 	log.Debug("Building Listing Response")
