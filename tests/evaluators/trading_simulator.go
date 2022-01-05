@@ -107,7 +107,7 @@ func tradingSimulator(conns ...*grpc.ClientConn) error {
 						if n.amount >= (amount - purchased) {
 							purchased += (amount - purchased)
 							pricepaid += float64(amount) * n.price
-							positions = append([]Trade{Trade{n.amount - amount, n.price}}, positions...)
+							positions = append([]Trade{{n.amount - amount, n.price}}, positions...)
 						} else {
 							purchased += n.amount
 							pricepaid += float64(n.amount) * n.price

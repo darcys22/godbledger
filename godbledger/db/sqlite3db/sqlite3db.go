@@ -94,8 +94,8 @@ func (db *Database) InitDB() error {
 	CREATE TABLE IF NOT EXISTS account_tag (
     account_id VARCHAR(255) NOT NULL,
     tag_id INTEGER NOT NULL,
-    FOREIGN KEY (account_id) REFERENCES accounts (account_id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    FOREIGN KEY (tag_id) REFERENCES tags (tag_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (account_id) REFERENCES accounts (account_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tags (tag_id) ON DELETE CASCADE ON UPDATE CASCADE,
     PRIMARY KEY (account_id, tag_id)
 	);`
 	log.Debug("Query: " + createDB)
@@ -122,10 +122,10 @@ func (db *Database) InitDB() error {
 	CREATE TABLE IF NOT EXISTS transactions (
 		transaction_id VARCHAR(255) NOT NULL,
 		postdate DATETIME NOT NULL,
-		brief VARCHAR(255),
+		description VARCHAR(255),
 		poster_user_id VARCHAR(255),
 		PRIMARY KEY(transaction_id),
-    FOREIGN KEY (poster_user_id) REFERENCES users (user_id) ON DELETE RESTRICT
+    FOREIGN KEY (poster_user_id) REFERENCES users (user_id) ON DELETE RESTRICT ON UPDATE CASCADE
 	);`
 	log.Debug("Query: " + createDB)
 	_, err = db.DB.Exec(createDB)
@@ -138,7 +138,7 @@ func (db *Database) InitDB() error {
 	CREATE TABLE IF NOT EXISTS transactions_body (
 		transaction_id VARCHAR(255) NOT NULL,
 		body TEXT,
-		FOREIGN KEY(transaction_id) REFERENCES transactions(transaction_id) ON DELETE CASCADE
+		FOREIGN KEY(transaction_id) REFERENCES transactions(transaction_id) ON DELETE CASCADE ON UPDATE CASCADE
 	);`
 	log.Debug("Query: " + createDB)
 	_, err = db.DB.Exec(createDB)
@@ -152,7 +152,7 @@ func (db *Database) InitDB() error {
     transaction_id VARCHAR(255) NOT NULL,
     tag_id INTEGER NOT NULL,
     FOREIGN KEY (transaction_id) REFERENCES transactions (transaction_id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    FOREIGN KEY (tag_id) REFERENCES tags (tag_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tags (tag_id) ON DELETE CASCADE ON UPDATE CASCADE,
     PRIMARY KEY (transaction_id, tag_id)
 	);`
 	log.Debug("Query: " + createDB)
@@ -170,7 +170,7 @@ func (db *Database) InitDB() error {
 		currency VARCHAR(255),
 		amount BIGINT,
 		transaction_id VARCHAR(255),
-		FOREIGN KEY(transaction_id) REFERENCES transactions(transaction_id) ON DELETE CASCADE,
+		FOREIGN KEY(transaction_id) REFERENCES transactions(transaction_id) ON DELETE CASCADE ON UPDATE CASCADE,
 		PRIMARY KEY(split_id)
 	);`
 	log.Debug("Query: " + createDB)
@@ -185,8 +185,8 @@ func (db *Database) InitDB() error {
 		id INT AUTO_INCREMENT PRIMARY KEY,
 		split_id VARCHAR(255),
 		account_id VARCHAR(255),
-		FOREIGN KEY(split_id) REFERENCES splits(split_id) ON DELETE CASCADE,
-		FOREIGN KEY(account_id) REFERENCES accounts(account_id) ON DELETE CASCADE
+		FOREIGN KEY(split_id) REFERENCES splits(split_id) ON DELETE CASCADE ON UPDATE CASCADE,
+		FOREIGN KEY(account_id) REFERENCES accounts(account_id) ON DELETE RESTRICT ON UPDATE CASCADE
 	);`
 	log.Debug("Query: " + createDB)
 	_, err = db.DB.Exec(createDB)
@@ -199,7 +199,7 @@ func (db *Database) InitDB() error {
 	CREATE TABLE IF NOT EXISTS reconciliations (
 		reconciliation_id VARCHAR(255) NOT NULL,
 		split_id VARCHAR(255) NOT NULL,
-		FOREIGN KEY (split_id) REFERENCES splits (split_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+		FOREIGN KEY (split_id) REFERENCES splits (split_id) ON DELETE CASCADE ON UPDATE CASCADE,
 		PRIMARY KEY (reconciliation_id, split_id)
 	);`
 	log.Debug("Query: " + createDB)
@@ -231,8 +231,8 @@ func (db *Database) InitDB() error {
 			("AUD",2),
 			("GBP",2),
 			("BTC",8),
-			("ETH",9),
-			("LOKI",9);
+			("ETH",18),
+			("OXEN",9);
 	`
 	log.Debug("Query: " + insertCurrency)
 	_, _ = db.DB.Exec(insertCurrency)

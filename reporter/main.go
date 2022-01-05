@@ -12,8 +12,6 @@ import (
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
 
-const ()
-
 var app *cli.App
 
 func init() {
