@@ -39,7 +39,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        go-version: [1.15.x]
+        go-version: [1.14.x]
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     environment: "PPA Signing Environment"

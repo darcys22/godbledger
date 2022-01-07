@@ -984,6 +984,7 @@ func doXgo(cmdline []string) {
 		xgoArgs := append(buildFlags(env), flag.Args()...)
 		xgoArgs = append(xgoArgs, []string{"--targets", *xtarget}...)
 		xgoArgs = append(xgoArgs, []string{"--dest", outDir}...)
+		xgoArgs = append(xgoArgs, []string{"--go", "go-1.15.x"}...)
 		xgoArgs = append(xgoArgs, "-v")
 		xgoArgs = append(xgoArgs, "./"+cmd) // relative package name (assumes we are inside GOPATH)
 		xgo := xgoTool(xgoArgs)
