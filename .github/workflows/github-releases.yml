@@ -1,0 +1,26 @@
+name: testing-github-reelases
+on:
+  push:
+    branches: [github-releases]
+
+jobs:
+  github:
+    strategy:
+      fail-fast: true
+      matrix:
+        go-version: [1.14.x]
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    environment: "PPA Signing Environment"
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: ${{ matrix.go-version }}
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Push Github Release
+      env: 
+        GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
+      run: |
+        make github
