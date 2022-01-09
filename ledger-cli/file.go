@@ -38,7 +38,14 @@ var commandFile = &cli.Command{
 	Description: `
 	Loads a file in the ledger cli format
 `,
-	Flags: []cli.Flag{},
+	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:    "currency",
+			Aliases: []string{"c"},
+			Value:   "USD",
+			Usage:   "Specify the currency that the ledger file will be in, default to USD",
+		},
+	},
 	Action: func(ctx *cli.Context) error {
 		err, cfg := cmd.MakeConfig(ctx)
 		if err != nil {
@@ -60,7 +67,7 @@ var commandFile = &cli.Command{
 				return fmt.Errorf("Could not read file %s (%v)", ledgerFileName, err)
 			}
 
-			generalLedger, parseError := ParseLedger(ledgerFileReader)
+			generalLedger, parseError := ParseLedger(ledgerFileReader, ctx.String("currency"))
 			if parseError != nil {
 				return fmt.Errorf("Could not parse file (%v)", parseError)
 			}

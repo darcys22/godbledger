@@ -3,7 +3,6 @@ bazel-*
 
 /tmp
 */**/*un~
-*/**/*.test
 *un~
 .DS_Store
 */**/.DS_Store

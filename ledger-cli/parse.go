@@ -34,8 +34,8 @@ const (
 // ParseLedger parses a ledger file and returns a list of Transactions.
 //
 // Transactions are sorted by date.
-func ParseLedger(ledgerReader io.Reader) (generalLedger []*Transaction, err error) {
-	parseLedger(ledgerReader, func(t *Transaction, e error) (stop bool) {
+func ParseLedger(ledgerReader io.Reader, currency string) (generalLedger []*Transaction, err error) {
+	parseLedger(ledgerReader, currency, func(t *Transaction, e error) (stop bool) {
 		if e != nil {
 			err = e
 			stop = true
@@ -55,7 +55,7 @@ func ParseLedger(ledgerReader io.Reader) (generalLedger []*Transaction, err erro
 
 var accountToAmountSpace = regexp.MustCompile(" {2,}|\t+")
 
-func parseLedger(ledgerReader io.Reader, callback func(t *Transaction, err error) (stop bool)) {
+func parseLedger(ledgerReader io.Reader, currency string, callback func(t *Transaction, err error) (stop bool)) {
 	var trans *Transaction
 	scanner := bufio.NewScanner(ledgerReader)
 	var line string
@@ -122,7 +122,7 @@ func parseLedger(ledgerReader io.Reader, callback func(t *Transaction, err error
 			}
 			lastIndex := len(nonEmptyWords) - 1
 			balErr, rationalNum := getBalance(strings.Trim(nonEmptyWords[lastIndex], whitespace))
-			accChange.Currency = "USD"
+			accChange.Currency = currency
 			if !balErr {
 				// Assuming no balance and whole line is account name
 				accChange.Name = strings.Join(nonEmptyWords, " ")
