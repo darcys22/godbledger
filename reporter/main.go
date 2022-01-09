@@ -51,6 +51,11 @@ var (
 		Name:  "json",
 		Usage: "output json instead of human-readable format",
 	}
+	formattingFlag = &cli.BoolFlag{
+		Name:    "unformatted",
+		Aliases: []string{"u"},
+		Usage:   "will display the dollar amounts without commas and dollar sign symbols",
+	}
 )
 
 func main() {
