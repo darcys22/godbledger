@@ -21,6 +21,8 @@ jobs:
       run: sudo apt-get install devscripts
     - name: Checkout code
       uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
     - name: Push PPA
       shell: 'script -q -e -c "bash {0}"'
       env: 
