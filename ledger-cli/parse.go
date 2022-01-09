@@ -148,11 +148,9 @@ func getBalance(balance string) (bool, *big.Rat) {
 	rationalNum := new(big.Rat)
 	if strings.Contains(balance, "(") {
 		rationalNum.SetFloat64(calc.Solve(balance))
-		rationalNum.Mul(rationalNum, big.NewRat(100, 1))
 		return true, rationalNum
 	}
 	_, isValid := rationalNum.SetString(balance)
-	rationalNum.Mul(rationalNum, big.NewRat(100, 1))
 	return isValid, rationalNum
 }
 
