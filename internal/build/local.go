@@ -6,9 +6,33 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+  "fmt"
+  "compress/gzip"
 
 	"github.com/pkg/errors"
 )
+
+func Gzip(source, target string) error {
+    reader, err := os.Open(source)
+    if err != nil {
+        return err
+    }
+ 
+    filename := filepath.Base(source)
+    target = filepath.Join(target, fmt.Sprintf("%s.gz", filename))
+    writer, err := os.Create(target)
+    if err != nil {
+        return err
+    }
+    defer writer.Close()
+ 
+    archiver := gzip.NewWriter(writer)
+    archiver.Name = filename
+    defer archiver.Close()
+ 
+    _, err = io.Copy(archiver, reader)
+    return err
+}
 
 // LocalAssets contains the local objects to be uploaded
 func LocalAssets(path string) ([]string, error) {
@@ -37,6 +61,12 @@ func LocalAssets(path string) ([]string, error) {
 	}
 
 	assets := make([]string, 0, len(files))
+	for _, f := range files {
+    fmt.Println(f)
+		if fi, _ := os.Stat(f); fi.IsDir() {
+      Gzip(f, path)	
+		}
+  }
 	for _, f := range files {
 
 		// Exclude directory.
