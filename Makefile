@@ -43,6 +43,9 @@ build-native:
 lint:
 	$(GORUN) utils/ci.go lint
 
+gofmt:
+	gofmt -l -s -w .
+
 # our tests include an integration test which expects the local
 # GOOS-based build output to be in the ./build/bin folder
 test: build-native
