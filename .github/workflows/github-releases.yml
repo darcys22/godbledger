@@ -28,6 +28,6 @@ jobs:
         GOPATH: /home/runner/work/darcys22/go
       run: |
         pwd
-        ls
+        ls go/src
         cd /home/runner/work/darcys22/go/src/github.com/darcys22/godbledger
         make github
