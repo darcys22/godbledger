@@ -25,9 +25,7 @@ jobs:
     - name: Push Github Release
       env: 
         GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
-        GOPATH: /home/runner/work/darcys22/go
+        GOPATH: home/runner/work/godbledger/godbledger/go
       run: |
-        pwd
-        ls go/src/github.com/darcys22
         cd go/src/github.com/darcys22/godbledger
         make github
