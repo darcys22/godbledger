@@ -52,8 +52,13 @@ jobs:
         go-version: ${{ matrix.go-version }}
     - name: Checkout code
       uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        path: go/src/github.com/darcys22/godbledger
     - name: Push Github Release
       env: 
         GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
+        GOPATH: /home/runner/work/godbledger/godbledger/go
       run: |
+        cd go/src/github.com/darcys22/godbledger
         make github

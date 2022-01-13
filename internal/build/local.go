@@ -4,34 +4,91 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"io"
+  "fmt"
+  "archive/tar"
+  "compress/gzip"
+	"bytes"
+	"io/ioutil"
 	"os"
 	"path/filepath"
-  "fmt"
-  "compress/gzip"
 
 	"github.com/pkg/errors"
 )
 
-func Gzip(source, target string) error {
-    reader, err := os.Open(source)
-    if err != nil {
-        return err
-    }
- 
-    filename := filepath.Base(source)
-    target = filepath.Join(target, fmt.Sprintf("%s.gz", filename))
-    writer, err := os.Create(target)
-    if err != nil {
-        return err
-    }
-    defer writer.Close()
- 
-    archiver := gzip.NewWriter(writer)
-    archiver.Name = filename
-    defer archiver.Close()
- 
-    _, err = io.Copy(archiver, reader)
-    return err
+func compress(src string, buf io.Writer) error {
+	// tar > gzip > buf
+	zr := gzip.NewWriter(buf)
+	tw := tar.NewWriter(zr)
+
+	// is file a folder?
+	fi, err := os.Stat(src)
+	if err != nil {
+		return err
+	}
+	mode := fi.Mode()
+	if mode.IsRegular() {
+		// get header
+		header, err := tar.FileInfoHeader(fi, src)
+		if err != nil {
+			return err
+		}
+		// write header
+		if err := tw.WriteHeader(header); err != nil {
+			return err
+		}
+		// get content
+		data, err := os.Open(src)
+		if err != nil {
+			return err
+		}
+		if _, err := io.Copy(tw, data); err != nil {
+			return err
+		}
+	} else if mode.IsDir() { // folder
+
+		// walk through every file in the folder
+		filepath.Walk(src, func(file string, fi os.FileInfo, err error) error {
+			// generate tar header
+			header, err := tar.FileInfoHeader(fi, file)
+			if err != nil {
+				return err
+			}
+
+			// must provide real name
+			// (see https://golang.org/src/archive/tar/common.go?#L626)
+      _ , outFile := filepath.Split(file)
+			header.Name = outFile
+
+			// write header
+			if err := tw.WriteHeader(header); err != nil {
+				return err
+			}
+			// if not a dir, write file content
+			if !fi.IsDir() {
+				data, err := os.Open(file)
+				if err != nil {
+					return err
+				}
+				if _, err := io.Copy(tw, data); err != nil {
+					return err
+				}
+			}
+			return nil
+		})
+	} else {
+		return fmt.Errorf("error: file type not supported")
+	}
+
+	// produce tar
+	if err := tw.Close(); err != nil {
+		return err
+	}
+	// produce gzip
+	if err := zr.Close(); err != nil {
+		return err
+	}
+	//
+	return nil
 }
 
 // LocalAssets contains the local objects to be uploaded
@@ -62,9 +119,20 @@ func LocalAssets(path string) ([]string, error) {
 
 	assets := make([]string, 0, len(files))
 	for _, f := range files {
-    fmt.Println(f)
 		if fi, _ := os.Stat(f); fi.IsDir() {
-      Gzip(f, path)	
+      var buf bytes.Buffer
+      if err := compress(f, &buf); err != nil {
+        fmt.Println(err)
+        os.Exit(1)
+      }
+      // write file to disk
+      pre, outFile := filepath.Split(f)
+      outFile = outFile + ".tar.gz"
+      if err = ioutil.WriteFile(pre+outFile, buf.Bytes(), 0600); err != nil {
+        fmt.Println(err)
+        os.Exit(1)
+      }
+      assets = append(assets, pre + outFile)
 		}
   }
 	for _, f := range files {
