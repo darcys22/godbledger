@@ -1,13 +1,13 @@
 package build
 
 import (
+	"archive/tar"
+	"bytes"
+	"compress/gzip"
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"io"
-  "fmt"
-  "archive/tar"
-  "compress/gzip"
-	"bytes"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -56,7 +56,7 @@ func compress(src string, buf io.Writer) error {
 
 			// must provide real name
 			// (see https://golang.org/src/archive/tar/common.go?#L626)
-      _ , outFile := filepath.Split(file)
+			_, outFile := filepath.Split(file)
 			header.Name = outFile
 
 			// write header
@@ -120,21 +120,21 @@ func LocalAssets(path string) ([]string, error) {
 	assets := make([]string, 0, len(files))
 	for _, f := range files {
 		if fi, _ := os.Stat(f); fi.IsDir() {
-      var buf bytes.Buffer
-      if err := compress(f, &buf); err != nil {
-        fmt.Println(err)
-        os.Exit(1)
-      }
-      // write file to disk
-      pre, outFile := filepath.Split(f)
-      outFile = outFile + ".tar.gz"
-      if err = ioutil.WriteFile(pre+outFile, buf.Bytes(), 0600); err != nil {
-        fmt.Println(err)
-        os.Exit(1)
-      }
-      assets = append(assets, pre + outFile)
+			var buf bytes.Buffer
+			if err := compress(f, &buf); err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+			// write file to disk
+			pre, outFile := filepath.Split(f)
+			outFile = outFile + ".tar.gz"
+			if err = ioutil.WriteFile(pre+outFile, buf.Bytes(), 0600); err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+			assets = append(assets, pre+outFile)
 		}
-  }
+	}
 	for _, f := range files {
 
 		// Exclude directory.
