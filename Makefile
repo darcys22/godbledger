@@ -14,7 +14,8 @@ endif
 GDBL_DATA_DIR ?= $(DEFAULT_DATA_DIR)
 
 GODIST = ./build/dist
-GO ?= latest
+#GO ?= latest
+GO ?= go-1.15.x
 GORUN = env GO111MODULE=on go run
 
 xtarget = $(strip $(subst build-,,$@)) # e.g. 'build-linux-amd64' -> 'linux-amd64'
