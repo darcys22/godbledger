@@ -7,6 +7,9 @@ import (
 	"strconv"
 	"time"
 
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
+
 	"encoding/csv"
 	"encoding/json"
 
@@ -37,6 +40,7 @@ If you want to see all the transactions in the database, or export to CSV
 	Flags: []cli.Flag{
 		csvFlag,
 		jsonFlag,
+		formattingFlag,
 	},
 	Action: func(ctx *cli.Context) error {
 		//Check if keyfile path given and make sure it doesn't already exist.
@@ -54,6 +58,7 @@ If you want to see all the transactions in the database, or export to CSV
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"Account", fmt.Sprintf("Balance at %s", queryDate.Format("02 January 2006"))})
 		table.SetBorder(false)
+		table.SetAlignment(tablewriter.ALIGN_RIGHT)
 
 		queryDB := `
 			SELECT split_accounts.account_id,
@@ -95,7 +100,12 @@ If you want to see all the transactions in the database, or export to CSV
 			if err != nil {
 				return fmt.Errorf("Could not process the amount as a float (%v)", err)
 			}
-			t.Amount = fmt.Sprintf("%.2f", centsAmount/math.Pow(10, decimals))
+			if ctx.Bool("unformatted") {
+				t.Amount = fmt.Sprintf("%.2f", centsAmount/math.Pow(10, decimals))
+			} else {
+				p := message.NewPrinter(language.English)
+				t.Amount = p.Sprintf("$%.2f", centsAmount/math.Pow(10, decimals))
+			}
 			tboutput.Data = append(tboutput.Data, t)
 			table.Append([]string{t.Account, t.Amount})
 		}
