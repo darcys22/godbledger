@@ -77,13 +77,13 @@ linux-arm-64:
 build-docker: docker-build
 
 docker-build:
-	docker build -t godbledger:$(VERSION) -t godbledger:latest -f ./utils/Dockerfile.build .
+	docker build --platform linux/amd64 -t godbledger:$(VERSION) -t godbledger:latest -f ./utils/Dockerfile.build .
 
 docker-login:
 	@$(if $(strip $(shell docker ps | grep godbledger-server)), @docker exec -it godbledger-server /bin/ash || 0, @docker run -it --rm --entrypoint /bin/ash godbledger:$(VERSION) )
 
 docker-start:
-	GDBL_DATA_DIR=$(GDBL_DATA_DIR) GDBL_LOG_LEVEL=$(GDBL_LOG_LEVEL) GDBL_VERSION=$(VERSION) docker-compose up
+	DOCKER_DEFAULT_PLATFORM=linux/amd64 GDBL_DATA_DIR=$(GDBL_DATA_DIR) GDBL_LOG_LEVEL=$(GDBL_LOG_LEVEL) GDBL_VERSION=$(VERSION) docker-compose up
 
 docker-stop:
 	docker-compose down
