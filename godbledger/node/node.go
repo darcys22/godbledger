@@ -1,7 +1,6 @@
 package node
 
 import (
-	"io/ioutil"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -109,7 +108,7 @@ func (n *Node) writePIDFile() {
 
 	// Retrieve the PID and write it to file.
 	pid := strconv.Itoa(os.Getpid())
-	if err := ioutil.WriteFile(n.PidFile, []byte(pid), 0644); err != nil {
+	if err := os.WriteFile(n.PidFile, []byte(pid), 0644); err != nil {
 		log.Error("Failed to write pidfile", "error", err)
 		os.Exit(1)
 	}

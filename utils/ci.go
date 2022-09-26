@@ -37,7 +37,6 @@ For all commands, -n prevents execution of external programs (dry run mode).
 package main
 
 import (
-	//"bufio"
 	"bytes"
 	"context"
 	"encoding/base64"
@@ -45,13 +44,11 @@ import (
 	"fmt"
 	"go/parser"
 	"go/token"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 
-	//"regexp"
 	"runtime"
 	"strings"
 
@@ -228,7 +225,7 @@ func doBuild(cmdline []string) {
 	goinstall.Args = append(goinstall.Args, packages...)
 	build.MustRun(goinstall)
 
-	if cmds, err := ioutil.ReadDir("cmd"); err == nil {
+	if cmds, err := os.ReadDir("cmd"); err == nil {
 		for _, cmd := range cmds {
 			pkgs, err := parser.ParseDir(token.NewFileSet(), filepath.Join(".", "cmd", cmd.Name()), nil, parser.PackageClauseOnly)
 			if err != nil {
@@ -739,7 +736,7 @@ func ppaUpload(workdir, ppa, sshUser string, files []string) {
 	if sshkey := getenvBase64("PPA_SSH_KEY"); len(sshkey) > 0 {
 		idfile = filepath.Join(workdir, "sshkey")
 		if _, err := os.Stat(idfile); os.IsNotExist(err) {
-			ioutil.WriteFile(idfile, sshkey, 0600)
+			os.WriteFile(idfile, sshkey, 0600)
 		}
 	}
 	// Upload
@@ -762,7 +759,7 @@ func makeWorkdir(wdflag string) string {
 	if wdflag != "" {
 		err = os.MkdirAll(wdflag, 0744)
 	} else {
-		wdflag, err = ioutil.TempDir("", "godbledger-build-")
+		wdflag, err = os.MkdirTemp("", "godbledger-build-")
 	}
 	if err != nil {
 		log.Fatal(err)

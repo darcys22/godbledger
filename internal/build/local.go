@@ -8,7 +8,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -130,7 +129,7 @@ func LocalAssets(path string) ([]string, error) {
 			// write file to disk
 			pre, outFile := filepath.Split(f)
 			outFile = outFile + ".tar.gz"
-			if err = ioutil.WriteFile(pre+outFile, buf.Bytes(), 0600); err != nil {
+			if err = os.WriteFile(pre+outFile, buf.Bytes(), 0600); err != nil {
 				fmt.Println(err)
 				os.Exit(1)
 			}
