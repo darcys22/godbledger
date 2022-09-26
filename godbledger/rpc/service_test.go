@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"flag"
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/darcys22/godbledger/godbledger/cmd"
@@ -19,7 +19,7 @@ import (
 
 func init() {
 	logrus.SetLevel(logrus.DebugLevel)
-	logrus.SetOutput(ioutil.Discard)
+	logrus.SetOutput(io.Discard)
 }
 
 func TestLifecycle_OK(t *testing.T) {

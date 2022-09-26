@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 	"strings"
@@ -79,7 +78,7 @@ func WaitForTextInFile(file *os.File, text string) error {
 	for {
 		select {
 		case <-ctx.Done():
-			contents, err := ioutil.ReadAll(file)
+			contents, err := io.ReadAll(file)
 			if err != nil {
 				return err
 			}

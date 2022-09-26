@@ -5,8 +5,8 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
 	"net"
+	"os"
 
 	"github.com/darcys22/godbledger/proto/transaction"
 
@@ -158,7 +158,7 @@ func (s *Service) logNewClientConnection(ctx context.Context) {
 
 func (s *Service) loadTLSCredentials() (credentials.TransportCredentials, error) {
 	// Load certificate of the CA who signed client's certificate
-	pemClientCA, err := ioutil.ReadFile(s.withCACert)
+	pemClientCA, err := os.ReadFile(s.withCACert)
 	if err != nil {
 		return nil, err
 	}

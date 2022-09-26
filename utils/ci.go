@@ -37,7 +37,6 @@ For all commands, -n prevents execution of external programs (dry run mode).
 package main
 
 import (
-	//"bufio"
 	"bytes"
 	"context"
 	"encoding/base64"
@@ -45,13 +44,11 @@ import (
 	"fmt"
 	"go/parser"
 	"go/token"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 
-	//"regexp"
 	"runtime"
 	"strings"
 
@@ -65,13 +62,6 @@ import (
 )
 
 var (
-	// Make Release iterates through these executables
-	packagesToBuild = []string{
-		"godbledger",
-		"ledger-cli",
-		"reporter",
-	}
-
 	// A debian package is created for all executables listed here.
 	debExecutables = []debExecutable{
 		{
@@ -117,7 +107,7 @@ var (
 	// This is the version of go that will be downloaded by
 	//
 	//     go run ci.go install -dlgo
-	dlgoVersion = "1.16"
+	dlgoVersion = "1.19"
 )
 
 var GOBIN, _ = filepath.Abs(filepath.Join("build", "bin"))
@@ -235,7 +225,7 @@ func doBuild(cmdline []string) {
 	goinstall.Args = append(goinstall.Args, packages...)
 	build.MustRun(goinstall)
 
-	if cmds, err := ioutil.ReadDir("cmd"); err == nil {
+	if cmds, err := os.ReadDir("cmd"); err == nil {
 		for _, cmd := range cmds {
 			pkgs, err := parser.ParseDir(token.NewFileSet(), filepath.Join(".", "cmd", cmd.Name()), nil, parser.PackageClauseOnly)
 			if err != nil {
@@ -358,7 +348,7 @@ func doLint(cmdline []string) {
 
 //downloadLinter downloads and unpacks golangci-lint.
 func downloadLinter(cachedir string) string {
-	const version = "1.27.0"
+	const version = "1.49.0"
 
 	csdb := build.MustLoadChecksums("utils/checksums.txt")
 	base := fmt.Sprintf("golangci-lint-%s-%s-%s", version, runtime.GOOS, runtime.GOARCH)
@@ -641,22 +631,6 @@ func (g *GHR) DeleteAssets(ctx context.Context, releaseID int64, localAssets []s
 	return nil
 }
 
-// skips archiving for some build configurations.
-func maybeSkipArchive(env build.Environment) {
-	if env.IsPullRequest {
-		log.Printf("skipping because this is a PR build")
-		os.Exit(0)
-	}
-	if env.IsCronJob {
-		log.Printf("skipping because this is a cron job")
-		os.Exit(0)
-	}
-	//if env.Branch != "master" && !strings.HasPrefix(env.Tag, "v1.") {
-	//log.Printf("skipping because branch %q, tag %q is not on the whitelist", env.Branch, env.Tag)
-	//os.Exit(0)
-	//}
-}
-
 // Debian Packaging
 func doDebianSource(cmdline []string) {
 	var (
@@ -670,7 +644,7 @@ func doDebianSource(cmdline []string) {
 	flag.CommandLine.Parse(cmdline)
 	*workdir = makeWorkdir(*workdir)
 	env := build.Env()
-	maybeSkipArchive(env)
+  log.Printf("remove this: ", env)
 
 	// Import the signing key.
 	//gpg --export-secret-key sean@darcyfinancial.com  | base64 | paste -s -d '' > secret-key-base64-encoded.gpg
@@ -762,7 +736,7 @@ func ppaUpload(workdir, ppa, sshUser string, files []string) {
 	if sshkey := getenvBase64("PPA_SSH_KEY"); len(sshkey) > 0 {
 		idfile = filepath.Join(workdir, "sshkey")
 		if _, err := os.Stat(idfile); os.IsNotExist(err) {
-			ioutil.WriteFile(idfile, sshkey, 0600)
+			os.WriteFile(idfile, sshkey, 0600)
 		}
 	}
 	// Upload
@@ -785,19 +759,12 @@ func makeWorkdir(wdflag string) string {
 	if wdflag != "" {
 		err = os.MkdirAll(wdflag, 0744)
 	} else {
-		wdflag, err = ioutil.TempDir("", "godbledger-build-")
+		wdflag, err = os.MkdirTemp("", "godbledger-build-")
 	}
 	if err != nil {
 		log.Fatal(err)
 	}
 	return wdflag
-}
-
-func isUnstableBuild(env build.Environment) bool {
-	if env.Tag != "" {
-		return false
-	}
-	return true
 }
 
 type debPackage struct {
@@ -859,9 +826,6 @@ func newDebMetadata(distro, goboot, author string, env build.Environment, t time
 // Name returns the name of the metapackage that depends
 // on all executable packages.
 func (meta debMetadata) Name() string {
-	if isUnstableBuild(meta.Env) {
-		return meta.PackageName + "-unstable"
-	}
 	return meta.PackageName
 }
 
@@ -888,26 +852,12 @@ func (meta debMetadata) ExeList() string {
 
 // ExeName returns the package name of an executable package.
 func (meta debMetadata) ExeName(exe debExecutable) string {
-	if isUnstableBuild(meta.Env) {
-		return exe.Package() + "-unstable"
-	}
 	return exe.Package()
 }
 
 // ExeConflicts returns the content of the Conflicts field
 // for executable packages.
 func (meta debMetadata) ExeConflicts(exe debExecutable) string {
-	if isUnstableBuild(meta.Env) {
-		// Set up the conflicts list so that the *-unstable packages
-		// cannot be installed alongside the regular version.
-		//
-		// https://www.debian.org/doc/debian-policy/ch-relationships.html
-		// is very explicit about Conflicts: and says that Breaks: should
-		// be preferred and the conflicting files should be handled via
-		// alternates. We might do this eventually but using a conflict is
-		// easier now.
-		return "godbledger, " + exe.Package()
-	}
 	return ""
 }
 
@@ -980,12 +930,12 @@ func doXgo(cmdline []string) {
 	gogetxgo := goTool("get", "src.techknowlogick.com/xgo")
 	build.MustRun(gogetxgo)
 
-	for _, cmd := range packagesToBuild {
+	for _, cmd := range debExecutables {
 		xgoArgs := append(buildFlags(env), flag.Args()...)
 		xgoArgs = append(xgoArgs, []string{"--targets", *xtarget}...)
 		xgoArgs = append(xgoArgs, []string{"--dest", outDir}...)
 		xgoArgs = append(xgoArgs, "-v")
-		xgoArgs = append(xgoArgs, "./"+cmd) // relative package name (assumes we are inside GOPATH)
+		xgoArgs = append(xgoArgs, "./"+cmd.BinaryName) // relative package name (assumes we are inside GOPATH)
 		xgo := xgoTool(xgoArgs)
 		build.MustRun(xgo)
 
@@ -997,7 +947,7 @@ func doXgo(cmdline []string) {
 			}
 
 			suffix := filepath.Base(filepath.Dir(path))
-			if strings.HasPrefix(info.Name(), cmd) && strings.Contains(info.Name(), suffix) {
+			if strings.HasPrefix(info.Name(), cmd.BinaryName) && strings.Contains(info.Name(), suffix) {
 				newName := strings.Replace(info.Name(), "-"+suffix, "", 1)
 				newPath := filepath.Join(filepath.Dir(path), newName)
 				log.Println("renaming:", path)

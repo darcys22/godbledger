@@ -5,8 +5,8 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
 	"math/big"
+	"os"
 	"time"
 
 	"github.com/darcys22/godbledger/proto/transaction"
@@ -74,7 +74,6 @@ var commandSingleTestTransaction = &cli.Command{
 }
 
 func Send(cfg *cmd.LedgerConfig, t *Transaction) error {
-
 	address := fmt.Sprintf("%s:%s", cfg.Host, cfg.RPCPort)
 	log.WithField("address", address).Info("GRPC Dialing on port")
 	opts := []grpc.DialOption{}
@@ -127,7 +126,7 @@ func Send(cfg *cmd.LedgerConfig, t *Transaction) error {
 }
 func loadTLSCredentials(cfg *cmd.LedgerConfig) (credentials.TransportCredentials, error) {
 	// Load certificate of the CA who signed server's certificate
-	pemServerCA, err := ioutil.ReadFile(cfg.CACert)
+	pemServerCA, err := os.ReadFile(cfg.CACert)
 	if err != nil {
 		return nil, err
 	}

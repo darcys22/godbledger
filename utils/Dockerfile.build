@@ -1,4 +1,4 @@
-FROM golang:1.15.5-alpine AS builder
+FROM --platform=linux/amd64 golang:1.15.5-alpine AS builder
 # https://megamorf.gitlab.io/2019/09/08/alpine-go-builds-with-cgo-enabled/
 
 RUN apk update
@@ -12,7 +12,7 @@ ADD . .
 # TODO: pull app version from VERSION
 RUN make
 
-FROM alpine
+FROM --platform=linux/amd64 alpine
 
 # netcat is needed by wait-for
 RUN apk add net-tools

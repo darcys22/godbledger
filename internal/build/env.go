@@ -51,45 +51,8 @@ func (env Environment) String() string {
 		env.Name, env.Commit, env.Date, env.Branch, env.Tag, env.Buildnum, env.IsPullRequest)
 }
 
-// Env returns metadata about the current CI environment, falling back to LocalEnv
-// if not running on CI.
 func Env() Environment {
-	switch {
-	case os.Getenv("CI") == "true" && os.Getenv("TRAVIS") == "true":
-		commit := os.Getenv("TRAVIS_PULL_REQUEST_SHA")
-		if commit == "" {
-			commit = os.Getenv("TRAVIS_COMMIT")
-		}
-		return Environment{
-			Name:          "travis",
-			Repo:          os.Getenv("TRAVIS_REPO_SLUG"),
-			Commit:        commit,
-			Date:          getDate(commit),
-			Branch:        os.Getenv("TRAVIS_BRANCH"),
-			Tag:           os.Getenv("TRAVIS_TAG"),
-			Buildnum:      os.Getenv("TRAVIS_BUILD_NUMBER"),
-			IsPullRequest: os.Getenv("TRAVIS_PULL_REQUEST") != "false",
-			IsCronJob:     os.Getenv("TRAVIS_EVENT_TYPE") == "cron",
-		}
-	case os.Getenv("CI") == "True" && os.Getenv("APPVEYOR") == "True":
-		commit := os.Getenv("APPVEYOR_PULL_REQUEST_HEAD_COMMIT")
-		if commit == "" {
-			commit = os.Getenv("APPVEYOR_REPO_COMMIT")
-		}
-		return Environment{
-			Name:          "appveyor",
-			Repo:          os.Getenv("APPVEYOR_REPO_NAME"),
-			Commit:        commit,
-			Date:          getDate(commit),
-			Branch:        os.Getenv("APPVEYOR_REPO_BRANCH"),
-			Tag:           os.Getenv("APPVEYOR_REPO_TAG_NAME"),
-			Buildnum:      os.Getenv("APPVEYOR_BUILD_NUMBER"),
-			IsPullRequest: os.Getenv("APPVEYOR_PULL_REQUEST_NUMBER") != "",
-			IsCronJob:     os.Getenv("APPVEYOR_SCHEDULED_BUILD") == "True",
-		}
-	default:
-		return LocalEnv()
-	}
+	return LocalEnv()
 }
 
 // LocalEnv returns build environment metadata gathered from git.

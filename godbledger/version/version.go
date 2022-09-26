@@ -47,8 +47,7 @@ var VersionWithMeta = func() string {
 }()
 
 // ArchiveVersion holds the textual version string used for Swarm archives.
-// e.g. "0.3.0-dea1ce05" for stable releases, or
-//      "0.3.1-unstable-21c059b6" for unstable releases
+// e.g. "0.3.0-dea1ce05" for stable releases, or "0.3.1-unstable-21c059b6" for unstable releases
 func ArchiveVersion(gitCommit string) string {
 	vsn := Version
 	if VersionMeta != "stable" {

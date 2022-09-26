@@ -8,7 +8,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -44,10 +43,12 @@ func compress(src string, buf io.Writer) error {
 		if _, err := io.Copy(tw, data); err != nil {
 			return err
 		}
-	} else if mode.IsDir() { // folder
-
+	} else if mode.IsDir() {
 		// walk through every file in the folder
 		filepath.Walk(src, func(file string, fi os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
 			// generate tar header
 			header, err := tar.FileInfoHeader(fi, file)
 			if err != nil {
@@ -128,7 +129,7 @@ func LocalAssets(path string) ([]string, error) {
 			// write file to disk
 			pre, outFile := filepath.Split(f)
 			outFile = outFile + ".tar.gz"
-			if err = ioutil.WriteFile(pre+outFile, buf.Bytes(), 0600); err != nil {
+			if err = os.WriteFile(pre+outFile, buf.Bytes(), 0600); err != nil {
 				fmt.Println(err)
 				os.Exit(1)
 			}
@@ -136,7 +137,6 @@ func LocalAssets(path string) ([]string, error) {
 		}
 	}
 	for _, f := range files {
-
 		// Exclude directory.
 		if fi, _ := os.Stat(f); fi.IsDir() {
 			continue

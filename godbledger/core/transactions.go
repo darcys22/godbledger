@@ -17,7 +17,6 @@ func NewUser(name string) (*User, error) {
 
 	usr := &User{guid.String(), name}
 	return usr, nil
-
 }
 
 type Currency struct {
@@ -26,10 +25,8 @@ type Currency struct {
 }
 
 func NewCurrency(name string, decimals int) (*Currency, error) {
-
 	cur := &Currency{name, decimals}
 	return cur, nil
-
 }
 
 type Account struct {

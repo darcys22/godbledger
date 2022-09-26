@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
@@ -128,7 +127,7 @@ requires Nodejs on the machine and also handlebars (npm install -g handlebars) a
 		}
 
 		outputJson, _ := json.Marshal(reporteroutput)
-		err = ioutil.WriteFile("src/output.json", outputJson, 0644)
+		err = os.WriteFile("src/output.json", outputJson, 0644)
 		if err != nil {
 			return fmt.Errorf("writing output.json failed (%v)", err)
 		}
@@ -168,7 +167,6 @@ requires Nodejs on the machine and also handlebars (npm install -g handlebars) a
 }
 
 func DownloadFile(filepath string, url string) error {
-
 	// Get the data
 	resp, err := http.Get(url)
 	if err != nil {

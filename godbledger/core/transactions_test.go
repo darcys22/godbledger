@@ -61,5 +61,4 @@ func TestTransaction(t *testing.T) {
 	assert.Equal(t, reversedTxn.Splits[0].Accounts[0].Name, "cash")
 	assert.Equal(t, reversedTxn.Splits[1].Amount, amountDR)
 	assert.Equal(t, reversedTxn.Splits[1].Accounts[0].Name, "income")
-
 }

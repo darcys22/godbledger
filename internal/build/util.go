@@ -21,7 +21,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -74,7 +73,7 @@ func RunGit(args ...string) string {
 
 // readGitFile returns content of file in .git directory.
 func readGitFile(file string) string {
-	content, err := ioutil.ReadFile(path.Join(".git", file))
+	content, err := os.ReadFile(path.Join(".git", file))
 	if err != nil {
 		return ""
 	}
@@ -113,7 +112,7 @@ func render(tpl *template.Template, outputFile string, outputPerm os.FileMode, x
 // so that go commands executed by build use the same version of Go as the 'host' that runs
 // build code. e.g.
 //
-//     /usr/lib/go-1.12.1/bin/go run build/ci.go ...
+// go run build/ci.go ...
 //
 // runs using go 1.12.1 and invokes go 1.12.1 tools from the same GOROOT. This is also important
 // because runtime.Version checks on the host should match the tools that are run.

@@ -1,7 +1,6 @@
 package node
 
 import (
-	"io/ioutil"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -30,7 +29,6 @@ type Node struct {
 }
 
 func New(ctx *cli.Context, cfg *cmd.LedgerConfig) (*Node, error) {
-
 	registry := core.NewServiceRegistry()
 
 	ledger := &Node{
@@ -41,7 +39,6 @@ func New(ctx *cli.Context, cfg *cmd.LedgerConfig) (*Node, error) {
 	}
 
 	return ledger, nil
-
 }
 
 func (n *Node) Register(constructor core.Service) error {
@@ -98,7 +95,6 @@ func (n *Node) Close() {
 
 // writePIDFile retrieves the current process ID and writes it to file.
 func (n *Node) writePIDFile() {
-
 	if n.PidFile == "" {
 		return
 	}
@@ -112,7 +108,7 @@ func (n *Node) writePIDFile() {
 
 	// Retrieve the PID and write it to file.
 	pid := strconv.Itoa(os.Getpid())
-	if err := ioutil.WriteFile(n.PidFile, []byte(pid), 0644); err != nil {
+	if err := os.WriteFile(n.PidFile, []byte(pid), 0644); err != nil {
 		log.Error("Failed to write pidfile", "error", err)
 		os.Exit(1)
 	}

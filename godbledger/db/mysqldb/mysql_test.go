@@ -17,7 +17,6 @@ import (
 )
 
 func TestValidateConnectionString(t *testing.T) {
-
 	//Test Regular string with no params
 	validatedString, err := ValidateConnectionString("godbledger:password@tcp(192.168.1.98:3306)/ledger")
 	assert.Nil(t, err)
