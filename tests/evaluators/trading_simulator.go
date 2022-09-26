@@ -34,7 +34,6 @@ var TradingSimulator = types.Evaluator{
 }
 
 func tradingSimulator(conns ...*grpc.ClientConn) error {
-
 	client := transaction.NewTransactorClient(conns[0])
 
 	ctx := context.Background()

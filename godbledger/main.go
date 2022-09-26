@@ -94,5 +94,4 @@ func main() {
 		log.Error(err.Error())
 		os.Exit(1)
 	}
-
 }

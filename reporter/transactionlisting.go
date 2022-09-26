@@ -138,11 +138,10 @@ If you want to see all the transactions in the database, or export to CSV/JSON
 			log.Infof("Exporting CSV to %s", ctx.String(csvFlag.Name))
 
 			file, err := os.OpenFile(ctx.String(csvFlag.Name), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
-			defer file.Close()
-
 			if err != nil {
 				return fmt.Errorf("opening csv file errored with (%v)", err)
 			}
+			defer file.Close()
 
 			csvWriter := csv.NewWriter(file)
 			defer csvWriter.Flush()

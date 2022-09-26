@@ -95,7 +95,6 @@ func (c *GitHubClient) SetUploadURL(urlStr string) error {
 
 // CreateRelease creates a new release object in the GitHub API
 func (c *GitHubClient) CreateRelease(ctx context.Context, req *github.RepositoryRelease) (*github.RepositoryRelease, error) {
-
 	release, res, err := c.Repositories.CreateRelease(context.TODO(), c.Owner, c.Repo, req)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create a release")
@@ -182,7 +181,6 @@ func (c *GitHubClient) DeleteTag(ctx context.Context, tag string) error {
 
 // UploadAsset uploads specified assets to a given release object
 func (c *GitHubClient) UploadAsset(ctx context.Context, releaseID int64, filename string) (*github.ReleaseAsset, error) {
-
 	filename, err := filepath.Abs(filename)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get abs path")

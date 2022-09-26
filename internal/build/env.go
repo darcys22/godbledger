@@ -52,7 +52,7 @@ func (env Environment) String() string {
 }
 
 func Env() Environment {
-  return LocalEnv()
+	return LocalEnv()
 }
 
 // LocalEnv returns build environment metadata gathered from git.

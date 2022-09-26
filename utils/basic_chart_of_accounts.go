@@ -51,7 +51,6 @@ var accounts = []Account{
 }
 
 func main() {
-
 	// Create a config from the defaults which would usually be created by the CLI library
 	set := flag.NewFlagSet("accounts", 0)
 	set.String("config", "", "doc")
@@ -88,5 +87,4 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-
 }

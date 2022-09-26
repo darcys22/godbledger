@@ -43,7 +43,6 @@ func (s *LedgerServer) AddTransaction(ctx context.Context, in *transaction.Trans
 
 	lines := in.GetLines()
 	for _, line := range lines {
-
 		a := line.GetAccountname()
 		acc, err := core.NewAccount(a, a)
 		if err != nil {
@@ -69,7 +68,6 @@ func (s *LedgerServer) AddTransaction(ctx context.Context, in *transaction.Trans
 			log.Infof("Add Transaction error: %s", err.Error())
 			return &transaction.TransactionResponse{}, err
 		}
-
 	}
 
 	response, err := s.ld.Insert(txn)

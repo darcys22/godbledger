@@ -105,7 +105,6 @@ var (
 )
 
 func setConfig(ctx *cli.Context, cfg *LedgerConfig) {
-
 	if ctx.IsSet(VerbosityFlag.Name) {
 		cfg.LogVerbosity = ctx.String(VerbosityFlag.Name)
 	}

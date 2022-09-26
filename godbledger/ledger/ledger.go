@@ -27,7 +27,6 @@ type Ledger struct {
 }
 
 func New(ctx *cli.Context, cfg *cmd.LedgerConfig) (*Ledger, error) {
-
 	ledger := &Ledger{
 		Config: cfg,
 	}
@@ -165,7 +164,6 @@ func (l *Ledger) DeleteAccount(accountStr string) error {
 }
 
 func (l *Ledger) GetCurrencies(txn *core.Transaction) ([]*core.Currency, error) {
-
 	currencies := []*core.Currency{}
 
 	for _, split := range txn.Splits {
@@ -181,7 +179,6 @@ func (l *Ledger) GetCurrencies(txn *core.Transaction) ([]*core.Currency, error) 
 		if !exists {
 			currencies = append(currencies, cur)
 		}
-
 	}
 
 	return currencies, nil
@@ -228,14 +225,12 @@ func (l *Ledger) GetAccounts(txn *core.Transaction) ([]*core.Account, error) {
 				accounts = append(accounts, a)
 			}
 		}
-
 	}
 
 	return accounts, nil
 }
 
 func (l *Ledger) ReconcileTransactions(splitIDs []string) (string, error) {
-
 	//TODO sean loop here to check that splits exist
 	//for _, splitID := range splitIDs {
 	//}

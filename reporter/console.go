@@ -81,7 +81,6 @@ func (c *Console) PromptInput(prompt string) (string, error) {
 }
 
 func reporterConsole(c *cli.Context) error {
-
 	console, _ := New(Config{})
 	console.Welcome()
 

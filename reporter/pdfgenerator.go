@@ -168,7 +168,6 @@ requires Nodejs on the machine and also handlebars (npm install -g handlebars) a
 }
 
 func DownloadFile(filepath string, url string) error {
-
 	// Get the data
 	resp, err := http.Get(url)
 	if err != nil {

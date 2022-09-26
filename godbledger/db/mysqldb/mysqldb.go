@@ -24,7 +24,6 @@ func (db *Database) Close() error {
 }
 
 func ValidateConnectionString(dsn string) (string, error) {
-
 	if dsn == "" {
 		return "", errors.New("Connection string not provided")
 	}
@@ -275,7 +274,6 @@ func (db *Database) InitDB() error {
 
 // ClearDB drops all tables
 func (db *Database) ClearDB() error {
-
 	//DROP TABLES
 	dropDB := `
 				DROP DATABASE ledger;

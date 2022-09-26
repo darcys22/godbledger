@@ -14,7 +14,6 @@ import (
 )
 
 func TestNewTransaction(t *testing.T) {
-
 	user, err := core.NewUser("Tester")
 	if err != nil {
 		t.Fatalf("New User Failed: %v", err)
@@ -79,5 +78,4 @@ func TestNewTransaction(t *testing.T) {
 	//}
 
 	ledger.Stop()
-
 }

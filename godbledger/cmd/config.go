@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bytes"
-	//"fmt"
 	"os"
 	"path/filepath"
 
@@ -65,7 +64,6 @@ var (
 )
 
 func MakeConfig(cli *cli.Context) (error, *LedgerConfig) {
-
 	config := defaultLedgerConfig
 	//set logrus verbosity
 	level, err := logrus.ParseLevel(config.LogVerbosity)
@@ -136,7 +134,6 @@ func InitConfig(config *LedgerConfig) error {
 
 // dumpConfig is the dumpconfig command.
 func dumpConfig(ctx *cli.Context) error {
-
 	err, cfg := MakeConfig(ctx)
 	if err != nil {
 		log.Fatalf("Could not open the config file: %v", err)
@@ -165,7 +162,6 @@ func dumpConfig(ctx *cli.Context) error {
 
 // genConfig generates a default config file for godbledger.
 func genConfig(ctx *cli.Context) error {
-
 	config := defaultLedgerConfig
 	if ctx.Bool("mysql") {
 		config.DatabaseType = "mysql"

@@ -13,7 +13,6 @@ import (
 )
 
 func TestSQLite(t *testing.T) {
-
 	// Create a config from the defaults which would usually be created by the CLI library
 	set := flag.NewFlagSet("test", 0)
 	set.String("config", "", "doc")

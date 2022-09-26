@@ -334,14 +334,12 @@ func (db *Database) FindTransaction(txnID string) (*core.Transaction, error) {
 		split.Accounts = append(split.Accounts, &account)
 		split.Currency = &cur
 		resp.Splits = append(resp.Splits, &split)
-
 	}
 
 	return &resp, nil
 }
 
 func (db *Database) DeleteTransaction(txnID string) error {
-
 	sqlStatement := `
 	DELETE FROM transactions
 	WHERE transaction_id = $1;`
@@ -462,11 +460,9 @@ func (db *Database) AddTagToAccount(accountID string, tag int) error {
 	tx.Commit()
 
 	return nil
-
 }
 
 func (db *Database) DeleteTagFromAccount(account, tag string) error {
-
 	tagID, err := db.FindTag(tag)
 	if err != nil {
 		return err
@@ -537,11 +533,9 @@ func (db *Database) AddTagToTransaction(txnID string, tag int) error {
 	tx.Commit()
 
 	return nil
-
 }
 
 func (db *Database) DeleteTagFromTransaction(txnID, tag string) error {
-
 	tagID, err := db.FindTag(tag)
 	if err != nil {
 		return err
@@ -610,7 +604,6 @@ func (db *Database) SafeAddCurrency(cur *core.Currency) error {
 }
 
 func (db *Database) DeleteCurrency(currency string) error {
-
 	sqlStatement := `
 	DELETE FROM currencies
 	WHERE name = ?;`
@@ -661,18 +654,15 @@ func (db *Database) AddAccount(acc *core.Account) error {
 	return err
 }
 
-//Returns True if account was created
 func (db *Database) SafeAddAccount(acc *core.Account) (bool, error) {
 	u, _ := db.FindAccount(strings.TrimSpace(acc.Code))
 	if u != nil {
 		return false, nil
 	}
 	return true, db.AddAccount(acc)
-
 }
 
 func (db *Database) DeleteAccount(account string) error {
-
 	sqlStatement := `
 	DELETE FROM accounts
 	WHERE 
@@ -732,7 +722,6 @@ func (db *Database) SafeAddUser(usr *core.User) error {
 		return nil
 	}
 	return db.AddUser(usr)
-
 }
 
 func (db *Database) TestDB() error {
@@ -780,7 +769,6 @@ func (db *Database) TestDB() error {
 }
 
 func (db *Database) GetTB(queryDate time.Time) (*[]core.TBAccount, error) {
-
 	queryDB := `
 		SELECT split_accounts.account_id,
 					 Sum(splits.amount),
@@ -832,7 +820,6 @@ func (db *Database) GetTB(queryDate time.Time) (*[]core.TBAccount, error) {
 		`
 
 	for index, element := range accounts {
-
 		log.Debugf("Querying Database for Tags on Account: %s", element.Account)
 
 		rows, err = db.DB.Query(tagsQuery, element.Account)
@@ -848,20 +835,16 @@ func (db *Database) GetTB(queryDate time.Time) (*[]core.TBAccount, error) {
 			log.Debugf("Tag found: %s", tag)
 			accounts[index].Tags = append(accounts[index].Tags, tag)
 		}
-
 	}
 
 	return &accounts, nil
-
 }
 
 func (db *Database) Query(query string, args ...interface{}) (*sql.Rows, error) {
 	return db.DB.Query(query, args...)
-
 }
 
 func (db *Database) ReconcileTransactions(reconciliationID string, splitIDs []string) (string, error) {
-
 	tx, err := db.DB.Begin()
 
 	if err != nil {
@@ -943,7 +926,6 @@ func (db *Database) ReconcileTransactions(reconciliationID string, splitIDs []st
 }
 
 func (db *Database) GetListing(startDate, endDate time.Time) (*[]core.Transaction, error) {
-
 	var txns []core.Transaction
 
 	log.Debugf("Searching Transactions in DB between %s & %s", startDate.Format("2006-01-02"), endDate.Format("2006-01-02"))
@@ -1014,7 +996,6 @@ func (db *Database) GetListing(startDate, endDate time.Time) (*[]core.Transactio
 			split.Accounts = append(split.Accounts, &account)
 			split.Currency = &cur
 			t.Splits = append(t.Splits, &split)
-
 		}
 		if len(t.Splits) > 0 {
 			txns = append(txns, t)

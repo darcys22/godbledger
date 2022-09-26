@@ -30,7 +30,6 @@ type Node struct {
 }
 
 func New(ctx *cli.Context, cfg *cmd.LedgerConfig) (*Node, error) {
-
 	registry := core.NewServiceRegistry()
 
 	ledger := &Node{
@@ -41,7 +40,6 @@ func New(ctx *cli.Context, cfg *cmd.LedgerConfig) (*Node, error) {
 	}
 
 	return ledger, nil
-
 }
 
 func (n *Node) Register(constructor core.Service) error {
@@ -98,7 +96,6 @@ func (n *Node) Close() {
 
 // writePIDFile retrieves the current process ID and writes it to file.
 func (n *Node) writePIDFile() {
-
 	if n.PidFile == "" {
 		return
 	}

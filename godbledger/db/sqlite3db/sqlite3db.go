@@ -45,7 +45,6 @@ func NewDB(dirPath, mode string) (*Database, error) {
 	db := &Database{DB: SqliteDB, DatabasePath: dirPath, Mode: mode}
 
 	return db, err
-
 }
 
 func (db *Database) InitDB() error {

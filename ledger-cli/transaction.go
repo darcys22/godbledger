@@ -74,7 +74,6 @@ var commandSingleTestTransaction = &cli.Command{
 }
 
 func Send(cfg *cmd.LedgerConfig, t *Transaction) error {
-
 	address := fmt.Sprintf("%s:%s", cfg.Host, cfg.RPCPort)
 	log.WithField("address", address).Info("GRPC Dialing on port")
 	opts := []grpc.DialOption{}
