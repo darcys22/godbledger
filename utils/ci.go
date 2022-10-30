@@ -927,7 +927,7 @@ func doXgo(cmdline []string) {
 	log.Printf("xgo target [%s] --> %s\n", *xtarget, outDir)
 
 	// Make sure xgo is available for cross compilation
-	gogetxgo := goTool("get", "src.techknowlogick.com/xgo")
+	gogetxgo := goTool("install", "src.techknowlogick.com/xgo@latest")
 	build.MustRun(gogetxgo)
 
 	for _, cmd := range debExecutables {
