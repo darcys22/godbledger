@@ -915,7 +915,6 @@ func doXgo(cmdline []string) {
 	env := build.Env()
 
 	if *xtarget == "" || strings.Contains(*xtarget, "*") {
-		// TODO: not sure about this, limiting xgo to a single target, but it lets us manage the output to a target-based folder
 		log.Println("must supply a single xgo build target for cross-compliation")
 		os.Exit(1)
 	}
@@ -931,31 +930,48 @@ func doXgo(cmdline []string) {
 	build.MustRun(gogetxgo)
 
 	for _, cmd := range debExecutables {
+
+    exeOutDir := filepath.Join(outDir, cmd.BinaryName + "_folder")
+    os.MkdirAll(filepath.Join(exeOutDir, "github.com", "darcys22"), os.ModePerm)
 		xgoArgs := append(buildFlags(env), flag.Args()...)
 		xgoArgs = append(xgoArgs, []string{"--targets", *xtarget}...)
-		xgoArgs = append(xgoArgs, []string{"--dest", outDir}...)
+		xgoArgs = append(xgoArgs, []string{"--dest", exeOutDir}...)
 		xgoArgs = append(xgoArgs, "-v")
-		xgoArgs = append(xgoArgs, "./"+cmd.BinaryName) // relative package name (assumes we are inside GOPATH)
+    xgoArgs = append(xgoArgs, []string{"--pkg", cmd.BinaryName}...)
+		xgoArgs = append(xgoArgs, ".")
 		xgo := xgoTool(xgoArgs)
 		build.MustRun(xgo)
 
-		// strip the suffix out of the binary name
-		// TODO: add this ability into xgo
-		filepath.Walk(outDir, func(path string, info os.FileInfo, err error) error {
+		// move the executables to the build directory
+		filepath.Walk(exeOutDir, func(path string, info os.FileInfo, err error) error {
 			if info.IsDir() {
 				return nil // skip
 			}
 
-			suffix := filepath.Base(filepath.Dir(path))
-			if strings.HasPrefix(info.Name(), cmd.BinaryName) && strings.Contains(info.Name(), suffix) {
-				newName := strings.Replace(info.Name(), "-"+suffix, "", 1)
-				newPath := filepath.Join(filepath.Dir(path), newName)
+			if strings.Contains(info.Name(), "godbledger") {
+				newPath := filepath.Join(outDir, cmd.BinaryName)
 				log.Println("renaming:", path)
 				log.Println("      to:", newPath)
-				os.Rename(path, newPath)
+        err := os.Rename(path, newPath)
+        if err != nil {
+          log.Fatal(err)
+        }
 			}
 			return nil
 		})
+
+    // Delete the temporary folders made
+    files, err := os.ReadDir(outDir)
+    if err != nil {
+      log.Fatal(err)
+    }
+
+    for _, file := range files {
+			if file.IsDir() {
+				log.Println("deleting:", file.Name())
+        os.RemoveAll(filepath.Join(outDir, file.Name()))
+			}
+    }
 	}
 }
 
