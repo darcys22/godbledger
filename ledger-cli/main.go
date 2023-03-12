@@ -59,6 +59,8 @@ func init() {
 		commandTagAccount,
 		// addcurrency.go
 		commandAddCurrency,
+    // addfeedaccount.go
+		commandAddFeedAccount,
 	}
 	app.Flags = []cli.Flag{
 		cmd.VerbosityFlag,

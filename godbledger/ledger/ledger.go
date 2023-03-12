@@ -159,6 +159,19 @@ func (l *Ledger) InsertAccount(accountStr string) error {
 	return err
 }
 
+func (l *Ledger) InsertFeedAccount(accountStr, currencyStr string) error {
+	acc, err := core.NewAccount(accountStr, accountStr)
+	if err != nil {
+		log.Error(err)
+	}
+  curr, err := l.GetCurrency(currencyStr)
+	if err != nil {
+		log.Error(err)
+	}
+	_, err = l.LedgerDb.SafeAddFeedAccount(acc, curr)
+	return err
+}
+
 func (l *Ledger) DeleteAccount(accountStr string) error {
 	return l.LedgerDb.DeleteAccount(accountStr)
 }
@@ -244,6 +257,10 @@ func (l *Ledger) GetTB(date time.Time) (*[]core.TBAccount, error) {
 
 func (l *Ledger) GetListing(enddate, startdate time.Time) (*[]core.Transaction, error) {
 	return l.LedgerDb.GetListing(enddate, startdate)
+}
+
+func (l *Ledger) GetAccount(account string) (core.Account, core.Currency, error) {
+	return l.LedgerDb.GetAccount(account)
 }
 
 func (l *Ledger) Start() {

@@ -301,3 +301,70 @@ func (s *LedgerServer) GetListing(ctx context.Context, in *transaction.ReportReq
 
 	return &response, nil
 }
+
+func (s *LedgerServer) AddTransactionFeedAccount(ctx context.Context, in *transaction.TransactionFeedAccountRequest) (*transaction.TransactionResponse, error) {
+	log.WithField("Request", in).Info("Received New Add Transaction Feed Account Request")
+
+	err := s.ld.InsertFeedAccount(in.GetName(), in.GetCurrency())
+	if err != nil {
+		log.Infof("Add Account error: %s", err.Error())
+		return &transaction.TransactionResponse{}, err
+	}
+
+  s.ld.InsertTag(in.GetName(), "feed")
+
+	return &transaction.TransactionResponse{Message: "Accepted"}, nil
+}
+
+func (s *LedgerServer) AddTransactionFeed(ctx context.Context, in *transaction.TransactionFeedRequest) (*transaction.TransactionResponse, error) {
+	log.WithField("Request", in).Info("Received New Add Feed Request")
+
+	usr, err := core.NewUser("MainUser")
+	if err != nil {
+		log.Infof("Add Transaction Feed error 1: %s", err.Error())
+		return &transaction.TransactionResponse{}, err
+	}
+
+	account, currency, err := s.ld.GetAccount(in.GetAccount())
+  if err != nil {
+    log.Infof("Add Transaction Feed error 2: %s", err.Error())
+    return &transaction.TransactionResponse{}, err
+  }
+
+	lines := in.GetLines()
+	for _, line := range lines {
+    txn, err := core.NewTransaction(usr)
+    if err != nil {
+      log.Infof("Add Transaction Feed error 3: %s", err.Error())
+      return &transaction.TransactionResponse{}, err
+    }
+    txn.Description = []byte(line.GetHash())
+
+    layout := "2006-01-02"
+    t, err := time.Parse(layout, line.GetDate())
+    if err != nil {
+      log.Infof("Add Transaction Feed error 4: %s", err.Error())
+      return &transaction.TransactionResponse{}, err
+    }
+
+		split, err := core.NewSplit(t, []byte(line.GetDescription()), []*core.Account{&account}, &currency, big.NewInt(line.GetAmount()))
+		if err != nil {
+			log.Infof("Add Transaction Feed error 5: %s", err.Error())
+			return &transaction.TransactionResponse{}, err
+		}
+
+		err = txn.AppendSplit(split)
+		if err != nil {
+			log.Infof("Add Transaction Feed error 6: %s", err.Error())
+			return &transaction.TransactionResponse{}, err
+		}
+    _ , err = s.ld.Insert(txn)
+    if err != nil {
+      log.Infof("Add Transaction Feed error 7: %s", err.Error())
+      return &transaction.TransactionResponse{}, err
+    }
+	}
+
+
+	return &transaction.TransactionResponse{Message: "Accepted"}, nil
+}
