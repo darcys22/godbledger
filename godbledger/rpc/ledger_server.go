@@ -311,7 +311,7 @@ func (s *LedgerServer) AddTransactionFeedAccount(ctx context.Context, in *transa
 		return &transaction.TransactionResponse{}, err
 	}
 
-  s.ld.InsertTag(in.GetName(), "feed")
+  s.ld.InsertTag(in.GetName(), "external")
 
 	return &transaction.TransactionResponse{Message: "Accepted"}, nil
 }
