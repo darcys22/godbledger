@@ -18,6 +18,8 @@ service Transactor {
   rpc AddAccount(AccountTagRequest) returns (TransactionResponse) {}
   rpc DeleteAccount(DeleteAccountTagRequest) returns (TransactionResponse) {}
   rpc ReconcileTransactions(ReconciliationRequest) returns (TransactionResponse) {}
+  rpc AddTransactionFeedAccount(TransactionFeedAccountRequest) returns (TransactionResponse) {}
+  rpc AddTransactionFeed(TransactionFeedRequest) returns (TransactionResponse) {}
 }
 
 message LineItem {
@@ -64,6 +66,23 @@ message CurrencyRequest {
 
 message DeleteCurrencyRequest {
     string currency = 1;
+}
+
+message TransactionFeedAccountRequest {
+  string name = 1;
+  string currency = 2;
+}
+
+message TransactionFeedLine {
+  string date = 1;
+  string hash = 2;
+  int64 amount = 3;
+  string description = 4;
+}
+
+message TransactionFeedRequest {
+    string account = 1;
+    repeated TransactionFeedLine lines = 2;
 }
 
 message TBLine {

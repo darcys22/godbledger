@@ -68,6 +68,8 @@ func (db *Database) InitDB() error {
 	CREATE TABLE IF NOT EXISTS accounts (
 		account_id VARCHAR(255) NOT NULL,
 		name VARCHAR(255) NOT NULL,
+		currency VARCHAR(255),
+    FOREIGN KEY (currency) REFERENCES currencies (name) ON DELETE CASCADE ON UPDATE CASCADE,
 		PRIMARY KEY(account_id)
 	);`
 	log.Debug("Query: " + createDB)

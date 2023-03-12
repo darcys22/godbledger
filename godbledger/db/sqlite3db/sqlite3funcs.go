@@ -653,6 +653,34 @@ func (db *Database) AddAccount(acc *core.Account) error {
 
 	return err
 }
+func (db *Database) AddFeedAccount(acc *core.Account, cur *core.Currency) error {
+	log.Debug("Adding Feed Account to DB")
+	insertAccount := `
+		INSERT INTO accounts(account_id, name, currency)
+			VALUES(?,?,?);
+	`
+	tx, _ := db.DB.Begin()
+	stmt, _ := tx.Prepare(insertAccount)
+	log.Debug("Query: " + insertAccount)
+	res, err := stmt.Exec(strings.TrimSpace(acc.Code), strings.TrimSpace(acc.Name), strings.TrimSpace(cur.Name))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	lastId, err := res.LastInsertId()
+	if err != nil {
+		log.Fatal(err)
+	}
+	rowCnt, err := res.RowsAffected()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Debugf("ID = %d, affected = %d\n", lastId, rowCnt)
+
+	tx.Commit()
+
+	return err
+}
 
 func (db *Database) SafeAddAccount(acc *core.Account) (bool, error) {
 	u, _ := db.FindAccount(strings.TrimSpace(acc.Code))
@@ -660,6 +688,14 @@ func (db *Database) SafeAddAccount(acc *core.Account) (bool, error) {
 		return false, nil
 	}
 	return true, db.AddAccount(acc)
+}
+
+func (db *Database) SafeAddFeedAccount(acc *core.Account, cur *core.Currency) (bool, error) {
+	u, _ := db.FindAccount(strings.TrimSpace(acc.Code))
+	if u != nil {
+		return false, nil
+	}
+	return true, db.AddFeedAccount(acc, cur)
 }
 
 func (db *Database) DeleteAccount(account string) error {
@@ -1006,4 +1042,36 @@ func (db *Database) GetListing(startDate, endDate time.Time) (*[]core.Transactio
 	}
 
 	return &txns, nil
+}
+
+func (db *Database) GetAccount(account_string string) (core.Account, core.Currency, error) {
+  var account core.Account
+  var cur core.Currency
+  // Find the account and currency
+  rows, err := db.Query(`
+      SELECT a.account_id,
+             a.NAME,
+             a.currency,
+             c.decimals
+      FROM   accounts AS a 
+             JOIN currencies AS c
+               ON a.currency = c.NAME
+      WHERE  a.NAME = ?
+      ;`,
+    account_string)
+	if err != nil {
+		return account, cur, err
+	}
+
+	for rows.Next() {
+		if err := rows.Scan(&account.Code, &account.Name, &cur.Name, &cur.Decimals); err != nil {
+			log.Fatal(err)
+      return account, cur, err
+		}
+	}
+	if rows.Err() != nil {
+		log.Fatal(err)
+    return account, cur, err
+	}
+	return account, cur, nil
 }

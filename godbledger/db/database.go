@@ -30,6 +30,7 @@ type Database interface {
 	FindAccount(code string) (*core.Account, error)
 	AddAccount(*core.Account) error
 	SafeAddAccount(*core.Account) (bool, error)
+	SafeAddFeedAccount(*core.Account, *core.Currency) (bool, error)
 	DeleteAccount(accountName string) error
 	FindUser(pubKey string) (*core.User, error)
 	AddUser(usr *core.User) error
@@ -37,5 +38,6 @@ type Database interface {
 	SafeAddUser(usr *core.User) error
 	GetTB(date time.Time) (*[]core.TBAccount, error)
 	GetListing(startdate, enddate time.Time) (*[]core.Transaction, error)
+  GetAccount(account string) (core.Account, core.Currency, error)
 	Query(query string, args ...interface{}) (*sql.Rows, error)
 }
