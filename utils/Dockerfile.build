@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 golang:1.15.5-alpine AS builder
+FROM --platform=linux/amd64 golang:1.19-alpine AS builder
 # https://megamorf.gitlab.io/2019/09/08/alpine-go-builds-with-cgo-enabled/
 
 RUN apk update
